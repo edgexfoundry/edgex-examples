@@ -1,0 +1,31 @@
+[Writable]
+LogLevel = 'DEBUG'
+
+[Service]
+BootTimeout = '30s'
+ClientMonitor = '15s'
+CheckInterval = '10s'
+Host = 'localhost'
+Port = 48095
+Protocol = 'http'
+ReadMaxLimit = 100
+StartupMsg = 'Cloud Event Transforms'
+Timeout = '5s'
+
+[Registry]
+Host = 'localhost'
+Port = 8500
+Type = 'consul'
+
+[Clients]
+  [Clients.CoreData]
+  Protocol = 'http'
+  Host = 'localhost'
+  Port = 48080
+
+[Logging]
+EnableRemote = false
+File = ''
+
+[Binding]
+Type="http"

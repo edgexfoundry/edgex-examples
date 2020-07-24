@@ -1,0 +1,70 @@
+[Writable]
+  LogLevel = "INFO"
+  [Writable.Pipeline]
+    ExecutionOrder = "TransformToJSON, MQTTSend, MarkAsPushed"
+
+    [Writable.Pipeline.Functions.TransformToJSON]
+    [Writable.Pipeline.Functions.MarkAsPushed]
+    [Writable.Pipeline.Functions.FilterByDeviceName]
+      [Writable.Pipeline.Functions.FilterByDeviceName.Parameters]
+        DeviceNames = ""
+    [Writable.Pipeline.Functions.FilterByValueDescriptor]
+      [Writable.Pipeline.Functions.FilterByValueDescriptor.Parameters]
+        ValueDescriptors = ""
+    [Writable.Pipeline.Functions.MQTTSend]
+      [Writable.Pipeline.Functions.MQTTSend.Parameters]
+        qos="0"
+        key=""
+        autoreconnect="false"
+        retain="false"
+        cert=""
+      [Writable.Pipeline.Functions.MQTTSend.Addressable]
+        Address=   "<orgid>.messaging.internetofthings.ibmcloud.com"
+        Port=      1883
+        Protocol=  "tcp"
+        Publisher= "d:<orgid>:<devicetype>:<deviceid>"
+        User=      "use-token-auth"
+        Password=  "<Authentication-Token>"
+        Topic=     "iot-2/evt/status/fmt/json"
+
+
+[Service]
+BootTimeout = 30000
+ClientMonitor = 15000
+CheckInterval = "10s"
+Host = "app-service-configurable-mqtt-export"
+Port = 48095
+Protocol = "http"
+ReadMaxLimit = 100
+StartupMsg = "AppServiceConfigurable-mqtt-export has Started"
+Timeout = 5000
+
+[Registry]
+Host = "edgex-core-consul"
+Port = 8500
+Type = "consul"
+
+[Clients]
+  [Clients.CoreData]
+  Protocol = "http"
+  Host = "edgex-core-data"
+  Port = 48080
+
+  [Clients.Logging]
+  Protocol = "http"
+  Host = "edgex-support-logging"
+  Port = 48061
+
+[Binding]
+Type="messagebus"
+SubscribeTopic="events"
+
+[MessageBus]
+Type = "zero"
+    [MessageBus.SubscribeHost]
+        Host = "edgex-core-data"
+        Port = 5563
+        Protocol = "tcp"
+
+[Logging]
+EnableRemote = true

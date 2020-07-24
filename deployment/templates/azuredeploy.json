@@ -1,0 +1,534 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "containerGroupName": {
+      "type": "string",
+      "defaultValue": "edgex-example",
+      "metadata": {
+        "description": "Container Group name."
+      }
+    }
+  },
+  "variables": {
+    "consul-image": "nexus3.edgexfoundry.org:10004/docker-edgex-consul:master",
+    "redis-image": "redis:5.0.8-alpine",
+    "system-image": "nexus3.edgexfoundry.org:10004/docker-sys-mgmt-agent-go:master",
+    "notifications-image": "nexus3.edgexfoundry.org:10004/docker-support-notifications-go:master",
+    "metadata-image": "nexus3.edgexfoundry.org:10004/docker-core-metadata-go:master",
+    "data-image": "nexus3.edgexfoundry.org:10004/docker-core-data-go:master",
+    "command-image": "nexus3.edgexfoundry.org:10004/docker-core-command-go:master",
+    "scheduler-image": "nexus3.edgexfoundry.org:10004/docker-support-scheduler-go:master",
+    "app-service-rules-image": "nexus3.edgexfoundry.org:10004/docker-app-service-configurable:master",
+    "rulesengine-image": "emqx/kuiper:0.3.2",
+    "device-virtual-image": "nexus3.edgexfoundry.org:10004/docker-device-virtual-go:master",
+    "device-rest-image": "nexus3.edgexfoundry.org:10004/docker-device-rest-go:master"
+  },
+  "resources": [
+    {
+      "name": "[parameters('containerGroupName')]",
+      "type": "Microsoft.ContainerInstance/containerGroups",
+      "apiVersion": "2018-10-01",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "containers": [
+          {
+            "name": "consul",
+            "properties": {
+              "image": "[variables('consul-image')]",
+              "resources": {
+                "requests": {
+                  "cpu": 0.2,
+                  "memoryInGB": 0.5
+                }
+              },
+              "ports": [
+                {
+                  "port": 8400,
+                  "protocol": "tcp"
+                },
+                {
+                  "port": 8500,
+                  "protocol": "tcp"
+                }
+              ],
+              "environmentVariables": [
+                {
+                  "name": "EDGEX_DB",
+                  "value": "redis"
+                },
+                {
+                  "name": "EDGEX_SECURE",
+                  "value": "false"
+                }
+              ]
+            }
+          },
+          {
+            "name": "redis",
+            "properties": {
+              "image": "[variables('redis-image')]",
+              "resources": {
+                "requests": {
+                  "cpu": 0.2,
+                  "memoryInGB": 0.5
+                }
+              },
+              "ports": [
+                {
+                  "port": 6379,
+                  "protocol": "tcp"
+                }
+              ],
+              "environmentVariables": [
+                {
+                  "name": "EDGEX_SECURITY_SECRET_STORE",
+                  "value": "false"
+                },
+                {
+                  "name": "EDGEX_CONFIGURATION_PROVIDER",
+                  "value": "consul.http://localhost:8500"
+                },
+                {
+                  "name": "Logging_EnableRemote",
+                  "value": "false"
+                }
+              ]
+            }
+          },
+          {
+            "name": "system",
+            "properties": {
+              "image": "[variables('system-image')]",
+              "resources": {
+                "requests": {
+                  "cpu": 0.2,
+                  "memoryInGB": 0.5
+                }
+              },
+              "ports": [
+              ],
+              "environmentVariables": [
+                {
+                  "name": "EDGEX_SECURITY_SECRET_STORE",
+                  "value": "false"
+                },
+                {
+                  "name": "EDGEX_CONFIGURATION_PROVIDER",
+                  "value": "consul.http://localhost:8500"
+                },
+                {
+                  "name": "Logging_EnableRemote",
+                  "value": "false"
+                },
+                {
+                  "name": "ExecutorPath",
+                  "value": "/sys-mgmt-executor"
+                },
+                {
+                  "name": "MetricsMechanism",
+                  "value": "executor"
+                }
+              ]
+            }
+          },
+          {
+            "name": "notifications",
+            "properties": {
+              "image": "[variables('notifications-image')]",
+              "resources": {
+                "requests": {
+                  "cpu": 0.2,
+                  "memoryInGB": 0.5
+                }
+              },
+              "ports": [
+                {
+                  "port": 48060,
+                  "protocol": "tcp"
+                }
+              ],
+
+              "environmentVariables": [
+                {
+                  "name": "EDGEX_SECURITY_SECRET_STORE",
+                  "value": "false"
+                },
+                {
+                  "name": "EDGEX_CONFIGURATION_PROVIDER",
+                  "value": "consul.http://localhost:8500"
+                },
+                {
+                  "name": "Logging_EnableRemote",
+                  "value": "false"
+                }
+              ]
+            }
+          },
+          {
+            "name": "metadata",
+            "properties": {
+              "image": "[variables('metadata-image')]",
+              "resources": {
+                "requests": {
+                  "cpu": 0.2,
+                  "memoryInGB": 0.5
+                }
+              },
+              "ports": [
+                {
+                  "port": 48081,
+                  "protocol": "tcp"
+                }
+              ],
+              "environmentVariables": [
+                {
+                  "name": "EDGEX_SECURITY_SECRET_STORE",
+                  "value": "false"
+                },
+                {
+                  "name": "EDGEX_CONFIGURATION_PROVIDER",
+                  "value": "consul.http://localhost:8500"
+                },
+                {
+                  "name": "Logging_EnableRemote",
+                  "value": "false"
+                },
+                {
+                  "name": "Notifications_Sender",
+                  "value": "localhost"
+                }
+              ]
+            }
+          },
+          {
+            "name": "data",
+            "properties": {
+              "image": "[variables('data-image')]",
+              "resources": {
+                "requests": {
+                  "cpu": 0.2,
+                  "memoryInGB": 0.5
+                }
+              },
+              "ports": [
+                {
+                  "port": 48080,
+                  "protocol": "tcp"
+                },
+                {
+                  "port": 5563,
+                  "protocol": "tcp"
+                }
+              ],
+              "environmentVariables": [
+                {
+                  "name": "PORT",
+                  "value": "48080"
+                },
+                {
+                  "name": "EDGEX_SECURITY_SECRET_STORE",
+                  "value": "false"
+                },
+                {
+                  "name": "EDGEX_CONFIGURATION_PROVIDER",
+                  "value": "consul.http://localhost:8500"
+                },
+                {
+                  "name": "Logging_EnableRemote",
+                  "value": "false"
+                }
+              ]
+            }
+          },
+          {
+            "name": "command",
+            "properties": {
+              "image": "[variables('command-image')]",
+              "resources": {
+                "requests": {
+                  "cpu": 0.2,
+                  "memoryInGB": 0.5
+                }
+              },
+              "ports": [
+                {
+                  "port": 48082,
+                  "protocol": "tcp"
+                }
+              ],
+              "environmentVariables": [
+                {
+                  "name": "EDGEX_SECURITY_SECRET_STORE",
+                  "value": "false"
+                },
+                {
+                  "name": "EDGEX_CONFIGURATION_PROVIDER",
+                  "value": "consul.http://localhost:8500"
+                },
+                {
+                  "name": "Logging_EnableRemote",
+                  "value": "false"
+                }
+              ]
+            }
+          },
+          {
+            "name": "scheduler",
+            "properties": {
+              "image": "[variables('scheduler-image')]",
+              "resources": {
+                "requests": {
+                  "cpu": 0.2,
+                  "memoryInGB": 0.5
+                }
+              },
+              "ports": [
+                {
+                  "port": 48085,
+                  "protocol": "tcp"
+                }
+              ],
+              "environmentVariables": [
+                {
+                  "name": "EDGEX_SECURITY_SECRET_STORE",
+                  "value": "false"
+                },
+                {
+                  "name": "EDGEX_CONFIGURATION_PROVIDER",
+                  "value": "consul.http://localhost:8500"
+                },
+                {
+                  "name": "Logging_EnableRemote",
+                  "value": "false"
+                },
+                {
+                  "name": "IntervalActions_ScrubPushed_Host",
+                  "value": "localhost"
+                },
+                {
+                  "name": "IntervalActions_ScrubAged_Host",
+                  "value": "localhost"
+                }
+              ]
+            }
+          },
+          {
+            "name": "app-service-rules",
+            "properties": {
+              "image": "[variables('app-service-rules-image')]",
+              "command": [
+                "/app-service-configurable",
+                "-cp=consul.http://edgex-core-consul:8500",
+                "-s",
+                "--registry",
+                "--confdir=/res"
+              ],
+              "resources": {
+                "requests": {
+                  "cpu": 0.2,
+                  "memoryInGB": 0.5
+                }
+              },
+              "ports": [
+                {
+                  "port": 48100,
+                  "protocol": "tcp"
+                }
+              ],
+              "environmentVariables": [
+                {
+                  "name": "EDGEX_SECURITY_SECRET_STORE",
+                  "value": "false"
+                },
+                {
+                  "name": "EDGEX_CONFIGURATION_PROVIDER",
+                  "value": "consul.http://localhost:8500"
+                },
+                {
+                  "name": "Logging_EnableRemote",
+                  "value": "false"
+                },
+                {
+                  "name": "edgex_profile",
+                  "value": "rules-engine"
+                },
+                {
+                  "name": "Service_Port",
+                  "value": "48100"
+                },
+                {
+                  "name": "MessageBus_SubscribeHost_Host",
+                  "value": "localhost"
+                },
+                {
+                  "name": "Binding_PublishTopic",
+                  "value": "events"
+                }
+              ]
+            }
+          },
+          {
+            "name": "rulesengine",
+            "properties": {
+              "image": "[variables('rulesengine-image')]",
+              "resources": {
+                "requests": {
+                  "cpu": 0.2,
+                  "memoryInGB": 0.5
+                }
+              },
+              "ports": [
+                {
+                  "port": 48075
+                }
+              ],
+              "environmentVariables": [
+                {
+                  "name": "KUIPER_CONSOLE_LOG",
+                  "value": "true"
+                },
+                {
+                  "name": "KUIPER_REST_PORT",
+                  "value": "48075"
+                },
+                {
+                  "name": "EDGEX_SERVER",
+                  "value": "localhost"
+                },
+                {
+                  "name": "EDGEX_SERVICE_SERVER",
+                  "value": "http://localhost:48080"
+                },
+                {
+                  "name": "EDGEX_TOPIC",
+                  "value": "events"
+                },
+                {
+                  "name": "EDGEX_PROTOCOL",
+                  "value": "tcp"
+                },
+                {
+                  "name": "EDGEX_PORT",
+                  "value": "5566"
+                }
+              ]
+            }
+          },
+          {
+            "name": "device-virtual",
+            "properties": {
+              "image": "[variables('device-virtual-image')]",
+              "resources": {
+                "requests": {
+                  "cpu": 0.2,
+                  "memoryInGB": 0.5
+                }
+              },
+              "ports": [
+                {
+                  "port": 49990,
+                  "protocol": "tcp"
+                }
+              ],
+              "environmentVariables": [
+                {
+                  "name": "EDGEX_SECURITY_SECRET_STORE",
+                  "value": "false"
+                },
+                {
+                  "name": "EDGEX_CONFIGURATION_PROVIDER",
+                  "value": "consul.http://localhost:8500"
+                },
+                {
+                  "name": "Logging_EnableRemote",
+                  "value": "false"
+                }
+              ]
+            }
+          },
+          {
+            "name": "device-rest",
+            "properties": {
+              "image": "[variables('device-rest-image')]",
+              "resources": {
+                "requests": {
+                  "cpu": 0.2,
+                  "memoryInGB": 0.5
+                }
+              },
+              "ports": [
+              ],
+              "environmentVariables": [
+                {
+                  "name": "EDGEX_SECURITY_SECRET_STORE",
+                  "value": "false"
+                },
+                {
+                  "name": "EDGEX_CONFIGURATION_PROVIDER",
+                  "value": "consul.http://localhost:8500"
+                },
+                {
+                  "name": "Logging_EnableRemote",
+                  "value": "false"
+                }
+              ]
+            }
+          }
+        ],
+        "osType": "Linux",
+        "ipAddress": {
+          "type": "Public",
+          "ports": [
+            {
+              "protocol": "tcp",
+              "port": 8400
+            },
+            {
+              "protocol": "tcp",
+              "port": 8500
+            },
+            {
+              "protocol": "tcp",
+              "port": 48060
+            },
+            {
+              "protocol": "tcp",
+              "port": 48081
+            },
+            {
+              "protocol": "tcp",
+              "port": 48082
+            },
+            {
+              "protocol": "tcp",
+              "port": 48080
+            },
+            {
+              "protocol": "tcp",
+              "port": 48085
+            },
+            {
+              "protocol": "tcp",
+              "port": 48100
+            },
+            {
+              "protocol": "tcp",
+              "port": 48075
+            },
+            {
+              "protocol": "tcp",
+              "port": 49990
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "containerIPv4Address": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.ContainerInstance/containerGroups/', parameters('containerGroupName'))).ipAddress.ip]"
+    }
+  }
+}
