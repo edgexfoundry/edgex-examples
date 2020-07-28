@@ -10,7 +10,7 @@ This folder contains various examples of Application Services based on the App F
 
 Please see the [edgex-go README](https://github.com/edgexfoundry/edgex-go/blob/master/README.md).
 
-## Building Examples
+## Building Custom Examples
 
 Each `custom` example has its own `Makefile` with the `build` target. So simply run `make build` from an example's base folder when exploring that example.
 
@@ -20,9 +20,9 @@ The top level `makefile` is designed to build all the examples under the `custom
 
 For simplicity, the executable created for each example is named `app-service` and placed in each examples sub-folder.
 
-## Running an Example
+## Running a Custom Example
 
-After building examples you simply cd to the folder for the example you want to run and run the executable for that example with or without any of the supported command line options.
+After building examples you simply `cd` to the folder for the example you want to run and run the executable for that example with or without any of the supported command line options.
 
 The following commands will run the `simple-filter-xml` example
 
@@ -43,6 +43,6 @@ This command must be run from those example folders, i.e. not the top level Make
 
 > *Note that Application Services no longer use docker profiles. They use Environment Overrides in the docker compose file to make the necessary changes to the configuration for running in Docker. See the **Environment Variable Overrides For Docker** section in [App Service Configurable's README](https://github.com/edgexfoundry/app-service-configurable/blob/master/README.md#environment-variable-overrides-for-docker)* for more details and an example. 
 
-## Profiles
+## Configurable Examples
 
-The profiles folder contains example profiles for use with App Service Configurable. 
+The `configurable` folder contains example profiles for use with App Service Configurable. 

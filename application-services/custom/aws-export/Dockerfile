@@ -14,14 +14,14 @@
 # limitations under the License.
 #
 
-FROM golang:1.12-alpine AS builder
+FROM golang:1.13-alpine AS builder
 
 LABEL license='SPDX-License-Identifier: Apache-2.0' \
   copyright='Copyright (c) 2019: Intel'
 
 # add git for go modules
 RUN apk update && apk add --no-cache make git gcc libc-dev libsodium-dev zeromq-dev
-WORKDIR /app-functions-aws
+WORKDIR /aws-export
 
 COPY go.mod .
 
@@ -30,7 +30,7 @@ RUN go mod download
 COPY . .
 RUN apk info -a zeromq-dev
 
-RUN make examples/aws-export/aws-export
+RUN make build
 
 # Next image - Copy built Go binary into new workspace
 FROM alpine
@@ -39,7 +39,7 @@ LABEL license='SPDX-License-Identifier: Apache-2.0' \
   copyright='Copyright (c) 2019: Intel'
 
 RUN apk --no-cache add zeromq
-COPY --from=builder /app-functions-aws/examples/aws-export/res /res
-COPY --from=builder /app-functions-aws/examples/aws-export/app-service /aws-export
+COPY --from=builder /aws-export/res /res
+COPY --from=builder /aws-export/app-service /aws-export
 
 CMD [ "/aws-export" , "-cp=consul.http://edgex-core-consul:8500", "--registry", "--confdir=/res"]

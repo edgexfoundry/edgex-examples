@@ -21,7 +21,7 @@ LABEL license='SPDX-License-Identifier: Apache-2.0' \
 
 # add git for go modules
 RUN apk update && apk add --no-cache make git gcc libc-dev libsodium-dev zeromq-dev
-WORKDIR /app-service-examples
+WORKDIR /cloud-event
 
 COPY go.mod .
 
@@ -30,7 +30,7 @@ RUN go mod download
 COPY . .
 RUN apk info -a zeromq-dev
 
-RUN make app-services/cloud-event-transforms
+RUN make build
 
 # Next image - Copy built Go binary into new workspace
 FROM alpine
@@ -40,7 +40,7 @@ LABEL license='SPDX-License-Identifier: Apache-2.0' \
 
 RUN apk --no-cache add zeromq
 
-COPY --from=builder /app-service-examples/app-services/cloud-event-transforms/res /res
-COPY --from=builder /app-service-examples/app-services/cloud-event-transforms/app-service /cloud-event-transforms
+COPY --from=builder /cloud-event/res /res
+COPY --from=builder /cloud-event/app-service /cloud-event-transforms
 
 CMD [ "/cloud-event-transforms" , "-cp=consul.http://edgex-core-consul:8500", "--registry", "--confdir=/res"]
