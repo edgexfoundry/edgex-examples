@@ -1,0 +1,1460 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Deploy EdgeX sample stack
+
+Metadata: 
+  AWS::CloudFormation::Interface: 
+    ParameterGroups: 
+      - Label: 
+          default: Network Configuration
+        Parameters: 
+          - VpcId
+          - PublicSubnets
+          - PrivateSubnets
+          - HealthCheckThreshold
+          - DeregistrationDelay
+      - Label: 
+          default: Discovery Configurations
+        Parameters:
+          - DiscoveryDuration
+          - DiscoveryInterval
+      - Label: 
+          default: Docker Images
+        Parameters:
+          - consulImage
+          - redisImage
+          - systemImage
+          - notificationsImage
+          - metadataImage
+          - dataImage
+          - commandImage
+          - schedulerImage
+          - apprulesImage
+          - rulesengineImage
+          - devicevirtualImage
+          - devicerestImage
+
+Parameters:
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC ID in which resources will be deployed.
+  PublicSubnets:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: Public Subnet IDs
+  PrivateSubnets:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: Private Subnet IDs
+  HealthCheckThreshold:
+    Type: Number
+    Default: 2
+    MinValue: 2
+    MaxValue: 10
+    Description: Number of checks to use as healthy/unhealth threshold
+  DeregistrationDelay:
+    Type: Number
+    Default: 0
+    MinValue: 0
+    MaxValue: 3600
+    Description: The amount of time, in seconds, for Elastic Load Balancing to wait before changing the state of a deregistering target from draining to unused.
+
+  consulImage:
+    Type: String
+    Default: edgexfoundry/docker-edgex-consul:1.2.0
+    Description: URI for  can also point at a ECR repository e.g. <aws_account_id>.dkr.ecr.<region>.amazonaws.com/<repo_name>.
+  redisImage:
+    Type: String
+    Default: redis:5.0.8-alpine
+    Description: URI for  can also point at a ECR repository e.g. <aws_account_id>.dkr.ecr.<region>.amazonaws.com/<repo_name>.
+  systemImage:
+    Type: String
+    Default: edgexfoundry/docker-sys-mgmt-agent-go:1.2.1
+    Description: URI for  can also point at a ECR repository e.g. <aws_account_id>.dkr.ecr.<region>.amazonaws.com/<repo_name>.
+  notificationsImage:
+    Type: String
+    Default: edgexfoundry/docker-support-notifications-go:1.2.1
+    Description: URI for  can also point at a ECR repository e.g. <aws_account_id>.dkr.ecr.<region>.amazonaws.com/<repo_name>.
+  metadataImage:
+    Type: String
+    Default: edgexfoundry/docker-core-metadata-go:1.2.1
+    Description: URI for  can also point at a ECR repository e.g. <aws_account_id>.dkr.ecr.<region>.amazonaws.com/<repo_name>.
+  dataImage:
+    Type: String
+    Default: edgexfoundry/docker-core-data-go:1.2.1
+    Description: URI for  can also point at a ECR repository e.g. <aws_account_id>.dkr.ecr.<region>.amazonaws.com/<repo_name>.
+  commandImage:
+    Type: String
+    Default: edgexfoundry/docker-core-command-go:1.2.1
+    Description: URI for  can also point at a ECR repository e.g. <aws_account_id>.dkr.ecr.<region>.amazonaws.com/<repo_name>.
+  schedulerImage:
+    Type: String
+    Default: edgexfoundry/docker-support-scheduler-go:1.2.1
+    Description: URI for  can also point at a ECR repository e.g. <aws_account_id>.dkr.ecr.<region>.amazonaws.com/<repo_name>.
+  apprulesImage:
+    Type: String
+    Default: edgexfoundry/docker-app-service-configurable:1.2.0
+    Description: URI for  can also point at a ECR repository e.g. <aws_account_id>.dkr.ecr.<region>.amazonaws.com/<repo_name>.
+  rulesengineImage:
+    Type: String
+    Default: emqx/kuiper:0.4.2-alpine
+    Description: URI for  can also point at a ECR repository e.g. <aws_account_id>.dkr.ecr.<region>.amazonaws.com/<repo_name>.
+  devicevirtualImage:
+    Type: String
+    Default: edgexfoundry/docker-device-virtual-go:1.2.1
+    Description: URI for  can also point at a ECR repository e.g. <aws_account_id>.dkr.ecr.<region>.amazonaws.com/<repo_name>.
+  devicerestImage:
+    Type: String
+    Default: edgexfoundry/docker-device-rest-go:1.1.1
+    Description: URI for  can also point at a ECR repository e.g. <aws_account_id>.dkr.ecr.<region>.amazonaws.com/<repo_name>.
+
+  DiscoveryDuration:
+    Type: Number
+    Default: 240
+    Description: Total time the service will look for dependencies before failing
+
+  DiscoveryInterval:
+    Type: Number
+    Default: 5
+    Description: Time between retry attempts to contact dependencies
+
+Resources:
+ ### Roles ###
+  TaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: [ecs-tasks.amazonaws.com]
+          Action: ['sts:AssumeRole']
+      Path: /
+      Policies:
+      - PolicyName: ecs-service
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action:
+              # Rules which allow ECS to attach network interfaces to instances
+              # on your behalf in order for awsvpc networking mode to work right
+              - 'ec2:AttachNetworkInterface'
+              - 'ec2:CreateNetworkInterface'
+              - 'ec2:CreateNetworkInterfacePermission'
+              - 'ec2:DeleteNetworkInterface'
+              - 'ec2:DeleteNetworkInterfacePermission'
+              - 'ec2:Describe*'
+              - 'ec2:DetachNetworkInterface'
+              # Rules which allow ECS to update load balancers on your behalf
+              # with the information sabout how to send traffic to your containers
+              - 'elasticloadbalancing:DeregisterInstancesFromLoadBalancer'
+              - 'elasticloadbalancing:DeregisterTargets'
+              - 'elasticloadbalancing:Describe*'
+              - 'elasticloadbalancing:RegisterInstancesWithLoadBalancer'
+              - 'elasticloadbalancing:RegisterTargets'
+              # Allow reading SSM parameters
+              - 'ssm:GetParam*'
+            Resource: '*'
+
+  TaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: [ecs-tasks.amazonaws.com]
+          Action: ['sts:AssumeRole']
+      Path: /
+      Policies:
+        - PolicyName: AmazonECSTaskExecutionRolePolicy
+          PolicyDocument:
+            Statement:
+            - Effect: Allow
+              Action:
+                # Allow the ECS Tasks to download images from ECR
+                - 'ecr:GetAuthorizationToken'
+                - 'ecr:BatchCheckLayerAvailability'
+                - 'ecr:GetDownloadUrlForLayer'
+                - 'ecr:BatchGetImage'
+                # Allow the ECS tasks to upload logs to CloudWatch
+                - 'logs:CreateLogStream'
+                - 'logs:PutLogEvents'
+              Resource: '*'
+
+ ### Security Groups ###
+  ContainerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref VpcId
+      GroupDescription: Container Security Group
+      SecurityGroupIngress:
+        - Description: consul
+          IpProtocol: tcp
+          FromPort: 8500
+          ToPort: 8500
+          CidrIp: 0.0.0.0/0
+        #- Description: consul2
+        #  IpProtocol: tcp
+        #  FromPort: 8400
+        #  ToPort: 8400
+        #  CidrIp: 0.0.0.0/0
+        - Description: redis
+          IpProtocol: tcp
+          FromPort: 6379
+          ToPort: 6379
+          CidrIp: 0.0.0.0/0
+        - Description: notifications
+          IpProtocol: tcp
+          FromPort: 48060
+          ToPort: 48060
+          CidrIp: 0.0.0.0/0
+        - Description: scheduler
+          IpProtocol: tcp
+          FromPort: 48085
+          ToPort: 48085
+          CidrIp: 0.0.0.0/0
+        - Description: apprules
+          IpProtocol: tcp
+          FromPort: 48100
+          ToPort: 48100
+          CidrIp: 0.0.0.0/0
+        - Description: rulesengine
+          IpProtocol: tcp
+          FromPort: 48075
+          ToPort: 48075
+          CidrIp: 0.0.0.0/0
+        - Description: metadata
+          IpProtocol: tcp
+          FromPort: 48081
+          ToPort: 48081
+          CidrIp: 0.0.0.0/0
+        - Description: data
+          IpProtocol: tcp
+          FromPort: 48080
+          ToPort: 48080
+          CidrIp: 0.0.0.0/0
+        - Description: data2
+          IpProtocol: tcp
+          FromPort: 5563
+          ToPort: 5563
+          CidrIp: 0.0.0.0/0
+        - Description: command
+          IpProtocol: tcp
+          FromPort: 48082
+          ToPort: 48082
+          CidrIp: 0.0.0.0/0
+        - Description: system
+          IpProtocol: tcp
+          FromPort: 48090
+          ToPort: 48090
+          CidrIp: 0.0.0.0/0
+        - Description: devicevirtual
+          IpProtocol: tcp
+          FromPort: 49990
+          ToPort: 49990
+          CidrIp: 0.0.0.0/0
+        - Description: devicerest
+          IpProtocol: tcp
+          FromPort: 49986
+          ToPort: 49986
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: '-1'
+          CidrIp: 0.0.0.0/0
+
+ ### Load Balancing ###
+  BackendLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Type: network
+      Name: !Sub ${AWS::StackName}-Backend
+      Scheme: internal
+      Subnets: !Ref PrivateSubnets
+
+  consulTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    DependsOn: BackendLoadBalancer
+    Properties:
+      TargetType: ip
+      HealthCheckProtocol: TCP
+      HealthyThresholdCount: !Ref HealthCheckThreshold
+      UnhealthyThresholdCount: !Ref HealthCheckThreshold
+      Name: !Sub consul-${AWS::StackName}
+      Port: 8500
+      Protocol: TCP
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: !Ref DeregistrationDelay
+      VpcId: !Ref VpcId
+  consulListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref consulTargetGroup
+      LoadBalancerArn: !Ref BackendLoadBalancer
+      Port: 8500
+      Protocol: TCP
+
+  redisTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    DependsOn: BackendLoadBalancer
+    Properties:
+      TargetType: ip
+      HealthCheckProtocol: TCP
+      HealthyThresholdCount: !Ref HealthCheckThreshold
+      UnhealthyThresholdCount: !Ref HealthCheckThreshold
+      Name: !Sub redis-${AWS::StackName}
+      Port: 6379
+      Protocol: TCP
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: !Ref DeregistrationDelay
+      VpcId: !Ref VpcId
+  redisListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref redisTargetGroup
+      LoadBalancerArn: !Ref BackendLoadBalancer
+      Port: 6379
+      Protocol: TCP
+
+  SupportLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Type: network
+      Name: !Sub ${AWS::StackName}-Support
+      Scheme: internet-facing
+      Subnets: !Ref PublicSubnets
+
+  notificationsTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    DependsOn: SupportLoadBalancer
+    Properties:
+      TargetType: ip
+      HealthCheckProtocol: TCP
+      HealthyThresholdCount: !Ref HealthCheckThreshold
+      UnhealthyThresholdCount: !Ref HealthCheckThreshold
+      Name: !Sub notifications-${AWS::StackName}
+      Port: 48060
+      Protocol: TCP
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: !Ref DeregistrationDelay
+      VpcId: !Ref VpcId
+  notificationsListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref notificationsTargetGroup
+      LoadBalancerArn: !Ref SupportLoadBalancer
+      Port: 48060
+      Protocol: TCP
+
+  schedulerTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    DependsOn: SupportLoadBalancer
+    Properties:
+      TargetType: ip
+      HealthCheckProtocol: TCP
+      HealthyThresholdCount: !Ref HealthCheckThreshold
+      UnhealthyThresholdCount: !Ref HealthCheckThreshold
+      Name: !Sub scheduler-${AWS::StackName}
+      Port: 48085
+      Protocol: TCP
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: !Ref DeregistrationDelay
+      VpcId: !Ref VpcId
+  schedulerListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref schedulerTargetGroup
+      LoadBalancerArn: !Ref SupportLoadBalancer
+      Port: 48085
+      Protocol: TCP
+
+  apprulesTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    DependsOn: SupportLoadBalancer
+    Properties:
+      TargetType: ip
+      HealthCheckProtocol: TCP
+      HealthyThresholdCount: !Ref HealthCheckThreshold
+      UnhealthyThresholdCount: !Ref HealthCheckThreshold
+      Name: !Sub apprules-${AWS::StackName}
+      Port: 48100
+      Protocol: TCP
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: !Ref DeregistrationDelay
+      VpcId: !Ref VpcId
+  apprulesListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref apprulesTargetGroup
+      LoadBalancerArn: !Ref SupportLoadBalancer
+      Port: 48100
+      Protocol: TCP
+
+  rulesengineTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    DependsOn: SupportLoadBalancer
+    Properties:
+      TargetType: ip
+      HealthCheckProtocol: TCP
+      HealthyThresholdCount: !Ref HealthCheckThreshold
+      UnhealthyThresholdCount: !Ref HealthCheckThreshold
+      Name: !Sub rulesengine-${AWS::StackName}
+      Port: 48075
+      Protocol: TCP
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: !Ref DeregistrationDelay
+      VpcId: !Ref VpcId
+  rulesengineListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref rulesengineTargetGroup
+      LoadBalancerArn: !Ref SupportLoadBalancer
+      Port: 48075
+      Protocol: TCP
+
+  CoreLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Type: network
+      Name: !Sub ${AWS::StackName}-Core
+      Scheme: internet-facing
+      Subnets: !Ref PublicSubnets
+
+  metadataTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    DependsOn: CoreLoadBalancer
+    Properties:
+      TargetType: ip
+      HealthCheckProtocol: TCP
+      HealthyThresholdCount: !Ref HealthCheckThreshold
+      UnhealthyThresholdCount: !Ref HealthCheckThreshold
+      Name: !Sub metadata-${AWS::StackName}
+      Port: 48081
+      Protocol: TCP
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: !Ref DeregistrationDelay
+      VpcId: !Ref VpcId
+  metadataListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref metadataTargetGroup
+      LoadBalancerArn: !Ref CoreLoadBalancer
+      Port: 48081
+      Protocol: TCP
+
+  dataTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    DependsOn: CoreLoadBalancer
+    Properties:
+      TargetType: ip
+      HealthCheckProtocol: TCP
+      HealthyThresholdCount: !Ref HealthCheckThreshold
+      UnhealthyThresholdCount: !Ref HealthCheckThreshold
+      Name: !Sub data-${AWS::StackName}
+      Port: 48080
+      Protocol: TCP
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: !Ref DeregistrationDelay
+      VpcId: !Ref VpcId
+  dataListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref dataTargetGroup
+      LoadBalancerArn: !Ref CoreLoadBalancer
+      Port: 48080
+      Protocol: TCP
+
+  data2TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    DependsOn: CoreLoadBalancer
+    Properties:
+      TargetType: ip
+      HealthCheckProtocol: TCP
+      HealthyThresholdCount: !Ref HealthCheckThreshold
+      UnhealthyThresholdCount: !Ref HealthCheckThreshold
+      HealthCheckPort: '48080'
+      Name: !Sub data2-${AWS::StackName}
+      Port: 5563
+      Protocol: TCP
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: !Ref DeregistrationDelay
+      VpcId: !Ref VpcId
+  data2Listener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref data2TargetGroup
+      LoadBalancerArn: !Ref CoreLoadBalancer
+      Port: 5563
+      Protocol: TCP
+
+  commandTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    DependsOn: CoreLoadBalancer
+    Properties:
+      TargetType: ip
+      HealthCheckProtocol: TCP
+      HealthyThresholdCount: !Ref HealthCheckThreshold
+      UnhealthyThresholdCount: !Ref HealthCheckThreshold
+      Name: !Sub command-${AWS::StackName}
+      Port: 48082
+      Protocol: TCP
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: !Ref DeregistrationDelay
+      VpcId: !Ref VpcId
+  commandListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref commandTargetGroup
+      LoadBalancerArn: !Ref CoreLoadBalancer
+      Port: 48082
+      Protocol: TCP
+
+  systemTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    DependsOn: CoreLoadBalancer
+    Properties:
+      TargetType: ip
+      HealthCheckProtocol: TCP
+      HealthyThresholdCount: !Ref HealthCheckThreshold
+      UnhealthyThresholdCount: !Ref HealthCheckThreshold
+      Name: !Sub system-${AWS::StackName}
+      Port: 48090
+      Protocol: TCP
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: !Ref DeregistrationDelay
+      VpcId: !Ref VpcId
+  systemListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref systemTargetGroup
+      LoadBalancerArn: !Ref CoreLoadBalancer
+      Port: 48090
+      Protocol: TCP
+
+  DevicesLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Type: network
+      Name: !Sub ${AWS::StackName}-Devices
+      Scheme: internet-facing
+      Subnets: !Ref PublicSubnets
+
+  devicevirtualTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    DependsOn: DevicesLoadBalancer
+    Properties:
+      TargetType: ip
+      HealthCheckProtocol: TCP
+      HealthyThresholdCount: !Ref HealthCheckThreshold
+      UnhealthyThresholdCount: !Ref HealthCheckThreshold
+      Name: !Sub devicevirtual-${AWS::StackName}
+      Port: 49990
+      Protocol: TCP
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: !Ref DeregistrationDelay
+      VpcId: !Ref VpcId
+  devicevirtualListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref devicevirtualTargetGroup
+      LoadBalancerArn: !Ref DevicesLoadBalancer
+      Port: 49990
+      Protocol: TCP
+
+  devicerestTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    DependsOn: DevicesLoadBalancer
+    Properties:
+      TargetType: ip
+      HealthCheckProtocol: TCP
+      HealthyThresholdCount: !Ref HealthCheckThreshold
+      UnhealthyThresholdCount: !Ref HealthCheckThreshold
+      Name: !Sub devicerest-${AWS::StackName}
+      Port: 49986
+      Protocol: TCP
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: !Ref DeregistrationDelay
+      VpcId: !Ref VpcId
+  devicerestListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref devicerestTargetGroup
+      LoadBalancerArn: !Ref DevicesLoadBalancer
+      Port: 49986
+      Protocol: TCP
+
+ ### Fargate ###
+  FargateCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Ref AWS::StackName
+
+  BackendServices:
+    Type: AWS::ECS::Service
+    DependsOn:
+      - consulListener
+      #- consul2Listener
+      - redisListener
+    Properties:
+      Cluster: !Ref FargateCluster
+      #ServiceName: !Sub ${AWS::StackName}-1-Backend
+      LaunchType: FARGATE
+      DesiredCount: 1
+      TaskDefinition: !Ref BackendTaskDefinition
+      LoadBalancers:
+        - ContainerName: consul
+          ContainerPort: 8500
+          TargetGroupArn: !Ref consulTargetGroup
+        #- ContainerName: consul
+        #  ContainerPort: 8400
+        #  TargetGroupArn: !Ref consul2TargetGroup
+        - ContainerName: redis
+          ContainerPort: 6379
+          TargetGroupArn: !Ref redisTargetGroup
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: DISABLED
+          SecurityGroups: [!Ref ContainerSecurityGroup]
+          Subnets: !Ref PrivateSubnets
+
+  SupportServices:
+    Type: AWS::ECS::Service
+    DependsOn:
+      - BackendServices
+      - notificationsListener
+      - schedulerListener
+    Properties:
+      Cluster: !Ref FargateCluster
+      #ServiceName: !Sub ${AWS::StackName}-2-Support
+      LaunchType: FARGATE
+      DesiredCount: 1
+      TaskDefinition: !Ref SupportTaskDefinition
+      LoadBalancers:
+        - ContainerName: notifications
+          ContainerPort: 48060
+          TargetGroupArn: !Ref notificationsTargetGroup
+        - ContainerName: scheduler
+          ContainerPort: 48085
+          TargetGroupArn: !Ref schedulerTargetGroup
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: DISABLED
+          SecurityGroups: [!Ref ContainerSecurityGroup]
+          Subnets: !Ref PrivateSubnets
+
+  CoreServices:
+    Type: AWS::ECS::Service
+    DependsOn:
+      - SupportServices
+      - metadataListener
+      - dataListener
+      - data2Listener
+      - commandListener
+      - systemListener
+    Properties:
+      Cluster: !Ref FargateCluster
+      #ServiceName: !Sub ${AWS::StackName}-3-Core
+      LaunchType: FARGATE
+      DesiredCount: 1
+      TaskDefinition: !Ref CoreTaskDefinition
+      LoadBalancers:
+        - ContainerName: metadata
+          ContainerPort: 48081
+          TargetGroupArn: !Ref metadataTargetGroup
+        - ContainerName: data
+          ContainerPort: 48080
+          TargetGroupArn: !Ref dataTargetGroup
+        - ContainerName: data
+          ContainerPort: 5563
+          TargetGroupArn: !Ref data2TargetGroup
+        - ContainerName: command
+          ContainerPort: 48082
+          TargetGroupArn: !Ref commandTargetGroup
+        - ContainerName: system
+          ContainerPort: 48090
+          TargetGroupArn: !Ref systemTargetGroup
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: DISABLED
+          SecurityGroups: [!Ref ContainerSecurityGroup]
+          Subnets: !Ref PrivateSubnets
+
+  RulesServices:
+    Type: AWS::ECS::Service
+    DependsOn:
+      - CoreServices
+      - apprulesListener
+      - rulesengineListener
+    Properties:
+      Cluster: !Ref FargateCluster
+      #ServiceName: !Sub ${AWS::StackName}-4-Rules
+      LaunchType: FARGATE
+      DesiredCount: 1
+      TaskDefinition: !Ref RulesTaskDefinition
+      LoadBalancers:
+        - ContainerName: apprules
+          ContainerPort: 48100
+          TargetGroupArn: !Ref apprulesTargetGroup
+        - ContainerName: rulesengine
+          ContainerPort: 48075
+          TargetGroupArn: !Ref rulesengineTargetGroup
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: DISABLED
+          SecurityGroups: [!Ref ContainerSecurityGroup]
+          Subnets: !Ref PrivateSubnets
+
+  DeviceServices:
+    Type: AWS::ECS::Service
+    DependsOn:
+      - CoreServices
+      - devicevirtualListener
+    Properties:
+      Cluster: !Ref FargateCluster
+      #ServiceName: !Sub ${AWS::StackName}-5-Devices
+      LaunchType: FARGATE
+      DesiredCount: 1
+      TaskDefinition: !Ref DeviceTaskDefinition
+      LoadBalancers:
+        - ContainerName: devicevirtual
+          ContainerPort: 49990
+          TargetGroupArn: !Ref devicevirtualTargetGroup
+        - ContainerName: devicerest
+          ContainerPort: 49986
+          TargetGroupArn: !Ref devicerestTargetGroup
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: DISABLED
+          SecurityGroups: [!Ref ContainerSecurityGroup]
+          Subnets: !Ref PrivateSubnets
+
+ ### Container Defintions ###
+  BackendTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: edgex-sample-backend
+      ExecutionRoleArn: !GetAtt TaskExecutionRole.Arn
+      Cpu: '512'
+      Memory: '1024'
+      NetworkMode: 'awsvpc'
+      RequiresCompatibilities: [FARGATE]
+      TaskRoleArn: !GetAtt TaskRole.Arn
+      ContainerDefinitions:
+        - Name: consul
+          Image: !Ref consulImage
+          Essential: true
+          PortMappings:
+            - ContainerPort: 8500
+              Protocol: tcp
+            #- ContainerPort: 8400
+            #  Protocol: tcp
+          Environment:
+            - Name: EDGEX_STARTUP_DURATION
+              Value: !Ref DiscoveryDuration
+            - Name: EDGEX_STARTUP_INTERVAL
+              Value: !Ref DiscoveryInterval
+            - Name: CONSUL_BIND_INTERFACE
+              Value: eth0
+            - Name: EDGEX_DB
+              Value: redis
+            - Name: EDGEX_SECURE
+              Value: 'false'
+            - Name: SERVICE_HOST 
+              Value: !GetAtt BackendLoadBalancer.DNSName
+            - Name: REGISTRY_HOST
+              Value: !GetAtt BackendLoadBalancer.DNSName
+            - Name: DATABASES_PRIMARY_HOST
+              Value: !GetAtt BackendLoadBalancer.DNSName
+            - Name: CLIENTS_COREDATA_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_DATA_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_METADATA_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_COMMAND_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_NOTIFICATIONS_HOST
+              Value: !GetAtt SupportLoadBalancer.DNSName
+            - Name: CLIENTS_SCHEDULER_HOST
+              Value: !GetAtt SupportLoadBalancer.DNSName
+            - Name: CLIENTS_RULESENGINE_HOST
+              Value: !GetAtt SupportLoadBalancer.DNSName
+            - Name: CLIENTS_VIRTUALDEVICE_HOST
+              Value: !GetAtt DevicesLoadBalancer.DNSName
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref ContainerCloudWatchLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: edgex-sample-consul
+        - Name: redis
+          Image: !Ref redisImage
+          Essential: true
+          PortMappings:
+            - ContainerPort: 6379
+              Protocol: tcp
+          Environment:
+            - Name: EDGEX_STARTUP_DURATION
+              Value: !Ref DiscoveryDuration
+            - Name: EDGEX_STARTUP_INTERVAL
+              Value: !Ref DiscoveryInterval
+            - Name: Logging_EnableRemote
+              Value: 'false'
+            - Name: EDGEX_SECURITY_SECRET_STORE
+              Value: 'false'
+            - Name: EDGEX_CONFIGURATION_PROVIDER
+              Value: !Sub
+                - consul.http://${LoadBalancerDNS}:8500
+                - LoadBalancerDNS: !GetAtt BackendLoadBalancer.DNSName
+            - Name: SERVICE_HOST 
+              Value: !GetAtt BackendLoadBalancer.DNSName
+            - Name: REGISTRY_HOST
+              Value: !GetAtt BackendLoadBalancer.DNSName
+            - Name: DATABASES_PRIMARY_HOST
+              Value: !GetAtt BackendLoadBalancer.DNSName
+            - Name: CLIENTS_COREDATA_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_DATA_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_METADATA_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_COMMAND_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_NOTIFICATIONS_HOST
+              Value: !GetAtt SupportLoadBalancer.DNSName
+            - Name: CLIENTS_SCHEDULER_HOST
+              Value: !GetAtt SupportLoadBalancer.DNSName
+            - Name: CLIENTS_RULESENGINE_HOST
+              Value: !GetAtt SupportLoadBalancer.DNSName
+            - Name: CLIENTS_VIRTUALDEVICE_HOST
+              Value: !GetAtt DevicesLoadBalancer.DNSName
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref ContainerCloudWatchLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: edgex-sample
+
+  SupportTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: edgex-sample-support
+      ExecutionRoleArn: !GetAtt TaskExecutionRole.Arn
+      Cpu: '512'
+      Memory: '1024'
+      NetworkMode: 'awsvpc'
+      RequiresCompatibilities: [FARGATE]
+      TaskRoleArn: !GetAtt TaskRole.Arn
+      ContainerDefinitions:
+        - Name: notifications
+          Image: !Ref notificationsImage
+          Essential: true
+          PortMappings:
+            - ContainerPort: 48060
+              Protocol: tcp
+          Environment:
+            - Name: EDGEX_STARTUP_DURATION
+              Value: !Ref DiscoveryDuration
+            - Name: EDGEX_STARTUP_INTERVAL
+              Value: !Ref DiscoveryInterval
+            - Name: Logging_EnableRemote
+              Value: 'false'
+            - Name: EDGEX_SECURITY_SECRET_STORE
+              Value: 'false'
+            - Name: EDGEX_CONFIGURATION_PROVIDER
+              Value: !Sub
+                - consul.http://${LoadBalancerDNS}:8500
+                - LoadBalancerDNS: !GetAtt BackendLoadBalancer.DNSName
+            - Name: SERVICE_HOST 
+              Value: !GetAtt SupportLoadBalancer.DNSName
+            - Name: REGISTRY_HOST
+              Value: !GetAtt BackendLoadBalancer.DNSName
+            - Name: DATABASES_PRIMARY_HOST
+              Value: !GetAtt BackendLoadBalancer.DNSName
+            - Name: CLIENTS_COREDATA_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_DATA_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_METADATA_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_COMMAND_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_NOTIFICATIONS_HOST
+              Value: !GetAtt SupportLoadBalancer.DNSName
+            - Name: CLIENTS_SCHEDULER_HOST
+              Value: !GetAtt SupportLoadBalancer.DNSName
+            - Name: CLIENTS_RULESENGINE_HOST
+              Value: !GetAtt SupportLoadBalancer.DNSName
+            - Name: CLIENTS_VIRTUALDEVICE_HOST
+              Value: !GetAtt DevicesLoadBalancer.DNSName
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref ContainerCloudWatchLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: edgex-sample
+        - Name: scheduler
+          Image: !Ref schedulerImage
+          Essential: true
+          PortMappings:
+            - ContainerPort: 48085
+              Protocol: tcp
+          Environment:
+            - Name: EDGEX_STARTUP_DURATION
+              Value: !Ref DiscoveryDuration
+            - Name: EDGEX_STARTUP_INTERVAL
+              Value: !Ref DiscoveryInterval
+            - Name: IntervalActions_ScrubPushed_Host
+              Value: localhost
+            - Name: IntervalActions_ScrubAged_Host
+              Value: localhost
+            - Name: Logging_EnableRemote
+              Value: 'false'
+            - Name: EDGEX_SECURITY_SECRET_STORE
+              Value: 'false'
+            - Name: EDGEX_CONFIGURATION_PROVIDER
+              Value: !Sub
+                - consul.http://${LoadBalancerDNS}:8500
+                - LoadBalancerDNS: !GetAtt BackendLoadBalancer.DNSName
+            - Name: SERVICE_HOST 
+              Value: !GetAtt SupportLoadBalancer.DNSName
+            - Name: REGISTRY_HOST
+              Value: !GetAtt BackendLoadBalancer.DNSName
+            - Name: DATABASES_PRIMARY_HOST
+              Value: !GetAtt BackendLoadBalancer.DNSName
+            - Name: CLIENTS_COREDATA_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_DATA_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_METADATA_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_COMMAND_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_NOTIFICATIONS_HOST
+              Value: !GetAtt SupportLoadBalancer.DNSName
+            - Name: CLIENTS_SCHEDULER_HOST
+              Value: !GetAtt SupportLoadBalancer.DNSName
+            - Name: CLIENTS_RULESENGINE_HOST
+              Value: !GetAtt SupportLoadBalancer.DNSName
+            - Name: CLIENTS_VIRTUALDEVICE_HOST
+              Value: !GetAtt DevicesLoadBalancer.DNSName
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref ContainerCloudWatchLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: edgex-sample
+
+  CoreTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: edgex-sample-core
+      ExecutionRoleArn: !GetAtt TaskExecutionRole.Arn
+      Cpu: '1024'
+      Memory: '2048'
+      NetworkMode: 'awsvpc'
+      RequiresCompatibilities: [FARGATE]
+      TaskRoleArn: !GetAtt TaskRole.Arn
+      ContainerDefinitions:
+        - Name: metadata
+          Image: !Ref metadataImage
+          Essential: true
+          PortMappings:
+            - ContainerPort: 48081
+              Protocol: tcp
+          Environment:
+            - Name: EDGEX_STARTUP_DURATION
+              Value: !Ref DiscoveryDuration
+            - Name: EDGEX_STARTUP_INTERVAL
+              Value: !Ref DiscoveryInterval
+            - Name: Logging_EnableRemote
+              Value: 'false'
+            - Name: EDGEX_SECURITY_SECRET_STORE
+              Value: 'false'
+            - Name: EDGEX_CONFIGURATION_PROVIDER
+              Value: !Sub
+                - consul.http://${LoadBalancerDNS}:8500
+                - LoadBalancerDNS: !GetAtt BackendLoadBalancer.DNSName
+            - Name: Notifications_Sender
+              Value: localhost
+            - Name: SERVICE_HOST 
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: REGISTRY_HOST
+              Value: !GetAtt BackendLoadBalancer.DNSName
+            - Name: DATABASES_PRIMARY_HOST
+              Value: !GetAtt BackendLoadBalancer.DNSName
+            - Name: CLIENTS_COREDATA_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_DATA_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_METADATA_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_COMMAND_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_NOTIFICATIONS_HOST
+              Value: !GetAtt SupportLoadBalancer.DNSName
+            - Name: CLIENTS_SCHEDULER_HOST
+              Value: !GetAtt SupportLoadBalancer.DNSName
+            - Name: CLIENTS_RULESENGINE_HOST
+              Value: !GetAtt SupportLoadBalancer.DNSName
+            - Name: CLIENTS_VIRTUALDEVICE_HOST
+              Value: !GetAtt DevicesLoadBalancer.DNSName
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref ContainerCloudWatchLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: edgex-sample
+        - Name: data
+          Image: !Ref dataImage
+          Essential: true
+          DependsOn:
+            - ContainerName: metadata
+              Condition: START
+          PortMappings:
+            - ContainerPort: 48080
+              Protocol: tcp
+            - ContainerPort: 5563
+              Protocol: tcp
+          Environment:
+            - Name: EDGEX_STARTUP_DURATION
+              Value: !Ref DiscoveryDuration
+            - Name: EDGEX_STARTUP_INTERVAL
+              Value: !Ref DiscoveryInterval
+            - Name: Logging_EnableRemote
+              Value: 'false'
+            - Name: EDGEX_SECURITY_SECRET_STORE
+              Value: 'false'
+            - Name: EDGEX_CONFIGURATION_PROVIDER
+              Value: !Sub
+                - consul.http://${LoadBalancerDNS}:8500
+                - LoadBalancerDNS: !GetAtt BackendLoadBalancer.DNSName
+            - Name: PORT
+              Value: '48080'
+            - Name: SERVICE_HOST 
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: REGISTRY_HOST
+              Value: !GetAtt BackendLoadBalancer.DNSName
+            - Name: DATABASES_PRIMARY_HOST
+              Value: !GetAtt BackendLoadBalancer.DNSName
+            - Name: CLIENTS_COREDATA_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_DATA_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_METADATA_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_COMMAND_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_NOTIFICATIONS_HOST
+              Value: !GetAtt SupportLoadBalancer.DNSName
+            - Name: CLIENTS_SCHEDULER_HOST
+              Value: !GetAtt SupportLoadBalancer.DNSName
+            - Name: CLIENTS_RULESENGINE_HOST
+              Value: !GetAtt SupportLoadBalancer.DNSName
+            - Name: CLIENTS_VIRTUALDEVICE_HOST
+              Value: !GetAtt DevicesLoadBalancer.DNSName
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref ContainerCloudWatchLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: edgex-sample
+        - Name: command
+          Image: !Ref commandImage
+          Essential: true
+          DependsOn:
+            - ContainerName: metadata
+              Condition: START
+          PortMappings:
+            - ContainerPort: 48082
+              Protocol: tcp
+          Environment:
+            - Name: EDGEX_STARTUP_DURATION
+              Value: !Ref DiscoveryDuration
+            - Name: EDGEX_STARTUP_INTERVAL
+              Value: !Ref DiscoveryInterval
+            - Name: Logging_EnableRemote
+              Value: 'false'
+            - Name: EDGEX_SECURITY_SECRET_STORE
+              Value: 'false'
+            - Name: EDGEX_CONFIGURATION_PROVIDER
+              Value: !Sub
+                - consul.http://${LoadBalancerDNS}:8500
+                - LoadBalancerDNS: !GetAtt BackendLoadBalancer.DNSName
+            - Name: SERVICE_HOST 
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: REGISTRY_HOST
+              Value: !GetAtt BackendLoadBalancer.DNSName
+            - Name: DATABASES_PRIMARY_HOST
+              Value: !GetAtt BackendLoadBalancer.DNSName
+            - Name: CLIENTS_COREDATA_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_DATA_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_METADATA_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_COMMAND_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_NOTIFICATIONS_HOST
+              Value: !GetAtt SupportLoadBalancer.DNSName
+            - Name: CLIENTS_SCHEDULER_HOST
+              Value: !GetAtt SupportLoadBalancer.DNSName
+            - Name: CLIENTS_RULESENGINE_HOST
+              Value: !GetAtt SupportLoadBalancer.DNSName
+            - Name: CLIENTS_VIRTUALDEVICE_HOST
+              Value: !GetAtt DevicesLoadBalancer.DNSName
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref ContainerCloudWatchLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: edgex-sample
+        - Name: system
+          Image: !Ref systemImage
+          Essential: true
+          DependsOn:
+            - ContainerName: metadata
+              Condition: START
+            - ContainerName: data
+              Condition: START
+            - ContainerName: command
+              Condition: START
+          PortMappings:
+            - ContainerPort: 48090
+              Protocol: tcp
+          Environment:
+            - Name: EDGEX_STARTUP_DURATION
+              Value: !Ref DiscoveryDuration
+            - Name: EDGEX_STARTUP_INTERVAL
+              Value: !Ref DiscoveryInterval
+            - Name: Logging_EnableRemote
+              Value: 'false'
+            - Name: EDGEX_SECURITY_SECRET_STORE
+              Value: 'false'
+            - Name: EDGEX_CONFIGURATION_PROVIDER
+              Value: !Sub
+                - consul.http://${LoadBalancerDNS}:8500
+                - LoadBalancerDNS: !GetAtt BackendLoadBalancer.DNSName
+            - Name: ExecutorPath
+              Value: /sys-mgmt-executor
+            - Name: MetricsMechanism
+              Value: executor
+            - Name: SERVICE_HOST 
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: REGISTRY_HOST
+              Value: !GetAtt BackendLoadBalancer.DNSName
+            - Name: DATABASES_PRIMARY_HOST
+              Value: !GetAtt BackendLoadBalancer.DNSName
+            - Name: CLIENTS_COREDATA_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_DATA_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_METADATA_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_COMMAND_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_NOTIFICATIONS_HOST
+              Value: !GetAtt SupportLoadBalancer.DNSName
+            - Name: CLIENTS_SCHEDULER_HOST
+              Value: !GetAtt SupportLoadBalancer.DNSName
+            - Name: CLIENTS_RULESENGINE_HOST
+              Value: !GetAtt SupportLoadBalancer.DNSName
+            - Name: CLIENTS_VIRTUALDEVICE_HOST
+              Value: !GetAtt DevicesLoadBalancer.DNSName
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref ContainerCloudWatchLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: edgex-sample
+
+  RulesTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: edgex-sample-rules
+      ExecutionRoleArn: !GetAtt TaskExecutionRole.Arn
+      Cpu: '512'
+      Memory: '1024'
+      NetworkMode: 'awsvpc'
+      RequiresCompatibilities: [FARGATE]
+      TaskRoleArn: !GetAtt TaskRole.Arn
+      ContainerDefinitions:
+        - Name: apprules
+          Image: !Ref apprulesImage
+          Essential: true
+          PortMappings:
+            - ContainerPort: 48100
+              Protocol: tcp
+          Environment:
+            - Name: EDGEX_STARTUP_DURATION
+              Value: !Ref DiscoveryDuration
+            - Name: EDGEX_STARTUP_INTERVAL
+              Value: !Ref DiscoveryInterval
+            - Name: edgex_profile
+              Value: rules-engine
+            - Name: Service_Port
+              Value: '48100'
+            - Name: MessageBus_SubscribeHost_Host
+              Value: localhost
+            - Name: Binding_PublishTopic
+              Value: events
+            - Name: Logging_EnableRemote
+              Value: 'false'
+            - Name: EDGEX_SECURITY_SECRET_STORE
+              Value: 'false'
+            - Name: EDGEX_CONFIGURATION_PROVIDER
+              Value: !Sub
+                - consul.http://${LoadBalancerDNS}:8500
+                - LoadBalancerDNS: !GetAtt BackendLoadBalancer.DNSName
+            - Name: SERVICE_HOST 
+              Value: !GetAtt SupportLoadBalancer.DNSName
+            - Name: REGISTRY_HOST
+              Value: !GetAtt BackendLoadBalancer.DNSName
+            - Name: DATABASES_PRIMARY_HOST
+              Value: !GetAtt BackendLoadBalancer.DNSName
+            - Name: CLIENTS_COREDATA_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_DATA_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_METADATA_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_COMMAND_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_NOTIFICATIONS_HOST
+              Value: !GetAtt SupportLoadBalancer.DNSName
+            - Name: CLIENTS_SCHEDULER_HOST
+              Value: !GetAtt SupportLoadBalancer.DNSName
+            - Name: CLIENTS_RULESENGINE_HOST
+              Value: !GetAtt SupportLoadBalancer.DNSName
+            - Name: CLIENTS_VIRTUALDEVICE_HOST
+              Value: !GetAtt DevicesLoadBalancer.DNSName
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref ContainerCloudWatchLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: edgex-sample
+        - Name: rulesengine
+          Image: !Ref rulesengineImage
+          Essential: true
+          DependsOn:
+            - ContainerName: apprules
+              Condition: START
+          PortMappings:
+            - ContainerPort: 48075
+              Protocol: tcp
+          Environment:
+            - Name: EDGEX_STARTUP_DURATION
+              Value: !Ref DiscoveryDuration
+            - Name: EDGEX_STARTUP_INTERVAL
+              Value: !Ref DiscoveryInterval
+            - Name: KUIPER_CONSOLE_LOG
+              Value: 'true'
+            - Name: KUIPER_REST_PORT
+              Value: '48075'
+            - Name: EDGEX_SERVER
+              Value: localhost
+            - Name: EDGEX_TOPIC
+              Value: events
+            - Name: EDGEX_SERVICE_SERVER
+              Value: http://localhost:48080
+            - Name: EDGEX_PROTOCOL
+              Value: tcp
+            - Name: EDGEX_PORT
+              Value: '5566'
+            - Name: SERVICE_HOST 
+              Value: !GetAtt SupportLoadBalancer.DNSName
+            - Name: REGISTRY_HOST
+              Value: !GetAtt BackendLoadBalancer.DNSName
+            - Name: DATABASES_PRIMARY_HOST
+              Value: !GetAtt BackendLoadBalancer.DNSName
+            - Name: CLIENTS_COREDATA_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_DATA_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_METADATA_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_COMMAND_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_NOTIFICATIONS_HOST
+              Value: !GetAtt SupportLoadBalancer.DNSName
+            - Name: CLIENTS_SCHEDULER_HOST
+              Value: !GetAtt SupportLoadBalancer.DNSName
+            - Name: CLIENTS_RULESENGINE_HOST
+              Value: !GetAtt SupportLoadBalancer.DNSName
+            - Name: CLIENTS_VIRTUALDEVICE_HOST
+              Value: !GetAtt DevicesLoadBalancer.DNSName
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref ContainerCloudWatchLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: edgex-sample
+
+  DeviceTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: edgex-sample-devices
+      ExecutionRoleArn: !GetAtt TaskExecutionRole.Arn
+      Cpu: '512'
+      Memory: '1024'
+      NetworkMode: 'awsvpc'
+      RequiresCompatibilities: [FARGATE]
+      TaskRoleArn: !GetAtt TaskRole.Arn
+      ContainerDefinitions:
+        - Name: devicevirtual
+          Image: !Ref devicevirtualImage
+          Essential: true
+          PortMappings:
+            - ContainerPort: 49990
+              Protocol: tcp
+          Environment:
+            - Name: EDGEX_STARTUP_DURATION
+              Value: !Ref DiscoveryDuration
+            - Name: EDGEX_STARTUP_INTERVAL
+              Value: !Ref DiscoveryInterval
+            - Name: EDGEX_SECURITY_SECRET_STORE
+              Value: 'false'
+            - Name: EDGEX_CONFIGURATION_PROVIDER
+              Value: !Sub
+                - consul.http://${LoadBalancerDNS}:8500
+                - LoadBalancerDNS: !GetAtt BackendLoadBalancer.DNSName
+            - Name: Logging_EnableRemote
+              Value: 'false'
+            - Name: SERVICE_HOST 
+              Value: !GetAtt DevicesLoadBalancer.DNSName
+            - Name: REGISTRY_HOST
+              Value: !GetAtt BackendLoadBalancer.DNSName
+            - Name: DATABASES_PRIMARY_HOST
+              Value: !GetAtt BackendLoadBalancer.DNSName
+            - Name: CLIENTS_COREDATA_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_DATA_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_METADATA_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_COMMAND_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_NOTIFICATIONS_HOST
+              Value: !GetAtt SupportLoadBalancer.DNSName
+            - Name: CLIENTS_SCHEDULER_HOST
+              Value: !GetAtt SupportLoadBalancer.DNSName
+            - Name: CLIENTS_RULESENGINE_HOST
+              Value: !GetAtt SupportLoadBalancer.DNSName
+            - Name: CLIENTS_VIRTUALDEVICE_HOST
+              Value: !GetAtt DevicesLoadBalancer.DNSName
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref ContainerCloudWatchLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: edgex-sample
+        - Name: devicerest
+          Image: !Ref devicerestImage
+          Essential: true
+          PortMappings:
+            - ContainerPort: 49986
+              Protocol: tcp
+          Environment:
+            - Name: EDGEX_STARTUP_DURATION
+              Value: !Ref DiscoveryDuration
+            - Name: EDGEX_STARTUP_INTERVAL
+              Value: !Ref DiscoveryInterval
+            - Name: EDGEX_SECURITY_SECRET_STORE
+              Value: 'false'
+            - Name: EDGEX_CONFIGURATION_PROVIDER
+              Value: !Sub
+                - consul.http://${LoadBalancerDNS}:8500
+                - LoadBalancerDNS: !GetAtt BackendLoadBalancer.DNSName
+            - Name: Logging_EnableRemote
+              Value: 'false'
+            - Name: SERVICE_HOST 
+              Value: !GetAtt DevicesLoadBalancer.DNSName
+            - Name: REGISTRY_HOST
+              Value: !GetAtt BackendLoadBalancer.DNSName
+            - Name: DATABASES_PRIMARY_HOST
+              Value: !GetAtt BackendLoadBalancer.DNSName
+            - Name: CLIENTS_COREDATA_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_DATA_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_METADATA_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_COMMAND_HOST
+              Value: !GetAtt CoreLoadBalancer.DNSName
+            - Name: CLIENTS_NOTIFICATIONS_HOST
+              Value: !GetAtt SupportLoadBalancer.DNSName
+            - Name: CLIENTS_SCHEDULER_HOST
+              Value: !GetAtt SupportLoadBalancer.DNSName
+            - Name: CLIENTS_RULESENGINE_HOST
+              Value: !GetAtt SupportLoadBalancer.DNSName
+            - Name: CLIENTS_VIRTUALDEVICE_HOST
+              Value: !GetAtt DevicesLoadBalancer.DNSName
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref ContainerCloudWatchLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: edgex-sample
+
+ ### Other ###
+  ContainerCloudWatchLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties: 
+      RetentionInDays: 14
+
+Outputs:
+  BackendLoadBalancer:
+    Description: Backend LoadBalancer DNS Name
+    Value: !GetAtt BackendLoadBalancer.DNSName
+  SupportLoadBalancer:
+    Description: Support LoadBalancer DNS Name
+    Value: !GetAtt SupportLoadBalancer.DNSName
+  CoreLoadBalancer:
+    Description: Core LoadBalancer DNS Name
+    Value: !GetAtt CoreLoadBalancer.DNSName
+  DevicesLoadBalancer:
+    Description: Devices LoadBalancer DNS Name
+    Value: !GetAtt DevicesLoadBalancer.DNSName
+  FargateCluster:
+    Description: ECS Cluster Name
+    Value: !Sub https://${AWS::Region}.console.aws.amazon.com/ecs/home#/clusters/${FargateCluster}/
+  ContainerCloudWatchLogGroup:
+    Description: CloudWatch Log Group where container logs are written to
+    Value: !Sub https://${AWS::Region}.console.aws.amazon.com/cloudwatch/home?region=${AWS::Region}#logStream:group=${ContainerCloudWatchLogGroup}

@@ -1,0 +1,14 @@
+*.out
+examples/bin
+.idea/
+.vscode
+**/debug
+**/debug.test
+app-service
+*.log
+*.txt
+*.html
+*.out
+*.dll
+*.exe
+go.sum

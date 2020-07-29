@@ -1,0 +1,11 @@
+go.sum
+examples/azure-export/azure-export
+examples/azure-export/logs
+coverage.out
+*.log
+*.txt
+*.html
+*.out
+*.dll
+*.exe
+go.sum
