@@ -1,0 +1,43 @@
+#  ----------------------------------------------------------------------------------
+#  Copyright 2020 Intel Corp.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+#  SPDX-License-Identifier: Apache-2.0'
+#  ----------------------------------------------------------------------------------
+
+FROM ubuntu:16.04
+
+ARG SSH_PUBLIC_KEY
+
+
+RUN apt-get update && apt-get install -y openssh-server
+RUN mkdir /var/run/sshd
+RUN echo 'root:THEPASSWORDYOUCREATED' | chpasswd
+
+# pam_loginuid is used to set the loginuid audit attribute of a process when a user login through SSH
+# see the reference in https://stackoverflow.com/questions/21391142/why-is-it-needed-to-set-pam-loginuid-to-its-optional-value-with-docker
+RUN sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+
+# Allow the openssh client to specify IP address from which connections to the port are allowed
+RUN echo 'GatewayPorts clientspecified' >> /etc/ssh/sshd_config
+
+# SSH login fix. Otherwise user is kicked off after login
+RUN sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
+
+RUN mkdir /root/.ssh && chmod 700 /root/.ssh
+
+RUN echo $SSH_PUBLIC_KEY >> "/root/.ssh/authorized_keys"
+
+EXPOSE 22
+CMD ["/usr/sbin/sshd", "-D"]
