@@ -1,6 +1,6 @@
 module simple-cbor-filter
 
-go 1.13
+go 1.15
 
 require (
 	github.com/edgexfoundry/app-functions-sdk-go v1.2.0

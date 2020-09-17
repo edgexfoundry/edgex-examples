@@ -1,6 +1,6 @@
 module azure-export
 
-go 1.13
+go 1.15
 
 require (
 	github.com/dghubble/sling v1.3.0
