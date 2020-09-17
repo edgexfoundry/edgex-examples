@@ -1,6 +1,6 @@
 module cloud-event
 
-go 1.13
+go 1.15
 
 require (
 	github.com/cloudevents/sdk-go v1.1.2
