@@ -1,0 +1,20 @@
+version: '3'
+
+services:
+  edgex-device-uart:
+    image: edgexfoundry/docker-device-uart-go:1.0.0-dev
+    ports:
+      - "49977:49977"
+    container_name: edgex-device-uart-go
+    hostname: edgex-device-uart-go
+    networks:
+      - edgex-network
+    restart: always
+    privileged: true
+    volumes:
+      - "/dev:/dev"
+
+networks:
+  edgex-network:
+    driver: "bridge"
+

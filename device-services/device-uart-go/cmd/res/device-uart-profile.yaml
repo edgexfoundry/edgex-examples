@@ -1,0 +1,171 @@
+name: "uart"
+manufacturer: "jiangxing.ai"
+model: "Device-Uart-01"
+labels:
+ - "linux device-uart-go example"
+description: "example of device-uart"
+
+deviceResources:
+    -
+        name: "gethex"
+        description: "get hex format data"
+        properties:
+            value:
+                { type: "String", readWrite: "R" }
+
+    -
+        name: "getstring"
+        description: "get string data"
+        properties:
+            value:
+                { type: "String", readWrite: "R" }
+
+    -
+        name: "sendhex"
+        description: "send hex data"
+        properties:
+            value:
+                { type: "String", readWrite: "W" }
+
+    -
+        name: "sendstring"
+        description: "send string data"
+        properties:
+            value:
+                { type: "String", readWrite: "W" }
+
+    -
+        name: "uartconfig"
+        description: "get uart config"
+        properties:
+            value:
+                { type: "String", readWrite: "R" }
+
+    -
+        name: "path"
+        description: "uart device path"
+        properties:
+            value:
+                { type: "String", readWrite: "W" }
+
+    -
+        name: "baud"
+        description: "uart baud"
+        properties:
+            value:
+                { type: "Int32", readWrite: "W" }
+            units:
+                { type: "string", readWrite: "R", defaultValue: "bps" }
+
+deviceCommands:
+    -
+        name: "gethex"
+        get:
+            - { operation: "get", deviceResource: "gethex" }
+
+    -
+        name: "getstring"
+        get:
+            - { operation: "get", deviceResource: "getstring" }
+
+    -
+        name: "sendhex"
+        set:
+            - { operation: "set", deviceResource: "sendhex"}
+
+    -
+        name: "sendstring"
+        set:
+            - { operation: "set", deviceResource: "sendstring"}
+
+    -
+        name: "uartconfig"
+        get:
+            - { operation: "get", deviceResource: "uartconfig"}
+        set:
+            - { operation: "set", deviceResource: "path"}
+            - { operation: "set", deviceResource: "baud"}
+
+coreCommands:
+    -
+        name: "gethex"
+        get:
+            path: "/api/v1/device/{deviceId}/gethex"
+            responses:
+            -
+                code: "200"
+                description: ""
+                expectedValues: ["gethex"]
+            -
+                code: "503"
+                description: "service unavailable"
+                expectedValues: []
+
+    -
+        name: "getstring"
+        get:
+            path: "/api/v1/device/{deviceId}/getstring"
+            responses:
+            -
+                code: "200"
+                description: ""
+                expectedValues: ["getstring"]
+            -
+                code: "503"
+                description: "service unavailable"
+                expectedValues: []
+
+    -
+        name: "sendhex"
+        put:
+            path: "/api/v1/device/{deviceId}/sendhex"
+            responses:
+            -
+                code: "200"
+                description: ""
+                expectValues: ["sendhex"]
+            -
+                code: "503"
+                description: "service unaviable"
+                expectValues: []
+
+    -
+        name: "sendstring"
+        put:
+            path: "/api/v1/device/{deviceId}/sendstring"
+            responses:
+            -
+                code: "200"
+                description: ""
+                expectValues: ["sendstring"]
+            -
+                code: "503"
+                description: "service unaviable"
+                expectValues: []
+
+    -
+        name: "uartconfig"
+        get:
+            path: "/api/v1/device/{deviceId}/uartconfig"
+            responses:
+            -
+                code: "200"
+                description: ""
+                expectValues: ["uartconfig"]
+            -
+                code: "503"
+                description: "service unaviable"
+                expectValues: []
+
+        put:
+            path: "/api/v1/device/{deviceId}/uartconfig"
+            parameterNames: ["path", "baud"]
+            responses:
+            -
+                code: "200"
+                description: ""
+                expectValues: []
+            -
+                code: "503"
+                description: "service unaviable"
+                expectValues: []
