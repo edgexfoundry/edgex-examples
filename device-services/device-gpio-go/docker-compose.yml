@@ -1,0 +1,20 @@
+version: '3'
+
+services:
+  edgex-device-gpio:
+    image: edgexfoundry/docker-device-gpio-go:1.0.0-dev
+    ports:
+      - "49960:49960"
+    container_name: edgex-device-gpio-go
+    hostname: edgex-device-gpio-go
+    networks:
+      - edgex-network
+    restart: always
+    privileged: true
+    volumes:
+      - "/sys/class/gpio:/sys/class/gpio"
+
+networks:
+  edgex-network:
+    driver: "bridge"
+

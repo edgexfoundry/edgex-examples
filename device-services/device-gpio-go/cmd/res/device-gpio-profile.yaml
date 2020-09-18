@@ -1,0 +1,140 @@
+name: "GPIO-Device"
+manufacturer: "jiangxing.ai"
+model: "SP-01"
+labels:
+  - "gpio-device"
+description: "Example of GPIO Device"
+
+deviceResources:
+  -
+    name: "export"
+    description: "export system gpio"
+    properties:
+      value:
+        { type: "Int16", readWrite: "W", minimum: "0", maximum: "255", defaultValue: "65" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "system gpio number" }
+  -
+    name: "unexport"
+    description: "unexport system gpio"
+    properties:
+      value:
+        { type: "Int16", readWrite: "W", minimum: "0", maximum: "255", defaultValue: "65" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "system gpio number" }
+  -
+    name: "direction"
+    description: "system gpio direction"
+    properties:
+      value:
+        { type: "String", readWrite: "RW", defaultValue: "out" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "output:out; input:in" }
+  -
+    name: "value"
+    description: "system gpio value"
+    properties:
+      value:
+        { type: "Int8", readWrite: "RW", minimum: "0", maximum: "1", defaultValue: "1" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "high:1; low:0" }
+
+
+deviceCommands:
+  -
+    name: "exportgpio"
+    set:
+      - { operation: "set", deviceResource: "export" }
+  -
+    name: "unexportgpio"
+    set:
+      - { operation: "set", deviceResource: "unexport" }
+  -
+    name: "gpiodirection"
+    get:
+      - { operation: "get", deviceResource: "direction" }
+    set:
+      - { operation: "set", deviceResource: "direction" }
+  -
+    name: "gpiovalue"
+    get:
+      - { operation: "get", deviceResource: "value" }
+    set:
+      - { operation: "set", deviceResource: "value", parameter: "1" }
+
+
+coreCommands:
+  -
+    name: "exportgpio"
+    put:
+      path: "/api/v1/device/{deviceId}/exportgpio"
+      parameterNames: ["export"]
+      responses:
+        -
+          code: "200"
+          description: ""
+        -
+          code: "503"
+          description: "service unavailable"
+          expectedValues: []
+  -
+    name: "unexportgpio"
+    put:
+      path: "/api/v1/device/{deviceId}/unexportgpio"
+      parameterNames: ["unexport"]
+      responses:
+        -
+          code: "200"
+          description: ""
+        -
+          code: "503"
+          description: "service unavailable"
+          expectedValues: []
+  -
+    name: "gpiodirection"
+    put:
+      path: "/api/v1/device/{deviceId}/gpiodirection"
+      parameterNames: ["direction"]
+      responses:
+        -
+          code: "200"
+          description: ""
+        -
+          code: "503"
+          description: "service unavailable"
+          expectedValues: []
+    get:
+      path: "/api/v1/device/{deviceId}/gpiodirection"
+      responses:
+        -
+          code: "200"
+          description: ""
+          expectedValues: ["direction"]
+        -
+          code: "503"
+          description: "service unavailable"
+          expectedValues: []
+  -
+    name: "gpiovalue"
+    put:
+      path: "/api/v1/device/{deviceId}/gpiovalue"
+      parameterNames: ["value"]
+      responses:
+        -
+          code: "200"
+          description: ""
+        -
+          code: "503"
+          description: "service unavailable"
+          expectedValues: []
+    get:
+      path: "/api/v1/device/{deviceId}/gpiovalue"
+      responses:
+        -
+          code: "200"
+          description: ""
+          expectedValues: ["value"]
+        -
+          code: "503"
+          description: "service unavailable"
+          expectedValues: []

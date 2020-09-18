@@ -1,0 +1,62 @@
+[Writable]
+LogLevel = 'INFO'
+
+[Service]
+BootTimeout = 30000
+CheckInterval = '10s'
+Host = '172.17.0.1'
+ServerBindAddr = ''  # blank value defaults to Service.Host value
+Port = 49960
+Protocol = 'http'
+StartupMsg = 'device uart started'
+Timeout = 5000
+ConnectRetries = 10
+Labels = []
+EnableAsyncReadings = true
+AsyncBufferSize = 16
+
+[Registry]
+Host = '172.17.0.1'
+Port = 8500
+Type = 'consul'
+
+[Logging]
+EnableRemote = false
+File = ''
+
+[Clients]
+  [Clients.Data]
+  Protocol = 'http'
+  Host = '172.17.0.1'
+  Port = 48080
+
+  [Clients.Metadata]
+  Protocol = 'http'
+  Host = '172.17.0.1'
+  Port = 48081
+
+  [Clients.Logging]
+  Protocol = 'http'
+  Host = '172.17.0.1'
+  Port = 48061
+
+[Device]
+  DataTransform = true
+  InitCmd = ''
+  InitCmdArgs = ''
+  MaxCmdOps = 128
+  MaxCmdValueLen = 256
+  RemoveCmd = ''
+  RemoveCmdArgs = ''
+  ProfilesDir = './res'
+  UpdateLastConnected = false
+
+# Pre-define Devices
+[[DeviceList]]
+  Name = "gpio"
+  Profile = "GPIO-Device"
+  Description = "example of gpio device"
+  Labels = []
+  [DeviceList.Protocols]
+    [DeviceList.Protocols.other]
+      Address = "/api/v1/device/gpio"
