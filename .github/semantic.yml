@@ -1,0 +1,22 @@
+allowMergeCommits: true
+# Always validate the PR title AND all the commits
+titleAndCommits: true
+types:
+    - feat
+    - fix
+    - docs
+    - style
+    - refactor
+    - perf
+    - test
+    - build
+    - ci
+    - revert
+scopes:
+    - app (for app services)
+    - deploy (for deployment)
+    - device (for device services)
+    - temp (for templates)
+    - security
+    - all (applies to all examples)
+
