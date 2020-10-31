@@ -1,0 +1,52 @@
+[Writable]
+LogLevel = 'INFO'
+
+[Service]
+BootTimeout = "30s"
+CheckInterval = "10s"
+Host = "localhost"
+ServerBindAddr = "" # if blank, uses default Go behavior https://golang.org/pkg/net/#Listen
+Port = 50001
+Protocol = "http"
+ReadMaxLimit = 100
+StartupMsg = 'LF Edge Fledge Export Service'
+Timeout = "5s"
+
+[Registry]
+Host = "localhost"
+Port = 8500
+Type = "consul"
+
+[Clients]
+  [Clients.CoreData]
+  Protocol = "http"
+  Host = "localhost"
+  Port = 48080
+
+  [Clients.Logging]
+  Protocol = "http"
+  Host = "localhost"
+  Port = 48061
+
+[Binding]
+Type="messagebus"
+SubscribeTopic="events"
+PublishTopic=""
+
+[MessageBus]
+Type = "zero"
+    [MessageBus.SubscribeHost]
+        Host = "localhost"
+        Port = 5563
+        Protocol = "tcp"
+    [MessageBus.PublishHost]
+        Host = "*"
+        Port = 5566
+        Protocol = "tcp"
+
+[Logging]
+EnableRemote = false
+File = ""
+
+[ApplicationSettings]
+FledgeSouthHTTPEndpoint = "http://192.168.0.10:6683/sensor-reading"
