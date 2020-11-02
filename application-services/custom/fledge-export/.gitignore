@@ -1,0 +1,7 @@
+.vscode
+go.sum
+coverage.out
+logs/
+.idea
+VERSION
+*.exe
