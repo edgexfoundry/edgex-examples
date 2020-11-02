@@ -13,10 +13,9 @@ types:
     - ci
     - revert
 scopes:
-    - app (for app services)
-    - deploy (for deployment)
-    - device (for device services)
-    - temp (for templates)
+    - app
+    - deploy
+    - device
+    - temp
     - security
-    - all (applies to all examples)
-
+    - all
