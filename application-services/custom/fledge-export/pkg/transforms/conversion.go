@@ -23,11 +23,11 @@ type FledgeReading struct {
 	Readings  map[string]interface{} `json:"readings,omitempty"`
 }
 
-func newFledgeReading(stamp int64, asset string) *FledgeReading {
+func newFledgeReading(stamp int64, asset string) FledgeReading {
 	tm := time.Unix(0, stamp*int64(time.Millisecond))
 	reading := FledgeReading{Timestamp: tm.String(), Asset: asset}
 	reading.Readings = make(map[string]interface{})
-	return &reading
+	return reading
 }
 
 // TransformToFledge ...
@@ -41,11 +41,11 @@ func (f Conversion) TransformToFledge(edgexcontext *appcontext.Context, params .
 	if event, ok := params[0].(models.Event); ok {
 		payload := make([]FledgeReading, 1)
 		fReading := newFledgeReading(event.Created, event.Device)
-		payload[0] = *fReading
 
 		for _, reading := range event.Readings {
 			fReading.Readings[reading.Name] = reading.Value
 		}
+		payload[0] = fReading
 
 		msg, err := json.Marshal(payload)
 		if err != nil {

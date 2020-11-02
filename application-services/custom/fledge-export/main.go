@@ -20,11 +20,7 @@ func main() {
 	// 2) Next, we need to initialize the SDK
 	if err := edgexSdk.Initialize(); err != nil {
 		message := fmt.Sprintf("SDK initialization failed: %v\n", err)
-		if edgexSdk.LoggingClient != nil {
-			edgexSdk.LoggingClient.Error(message)
-		} else {
-			fmt.Println(message)
-		}
+		edgexSdk.LoggingClient.Error(message)
 		os.Exit(-1)
 	}
 
@@ -38,7 +34,6 @@ func main() {
 	// 4) This is our pipeline configuration, the collection of functions to
 	// execute every time an event is triggered.
 	if err := edgexSdk.SetFunctionsPipeline(
-		//transforms.NewConversion().TransformToJSON,
 		fledgeTransforms.NewConversion().TransformToFledge,
 		transforms.NewHTTPSender(fledgeEndpoint[0], "application/json", false).HTTPPost,
 	); err != nil {

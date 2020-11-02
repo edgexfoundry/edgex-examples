@@ -1,4 +1,4 @@
-.PHONY: build test clean docker
+.PHONY: build clean
 
 GO=CGO_ENABLED=1 go
 
@@ -16,27 +16,7 @@ GOFLAGS=-ldflags "-X github.com/edgexfoundry/app-functions-sdk-go/internal.SDKVe
 GIT_SHA=$(shell git rev-parse HEAD)
 
 build:
-	$(GO) build $(GOFLAGS) -o $(MICROSERVICE)
-
-# NOTE: This is only used for local development. Jenkins CI does not use this make target
-docker:
-	docker build \
-	    --build-arg http_proxy \
-	    --build-arg https_proxy \
-		-f Dockerfile \
-		--label "git_sha=$(GIT_SHA)" \
-		-t edgexfoundry/docker-fledge-export:$(GIT_SHA) \
-		-t edgexfoundry/docker-fledge-export:master-dev \
-		-t nexus3.edgexfoundry.org:10004/docker-fledge-export:master-dev \
-		.
-
-test:
-	$(GO) test -coverprofile=coverage.out ./...
-	$(GO) vet ./...
-	gofmt -l .
-	[ "`gofmt -l .`" = "" ]
-	./bin/test-go-mod-tidy.sh
-	./bin/test-attribution-txt.sh
+	$(GO) build $(GOFLAGS) -o $(MICROSERVICE)	.
 
 clean:
 	rm -f $(MICROSERVICE)
