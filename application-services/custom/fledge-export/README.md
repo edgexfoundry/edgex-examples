@@ -18,7 +18,7 @@ See the [Fledge Plugin documentation](https://fledge-iot.readthedocs.io/en/v1.8.
 
 A Makefile has been provide to easily create and execute this service.  In order to build the micro service executable run the `make build` from the root directory of this example.
 
-Once the micro service has successfully been compiled, run the executable created in the root directory with `./fledge-export`.
+Once the micro service has successfully been compiled, run the executable created in the root directory with `./app-service`.
 
 ## Configuration
 
