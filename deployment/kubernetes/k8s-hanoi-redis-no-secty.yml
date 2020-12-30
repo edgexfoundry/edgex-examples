@@ -35,6 +35,7 @@ items:
       Clients_RulesEngine_Host: "edgex-kuiper"
       Clients_VirtualDevice_Host: "edgex-device-virtual"
       Databases_Primary_Host: "edgex-redis"
+      Service_ServerBindAddr: "0.0.0.0"
       # Required in case old configuration from previous release used.
       # Change to "true" if re-enabling logging service for remote logging
       Logging_EnableRemote: "false"
