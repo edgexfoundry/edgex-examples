@@ -18,6 +18,9 @@ import (
 
 func main() {
 
+	// using insecure secrets from configuration.toml.  This can be removed if setting an env via export in the OS.
+	os.Setenv("EDGEX_SECURITY_SECRET_STORE", "false")
+
 	// 1) First thing to do is to create an instance of the EdgeX SDK, giving it a service key
 	edgexSdk := &appsdk.AppFunctionsSDK{
 		ServiceKey: "InfluxDBExport", // Key used by Registry (Aka Consul)
@@ -31,14 +34,14 @@ func main() {
 	}
 
 	// 3) Initialize the MQTT addressable/configuration
-	mqttConfig := sdkTransforms.MqttConfig{}
-	addressable, err := influxTransforms.LoadMQTTAddressable(edgexSdk)
+	mqttConfig := sdkTransforms.MQTTSecretConfig{}
+	err := influxTransforms.LoadMQTTConfig(edgexSdk, &mqttConfig)
 
 	if err != nil {
 		edgexSdk.LoggingClient.Error(fmt.Sprintf("SDK MQTT Addressable initialize failed: %v\n", err))
 		os.Exit(-1)
 	}
-	mqttSender := sdkTransforms.NewMQTTSender(edgexSdk.LoggingClient, *addressable, nil, mqttConfig, false)
+	mqttSender := sdkTransforms.NewMQTTSecretSender(mqttConfig, false)
 
 	// 4) This is our pipeline configuration, the collection of functions to
 	// execute every time an event is triggered.

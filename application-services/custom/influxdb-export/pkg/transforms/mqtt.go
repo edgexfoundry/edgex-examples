@@ -9,11 +9,10 @@ package transforms
 import (
 	"errors"
 	"fmt"
-	"strconv"
 
 	"github.com/edgexfoundry/app-functions-sdk-go/appsdk"
+	sdkTransforms "github.com/edgexfoundry/app-functions-sdk-go/pkg/transforms"
 	"github.com/edgexfoundry/go-mod-core-contracts/clients/logger"
-	"github.com/edgexfoundry/go-mod-core-contracts/models"
 )
 
 var log logger.LoggingClient
@@ -29,32 +28,23 @@ func getAppSetting(settings map[string]string, name string) string {
 	return ""
 }
 
-func LoadMQTTAddressable(sdk *appsdk.AppFunctionsSDK) (*models.Addressable, error) {
-
-	addr := models.Addressable{}
+func LoadMQTTConfig(sdk *appsdk.AppFunctionsSDK, cfg *sdkTransforms.MQTTSecretConfig) error {
 
 	if sdk == nil {
-		return nil, errors.New("Invalid AppFunctionsSDK")
+		return errors.New("Invalid AppFunctionsSDK")
 	}
 
 	log = sdk.LoggingClient
-
 	appSettings := sdk.ApplicationSettings()
 	if appSettings != nil {
-		addr.Address = getAppSetting(appSettings, "Host")
-		i, err := strconv.Atoi(getAppSetting(appSettings, "Port"))
-		if err != nil {
-			return nil, errors.New("MQTT Port not a number in configuration")
-		}
-		addr.Port = i
-		addr.Protocol = getAppSetting(appSettings, "Protocol")
-		addr.Publisher = getAppSetting(appSettings, "Publisher")
-		addr.User = getAppSetting(appSettings, "User")
-		addr.Password = getAppSetting(appSettings, "Password")
-		addr.Topic = getAppSetting(appSettings, "Topic")
+		cfg.BrokerAddress = getAppSetting(appSettings, "BrokerAddress")
+		cfg.Topic = getAppSetting(appSettings, "Topic")
+		cfg.ClientId = getAppSetting(appSettings, "Publisher")
+		cfg.AuthMode = "usernamepassword"
+		cfg.SecretPath = "mqtt"
 	} else {
-		return nil, errors.New("No application-specific settings found")
+		return errors.New("No application-specific settings found")
 	}
 
-	return &addr, nil
+	return nil
 }
