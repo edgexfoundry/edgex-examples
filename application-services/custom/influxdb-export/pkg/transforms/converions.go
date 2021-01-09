@@ -40,7 +40,7 @@ func (f Conversion) TransformToInflux(edgexcontext *appcontext.Context, params .
 
 	// write device name as measurement
 	buffer.WriteString(event.Device)
-	// write tags if any, comma separated [,<tag_key>=<tag_value>[,<tag_key>=<tag_value>]]
+	// write tags if any, comma separated [,tag<index>=<tag_value>[,tag<index>=<tag_value>]]
 	for i, tag := range event.Tags {
 		// write comma
 		buffer.WriteString(",")
