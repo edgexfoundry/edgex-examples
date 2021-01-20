@@ -158,6 +158,7 @@ Once EdgeX is running in Kubernetes, you can explore the APIs and services as yo
 However, the port mapping to expose EdgeX services externally (outside of the Kubernetes environment) is different.  Kubernetes service node port range is between 30000-32767, so appropriate ports in this range have been selected to expose the EdgeX services externally.
 
 | EdgeX Service | EdgeX Port | External Port for the service with K8s |
+|---------------|------------|----------------------------------------|
 | Consul | 8500 | 30850 |
 | Consul | 8400 | 30840 |
 | Notifications | 48060 | 30060 |
