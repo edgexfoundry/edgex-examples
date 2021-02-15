@@ -40,18 +40,21 @@ func (f Conversion) TransformToInflux(edgexcontext *appcontext.Context, params .
 
 	// write device name as measurement
 	buffer.WriteString(event.Device)
-	// write tags if any, comma separated [,tag<index>=<tag_value>[,tag<index>=<tag_value>]]
-	for i, tag := range event.Tags {
+	// write tags if any, comma separated
+	// see Influx docs for syntax and example
+	// https://docs.influxdata.com/influxdb/v2.0/reference/syntax/line-protocol/
+	for key, val := range event.Tags {
 		// write comma
 		buffer.WriteString(",")
-		buffer.WriteString("tag")
-		buffer.WriteString(i)
+		buffer.WriteString(key)
 		buffer.WriteString("=")
-		buffer.WriteString(tag)
+		buffer.WriteString(val)
 	}
 	// write space
 	buffer.WriteString(" ")
-	// write fields (readings) comma separated <field_key>=<field_value>[,<field_key>=<field_value>]
+	// write fields (readings) comma separated
+	// see Influx docs for syntax and example
+	// https://docs.influxdata.com/influxdb/v2.0/reference/syntax/line-protocol/
 	for j, reading := range event.Readings {
 		if j > 0 {
 			buffer.WriteString(",")
