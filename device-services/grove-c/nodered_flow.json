@@ -1,0 +1,340 @@
+[
+    {
+        "id": "8c99a986.6f793",
+        "type": "tab",
+        "label": "Grove_Device",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "78ffefe4.bab588",
+        "type": "mqtt in",
+        "z": "8c99a986.6f793",
+        "name": "MQTT_DeviceGrove",
+        "topic": "MQTT_DeviceGrove",
+        "qos": "2",
+        "broker": "edb6482d.5eb0f8",
+        "x": 209.75,
+        "y": 227.75,
+        "wires": [
+            [
+                "d68b1a06.4b4c68"
+            ]
+        ]
+    },
+    {
+        "id": "d68b1a06.4b4c68",
+        "type": "json",
+        "z": "8c99a986.6f793",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 508.75,
+        "y": 226.75,
+        "wires": [
+            [
+                "4edf2e1f.3cefe8",
+                "8ed434f7.9e5c48",
+                "4dba4af8.445cd4",
+                "9572d268.6be65"
+            ]
+        ]
+    },
+    {
+        "id": "4edf2e1f.3cefe8",
+        "type": "function",
+        "z": "8c99a986.6f793",
+        "name": "RotaryAngle",
+        "func": "for (var i = 0; i < msg.payload.readings.length; i++)\n{\n    if (msg.payload.readings[i].name == \"RotaryAngle\")\n    {\n        twoPlacedFloat = parseFloat(msg.payload.readings[i].value).toFixed(2)\n        msg.payload = twoPlacedFloat;\n        return msg;\n    }\n}\n\nreturn null;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 806.75,
+        "y": 57.75,
+        "wires": [
+            [
+                "51379d0d.5e043c"
+            ]
+        ]
+    },
+    {
+        "id": "8ed434f7.9e5c48",
+        "type": "function",
+        "z": "8c99a986.6f793",
+        "name": "RotaryVoltage",
+        "func": "for (var i = 0; i < msg.payload.readings.length; i++)\n{\n    if (msg.payload.readings[i].name == \"RotaryVoltage\")\n    {\n        twoPlacedFloat = parseFloat(msg.payload.readings[i].value).toFixed(2)\n        msg.payload = twoPlacedFloat;\n        return msg;\n    }\n}\n\nreturn null;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 819.75,
+        "y": 157.75,
+        "wires": [
+            [
+                "2978e45a.c2203c"
+            ]
+        ]
+    },
+    {
+        "id": "51379d0d.5e043c",
+        "type": "ui_gauge",
+        "z": "8c99a986.6f793",
+        "name": "RotaryAngle",
+        "group": "f8e2ffd8.088d4",
+        "order": 1,
+        "width": "6",
+        "height": "6",
+        "gtype": "gage",
+        "title": "RotaryAngle",
+        "label": "Degree",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "300",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "x": 1104.5,
+        "y": 56.75,
+        "wires": []
+    },
+    {
+        "id": "2978e45a.c2203c",
+        "type": "ui_gauge",
+        "z": "8c99a986.6f793",
+        "name": "RotaryVoltage",
+        "group": "f8e2ffd8.088d4",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "RotaryVoltage",
+        "label": "Volts",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "5",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "x": 1111.75,
+        "y": 155.75,
+        "wires": []
+    },
+    {
+        "id": "6156bf94.f1eec8",
+        "type": "ui_chart",
+        "z": "8c99a986.6f793",
+        "name": "LightIntensity",
+        "group": "e50d4e67.d2bec",
+        "order": 1,
+        "width": "8",
+        "height": "10",
+        "label": "Luminosity",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "auto",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "0",
+        "ymax": "100",
+        "removeOlder": "1",
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "useOldStyle": false,
+        "x": 1069.5,
+        "y": 271,
+        "wires": [
+            [],
+            []
+        ]
+    },
+    {
+        "id": "4dba4af8.445cd4",
+        "type": "function",
+        "z": "8c99a986.6f793",
+        "name": "LightIntensity",
+        "func": "for (var i = 0; i < msg.payload.readings.length; i++)\n{\n    if (msg.payload.readings[i].name == \"LightIntensity\")\n    {\n        twoPlacedFloat = parseFloat(msg.payload.readings[i].value).toFixed(2)\n        msg.payload = twoPlacedFloat;\n        return msg;\n    }\n}\n\nreturn null;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 813.5,
+        "y": 333,
+        "wires": [
+            [
+                "6156bf94.f1eec8",
+                "75917b6f.1f5364"
+            ]
+        ]
+    },
+    {
+        "id": "9572d268.6be65",
+        "type": "function",
+        "z": "8c99a986.6f793",
+        "name": "SoundIntensity",
+        "func": "for (var i = 0; i < msg.payload.readings.length; i++)\n{\n    if (msg.payload.readings[i].name == \"SoundIntensity\")\n    {\n        twoPlacedFloat = parseFloat(msg.payload.readings[i].value).toFixed(2)\n        msg.payload = twoPlacedFloat;\n        return msg;\n    }\n}\n\nreturn null;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 853.75,
+        "y": 491.25,
+        "wires": [
+            [
+                "d517d98f.c02cb8",
+                "d87f1ed1.4f1258"
+            ]
+        ]
+    },
+    {
+        "id": "d517d98f.c02cb8",
+        "type": "ui_chart",
+        "z": "8c99a986.6f793",
+        "name": "SoundIntensity",
+        "group": "38cae0fc.e58f48",
+        "order": 3,
+        "width": "8",
+        "height": "10",
+        "label": "SoundIntensity",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "auto",
+        "interpolate": "linear",
+        "nodata": "SoundIntensity",
+        "dot": false,
+        "ymin": "0",
+        "ymax": "5",
+        "removeOlder": "1",
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "useOldStyle": false,
+        "x": 1094.5,
+        "y": 436.75,
+        "wires": [
+            [],
+            []
+        ]
+    },
+    {
+        "id": "75917b6f.1f5364",
+        "type": "ui_text",
+        "z": "8c99a986.6f793",
+        "group": "e50d4e67.d2bec",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "name": "Lumen",
+        "label": "<font size=\"+1\">Lumen: </font>",
+        "format": "{{msg.payload}}",
+        "layout": "row-center",
+        "x": 1059.5,
+        "y": 361.75,
+        "wires": []
+    },
+    {
+        "id": "d87f1ed1.4f1258",
+        "type": "ui_text",
+        "z": "8c99a986.6f793",
+        "group": "38cae0fc.e58f48",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "name": "Sound Intensity",
+        "label": "<font size=\"+1\">SoundIntensity (Vbiased): </font>",
+        "format": "{{msg.payload}}",
+        "layout": "row-center",
+        "x": 1104.5,
+        "y": 542.75,
+        "wires": []
+    },
+    {
+        "id": "edb6482d.5eb0f8",
+        "type": "mqtt-broker",
+        "z": "",
+        "name": "GroveDevice",
+        "broker": "mqtt-broker",
+        "port": "1883",
+        "clientid": "",
+        "usetls": false,
+        "compatmode": true,
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": ""
+    },
+    {
+        "id": "f8e2ffd8.088d4",
+        "type": "ui_group",
+        "z": "",
+        "name": "RotarySensor",
+        "tab": "2fd146a8.13df9a",
+        "order": 3,
+        "disp": true,
+        "width": "8",
+        "collapse": false
+    },
+    {
+        "id": "e50d4e67.d2bec",
+        "type": "ui_group",
+        "z": "",
+        "name": "LightSensor",
+        "tab": "2fd146a8.13df9a",
+        "order": 1,
+        "disp": true,
+        "width": "8",
+        "collapse": false
+    },
+    {
+        "id": "38cae0fc.e58f48",
+        "type": "ui_group",
+        "z": "",
+        "name": "SoundSensor",
+        "tab": "2fd146a8.13df9a",
+        "order": 2,
+        "disp": true,
+        "width": "8",
+        "collapse": false
+    },
+    {
+        "id": "2fd146a8.13df9a",
+        "type": "ui_tab",
+        "z": "",
+        "name": "Grove_Device",
+        "icon": "dashboard"
+    }
+]
