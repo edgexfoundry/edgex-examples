@@ -22,19 +22,19 @@ StartupMsg = "App service export to InfluxDB has Started"
 Timeout = "5s"
 
 [Registry]
-Host = "192.168.0.10"
+Host = "localhost"
 Port = 8500
 Type = "consul"
 
 [Clients]
   [Clients.CoreData]
   Protocol = "http"
-  Host = "192.168.0.10"
+  Host = "localhost"
   Port = 48080
 
   [Clients.Logging]
   Protocol = "http"
-  Host = "192.168.0.10"
+  Host = "localhost"
   Port = 48061
 
 [Binding]
@@ -44,7 +44,7 @@ SubscribeTopic="events"
 [MessageBus]
 Type = "zero"
     [MessageBus.SubscribeHost]
-        Host = "192.168.0.10"
+        Host = "localhost"
         Port = 5563
         Protocol = "tcp"
 
@@ -53,7 +53,7 @@ EnableRemote = false
 File = ""
 
 [ApplicationSettings]
-BrokerAddress = "tcp://192.168.0.10:1883"
+BrokerAddress = "tcp://localhost:1883"
 Publisher = ""
 Topic = "edgex/EdgeXEvents"
 
