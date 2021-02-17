@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019 Intel Corporation
+// Copyright (c) 2020 Technotects
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ const (
 	serviceKey = "customTrigger"
 )
 
-type stdinTrigger struct{
+type stdinTrigger struct {
 	tc appsdk.TriggerConfig
 }
 
@@ -62,28 +62,29 @@ func (t *stdinTrigger) Initialize(wg *sync.WaitGroup, ctx context.Context, backg
 		}
 	}()
 
-	for receiveMessage {
-		select {
-		case <- ctx.Done():
-			receiveMessage = false
-		case m := <- msgs:
-			go func() {
-				env := types.MessageEnvelope{
-					Payload: m,
-				}
+	go func() {
+		for receiveMessage {
+			select {
+			case <-ctx.Done():
+				receiveMessage = false
+			case m := <-msgs:
+				go func() {
+					env := types.MessageEnvelope{
+						Payload: m,
+					}
 
-				ctx := t.tc.ContextBuilder(env)
+					ctx := t.tc.ContextBuilder(env)
 
-				err := t.tc.MessageProcessor(ctx, env)
+					err := t.tc.MessageProcessor(ctx, env)
 
-				if err != nil {
-					t.tc.Logger.Error(err.Error())
-				}
-			}()
+					if err != nil {
+						t.tc.Logger.Error(err.Error())
+					}
+				}()
+			}
 		}
+	}()
 
-
-	}
 	return func() {
 		cancel()
 	}, nil
@@ -93,7 +94,7 @@ func main() {
 	// turn off secure mode for examples. Not recommended for production
 	os.Setenv("EDGEX_SECURITY_SECRET_STORE", "false")
 	// First thing to do is to create an instance of the EdgeX SDK and initialize it.
-	edgexSdk := &appsdk.AppFunctionsSDK{ServiceKey: serviceKey, TargetType: &[]byte{} }
+	edgexSdk := &appsdk.AppFunctionsSDK{ServiceKey: serviceKey, TargetType: &[]byte{}}
 
 	if err := edgexSdk.Initialize(); err != nil {
 		edgexSdk.LoggingClient.Error(fmt.Sprintf("SDK initialization failed: %v\n", err))
