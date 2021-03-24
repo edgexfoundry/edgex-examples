@@ -23,10 +23,10 @@ If you are unfamiliar with the Azure IoT Hub, read the following documents first
 1. The HTTP Command Service exposes an HTTP service for the client to switch on / off of the device without knowing the underlying EdgeX APIs. For the service to send commands to correct device, you must set DeviceID and CommandID in the [res/configuration.toml](./res/configuration.toml) file.<br>
     ```
      [ApplicationSettings]
-     DeviceID = "9f178953-84e7-49f6-9829-5b86b7cbbcda"
-     CommandID = "15786a22-d89b-474b-a7de-18371c3d22c5"
-    ```
-   **Note:** For real use cases, the DeviceID must be associated with the actual device that is managed by EdgeX; the CommandID must be associated with the required command registered under the EdgeX Core Command Service, and the command must provide correct responses to consume the [switch on / off JSON document](./status-on-request.json). For simplicity, we can use the Virtual Device Service in this sample.
+     DeviceName = "Simple-Device01"
+     CommandName = "Switch"
+```
+   **Note:** For real use cases, the DeviceName must be associated with the actual device that is managed by EdgeX; the CommandName must be associated with the required command registered under the EdgeX Core Command Service, and the command must provide correct responses to consume the [switch on / off JSON document](./status-on-request.json). For simplicity, we can use the Device Simple in this sample.
    
 2. Build the HTTP command service 
 

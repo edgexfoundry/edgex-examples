@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019 Intel Corporation
+// Copyright (c) 2021 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,20 +17,20 @@
 package functions
 
 import (
+	"errors"
 	"fmt"
 
-	"github.com/edgexfoundry/app-functions-sdk-go/appcontext"
+	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/interfaces"
 )
 
-func PrintToConsole(edgexcontext *appcontext.Context, params ...interface{}) (bool, interface{}) {
-	edgexcontext.LoggingClient.Debug("PrintToConsole")
+func PrintToConsole(ctx interfaces.AppFunctionContext, data interface{}) (bool, interface{}) {
+	ctx.LoggingClient().Debug("PrintToConsole")
 
-	if len(params) < 1 {
-		// We didn't receive a result
-		return false, nil
+	if data == nil {
+		return false, errors.New("PrintToConsole: No data received")
 	}
 
-	fmt.Println(params[0].(string))
+	fmt.Println(data)
 
-	return true, params[0]
+	return true, data
 }

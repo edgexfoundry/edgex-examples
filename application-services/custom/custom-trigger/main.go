@@ -41,7 +41,7 @@ type stdinTrigger struct {
 	tc interfaces.TriggerConfig
 }
 
-func (t *stdinTrigger) Initialize(wg *sync.WaitGroup, ctx context.Context, background <-chan types.MessageEnvelope) (bootstrap.Deferred, error) {
+func (t *stdinTrigger) Initialize(_ *sync.WaitGroup, ctx context.Context, _ <-chan types.MessageEnvelope) (bootstrap.Deferred, error) {
 	msgs := make(chan []byte)
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -94,7 +94,8 @@ func (t *stdinTrigger) Initialize(wg *sync.WaitGroup, ctx context.Context, backg
 
 func main() {
 	// turn off secure mode for examples. Not recommended for production
-	os.Setenv("EDGEX_SECURITY_SECRET_STORE", "false")
+	_ = os.Setenv("EDGEX_SECURITY_SECRET_STORE", "false")
+
 	// First thing to do is to create an instance of the EdgeX SDK and initialize it.
 	service, ok := pkg.NewAppServiceWithTargetType(serviceKey, &[]byte{})
 	if !ok {

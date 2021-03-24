@@ -17,9 +17,5 @@ Host = 'localhost'
 Port = 8500
 Type = 'consul'
 
-[Logging]
-EnableRemote = false
-File = ''
-
 [Trigger]
 Type="custom-stdin"

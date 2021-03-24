@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019 Intel Corporation
+// Copyright (c) 2021 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -31,35 +32,41 @@ const (
 
 func main() {
 	// turn off secure mode for examples. Not recommended for production
-	os.Setenv("EDGEX_SECURITY_SECRET_STORE", "false")
+	_ = os.Setenv("EDGEX_SECURITY_SECRET_STORE", "false")
 
-	// 1) First thing to do is to create an instance of the EdgeX SDK and initialize it.
+	// 1) First thing to do is to create an new instance of an EdgeX Application Service.
 	service, ok := pkg.NewAppService(serviceKey)
 	if !ok {
 		os.Exit(-1)
 	}
 
+	// Leverage the built in logging service in EdgeX
+	lc := service.LoggingClient()
+
 	// 2) shows how to access the application's specific configuration settings.
 	deviceNames, err := service.GetAppSettingStrings("DeviceNames")
 	if err != nil {
-		service.LoggingClient().Error(err.Error())
+		lc.Error(err.Error())
 		os.Exit(-1)
 	}
-	service.LoggingClient().Info(fmt.Sprintf("Filtering for devices %v", deviceNames))
+	lc.Info(fmt.Sprintf("Filtering for devices %v", deviceNames))
 
 	// 3) This is our pipeline configuration, the collection of functions to
 	// execute every time an event is triggered.
-	service.SetFunctionsPipeline(
+	if err := service.SetFunctionsPipeline(
 		transforms.NewFilterFor(deviceNames).FilterByDeviceName,
 		transforms.NewConversion().TransformToXML,
 		printXMLToConsole,
-	)
+	); err != nil {
+		lc.Error("SetFunctionsPipeline returned error: ", err.Error())
+		os.Exit(-1)
+	}
 
 	// 4) Lastly, we'll go ahead and tell the SDK to "start" and begin listening for events
 	// to trigger the pipeline.
 	err = service.MakeItRun()
 	if err != nil {
-		service.LoggingClient().Error("MakeItRun returned error: ", err.Error())
+		lc.Error("MakeItRun returned error: ", err.Error())
 		os.Exit(-1)
 	}
 
@@ -68,17 +75,20 @@ func main() {
 	os.Exit(0)
 }
 
-func printXMLToConsole(appContext interfaces.AppFunctionContext, data interface{}) (bool, interface{}) {
+func printXMLToConsole(ctx interfaces.AppFunctionContext, data interface{}) (bool, interface{}) {
+	// Leverage the built in logging service in EdgeX
+	lc := ctx.LoggingClient()
+
 	if data == nil {
-		// We didn't receive a result
-		return false, nil
+		return false, errors.New("printXMLToConsole: No data received")
 	}
 
-	fmt.Println(data.(string))
+	xml, ok := data.(string)
+	if !ok {
+		return false, errors.New("printXMLToConsole: Data received is not the expected 'string' type")
+	}
 
-	// Leverage the built in logging service in EdgeX
-	appContext.LoggingClient().Debug("XML printed to console")
-
-	appContext.SetResponseData([]byte(data.(string)))
-	return false, nil
+	lc.Debug(xml)
+	ctx.SetResponseData([]byte(xml))
+	return true, xml
 }

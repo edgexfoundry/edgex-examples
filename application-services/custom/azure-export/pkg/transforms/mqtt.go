@@ -10,10 +10,10 @@ import (
 	"time"
 
 	"github.com/dghubble/sling"
-	"github.com/edgexfoundry/app-functions-sdk-go/appsdk"
-	sdkTransforms "github.com/edgexfoundry/app-functions-sdk-go/pkg/transforms"
-	"github.com/edgexfoundry/go-mod-core-contracts/clients/logger"
-	"github.com/edgexfoundry/go-mod-core-contracts/models"
+	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/interfaces"
+	sdkTransforms "github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/transforms"
+	"github.com/edgexfoundry/go-mod-core-contracts/v2/clients/logger"
+	"github.com/edgexfoundry/go-mod-core-contracts/v2/models"
 )
 
 const (
@@ -123,14 +123,10 @@ func getNewClient(skipVerify bool) *http.Client {
 	return &http.Client{Timeout: 10 * time.Second, Transport: tr}
 }
 
-func LoadAzureMQTTConfig(sdk *appsdk.AppFunctionsSDK) (*AzureMQTTConfig, error) {
-	if sdk == nil {
-		return nil, errors.New("Invalid AppFunctionsSDK")
-	}
+func LoadAzureMQTTConfig(service interfaces.ApplicationService) (*AzureMQTTConfig, error) {
+	log = service.LoggingClient()
 
-	log = sdk.LoggingClient
-
-	appSettings := sdk.ApplicationSettings()
+	appSettings := service.ApplicationSettings()
 
 	if appSettings == nil {
 		return nil, errors.New("No application-specific settings found")

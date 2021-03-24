@@ -21,62 +21,68 @@ Host = 'localhost'
 Port = 8500
 Type = 'consul'
 
-[Logging]
-EnableRemote = false
-File = ''
-
 # Database is require when Store and Forward is enabled
 [Database]
 Type = "redisdb"
 Host = "localhost"
 Port = 6379
 Timeout = "30s"
-Username = ""
-Password = ""
 
 # SecretStore is required when Store and Forward is enabled and running with security
-# so Databse credentails can be pulled from Vault.
+# so Database credentials can be pulled from Vault.
+# Note when running in docker from compose file set the following environment variables:
+#   - SecretStore_Host: edgex-vault
 [SecretStore]
-  Host = 'localhost'
-  Port = 8200
-  Path = '/v1/secret/edgex/application-service/'
-  Protocol = 'https'
-
+Type = 'vault'
+Host = 'localhost'
+Port = 8200
+Path = '/v1/secret/edgex/app-service-sample/'
+Protocol = 'http'
+RootCaCertPath = ''
+ServerName = ''
+TokenFile = '/tmp/edgex/secrets/app-service-sample/secrets-token.json'
+AdditionalRetryAttempts = 10
+RetryWaitPeriod = "1s"
   [SecretStore.Authentication]
   AuthType = 'X-Vault-Token'
-  AuthToken = 'edgex'
 
 [Clients]
-  [Clients.CoreData]
+  [Clients.edgex-core-data]
   Protocol = 'http'
   Host = 'localhost'
   Port = 48080
 
-  [Clients.Logging]
-  Protocol = "http"
-  Host = "localhost"
-  Port = 48061
+# Choose either an HTTP trigger or edgex-messagebus trigger
 
-[MessageBus]
-Type = 'zero'
-    [MessageBus.PublishHost]
-        Host = '*'
-        Port = 5564
-        Protocol = 'tcp'
-    [MessageBus.SubscribeHost]
-        Host = 'localhost'
-        Port = 5563
-        Protocol = 'tcp'
-
-# Choose either an HTTP trigger or MessageBus trigger (aka Binding)
-
-#[Binding]
+#[Trigger]
 #Type="http"
 
-[Binding]
-Type="messagebus"
-SubscribeTopic="events"
-PublishTopic="somewhere"
+[Trigger]
+Type="edgex-messagebus"
+SubscribeTopics="edgex/events/#"
+PublishTopic="example"
+  [Trigger.EdgexMessageBus]
+  Type = "redisstreams"
+    [Trigger.EdgexMessageBus.SubscribeHost]
+    Host = "localhost"
+    Port = 6379
+    Protocol = "redis"
+    [Trigger.EdgexMessageBus.PublishHost]
+    Host = "localhost"
+    Port = 6379
+    Protocol = "redis"
 
+# App Service specifc simple settings
+# Great for single string settings
 [ApplicationSettings]
-DeviceNames = "Random-Float-Device"
+DeviceNames = "Random-Float-Device, Random-Integer-Device"
+
+# Example of App Service specific structured custom configuration.
+# This map into the transforms.MQTTSecretConfig structure
+# Only setting properties that default are not sufficent
+[MqttSecretConfig]
+BrokerAddress = "tcp://broker.hivemq.com:1883"
+ClientId = "sample-filter-xml-mqtt"
+AutoReconnect = true
+Topic = "edgex-export"
+AuthMode = "none"

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019 Intel Corporation
+// Copyright (c) 2021 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,20 +17,26 @@
 package functions
 
 import (
-	"fmt"
+	"errors"
 
-	"github.com/edgexfoundry/app-functions-sdk-go/appcontext"
+	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/interfaces"
 )
 
-func PrintXmlToConsole(edgexcontext *appcontext.Context, params ...interface{}) (bool, interface{}) {
-	edgexcontext.LoggingClient.Debug("PrintXmlToConsole")
+func PrintXMLToConsole(ctx interfaces.AppFunctionContext, data interface{}) (bool, interface{}) {
+	// Leverage the built in logging service in EdgeX
+	lc := ctx.LoggingClient()
 
-	if len(params) < 1 {
-		// We didn't receive a result
-		return false, nil
+	if data == nil {
+		return false, errors.New("PrintXMLToConsole: No data received")
 	}
 
-	fmt.Println(params[0].(string))
+	xml, ok := data.(string)
+	if !ok {
+		return false, errors.New("PrintXMLToConsole: Data received is not the expected 'string' type")
 
-	return true, params[0]
+	}
+
+	lc.Debug(xml)
+	ctx.SetResponseData([]byte(xml))
+	return true, xml
 }

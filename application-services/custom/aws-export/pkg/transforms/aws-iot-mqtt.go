@@ -8,10 +8,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/edgexfoundry/app-functions-sdk-go/appsdk"
-	sdkTransforms "github.com/edgexfoundry/app-functions-sdk-go/pkg/transforms"
-	"github.com/edgexfoundry/go-mod-core-contracts/clients/logger"
-	"github.com/edgexfoundry/go-mod-core-contracts/models"
+	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/interfaces"
+	sdkTransforms "github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/transforms"
+	"github.com/edgexfoundry/go-mod-core-contracts/v2/clients/logger"
+	"github.com/edgexfoundry/go-mod-core-contracts/v2/models"
 )
 
 const (
@@ -63,18 +63,18 @@ func getAppSetting(settings map[string]string, name string) string {
 }
 
 // LoadAWSMQTTConfig Loads the mqtt configuration necessary to connect to AWS cloud
-func LoadAWSMQTTConfig(sdk *appsdk.AppFunctionsSDK) (*AWSMQTTConfig, error) {
-	if sdk == nil {
+func LoadAWSMQTTConfig(service interfaces.ApplicationService) (*AWSMQTTConfig, error) {
+	if service == nil {
 		return nil, errors.New("Invalid AppFunctionsSDK")
 	}
 
-	log = sdk.LoggingClient
+	log = service.LoggingClient()
 
 	var ioTHost, iotPort, iotDevice, mqttCert, mqttKey, ioTTopic, deviceNames string
 	var skipCertVerify, persistOnError bool
 	var errSkip, errPersist error
 
-	appSettings := sdk.ApplicationSettings()
+	appSettings := service.ApplicationSettings()
 	if appSettings != nil {
 		ioTHost = getAppSetting(appSettings, awsIoTMQTTHost)
 		iotPort = getAppSetting(appSettings, awsIoTMQTTPort)

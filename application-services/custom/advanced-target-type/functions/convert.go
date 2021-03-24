@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019 Intel Corporation
+// Copyright (c) 2021 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,9 +18,10 @@ package functions
 
 import (
 	"encoding/xml"
+	"errors"
 	"fmt"
 
-	"github.com/edgexfoundry/app-functions-sdk-go/appcontext"
+	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/interfaces"
 )
 
 type PhoneInfo struct {
@@ -37,18 +38,19 @@ type Person struct {
 	PhoneDisplay string    `json:"phone_display"`
 }
 
-func FormatPhoneDisplay(edgexcontext *appcontext.Context, params ...interface{}) (bool, interface{}) {
+func FormatPhoneDisplay(ctx interfaces.AppFunctionContext, data interface{}) (bool, interface{}) {
+	// Leverage the built in logging service in EdgeX
+	lc := ctx.LoggingClient()
+	lc.Debug("Format Phone Number")
 
-	edgexcontext.LoggingClient.Debug("Format Phone Number")
-
-	if len(params) < 1 {
-		// We didn't receive a result
-		return false, nil
+	if data == nil {
+		return false, errors.New("ConvertToXML: No data received")
 	}
 
-	person, ok := params[0].(Person)
+	person, ok := data.(Person)
 	if !ok {
-		edgexcontext.LoggingClient.Error("type received is not a Person")
+		return false, errors.New("ConvertToXML: Data received is not the expected 'Person' type")
+
 	}
 
 	person.PhoneDisplay = fmt.Sprintf("+%02d(%03d) %03d-%04d",
@@ -57,22 +59,24 @@ func FormatPhoneDisplay(edgexcontext *appcontext.Context, params ...interface{})
 	return true, person
 }
 
-func ConvertToXML(edgexcontext *appcontext.Context, params ...interface{}) (bool, interface{}) {
-	edgexcontext.LoggingClient.Debug("Convert to XML")
+func ConvertToXML(ctx interfaces.AppFunctionContext, data interface{}) (bool, interface{}) {
+	// Leverage the built in logging service in EdgeX
+	lc := ctx.LoggingClient()
+	lc.Debug("Convert to XML")
 
-	if len(params) < 1 {
-		// We didn't receive a result
-		return false, nil
+	if data == nil {
+		return false, errors.New("ConvertToXML: No data received")
 	}
 
-	person, ok := params[0].(Person)
+	person, ok := data.(Person)
 	if !ok {
-		edgexcontext.LoggingClient.Error("type received is not a Person")
+		return false, errors.New("ConvertToXML: Data received is not the expected 'Person' type")
+
 	}
 
 	result, err := xml.MarshalIndent(person, "", "   ")
 	if err != nil {
-		return false, fmt.Sprintf("Error parsing XML. Error: %s", err.Error())
+		return false, fmt.Errorf("Error marshaling Person to XML. Error: %s", err.Error())
 	}
 
 	return true, string(result)
