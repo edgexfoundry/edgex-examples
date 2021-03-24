@@ -54,26 +54,21 @@ Password = ""
   Host = "localhost"
   Port = 48061
 
-[MessageBus]
-Type = 'zero'
-    [MessageBus.PublishHost]
-        Host = '*'
-        Port = 5564
-        Protocol = 'tcp'
-    [MessageBus.SubscribeHost]
-        Host = 'localhost'
-        Port = 5563
-        Protocol = 'tcp'
-
-# Choose either an HTTP trigger or MessageBus trigger (aka Binding)
-
-#[Binding]
-#Type="http"
-
-[Binding]
-Type="messagebus"
+[Trigger]
+Type="edgex-messagebus"
 SubscribeTopic="events"
 PublishTopic="somewhere"
+    [Trigger.EdgexMessageBus]
+    Type = "zero"
+        [Trigger.EdgexMessageBus.SubscribeHost]
+        Host = "localhost"
+        Port = 5563
+        Protocol = "tcp"
+        [Trigger.EdgexMessageBus.PublishHost]
+        Host = "*"
+        Port = 5565
+        Protocol = "tcp"
+
 
 [ApplicationSettings]
 DeviceNames = "Random-Float-Device"
