@@ -7,20 +7,14 @@ App-functions-aws is a sample provided to let the user send mqtt messages to Ama
 Client certificates (crt and key) can be copied in the folder certs
 
 The address of the AWS host and the path to the certificates can be found in the configuration.toml:
-
+``` toml
 [ApplicationSettings]
-
 AwsIoTMQTTHost      = "***.iot.us-west-2.amazonaws.com"
-
 AwsIoTMQTTPort      = "8883"
-
-
 MQTTCert            = "./certs/user.client.crt"
-
 MQTTKey             = "./certs/user.client.key"
-
 SkipCertVerify	    = "false"
-
+```
 # Important note
 
 If SkipCertVerify is true, TLS accepts any certificate
