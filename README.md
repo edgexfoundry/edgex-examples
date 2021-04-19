@@ -1,4 +1,6 @@
 # Official EdgeX Foundry Examples
+[![Go Report Card](https://goreportcard.com/badge/github.com/edgexfoundry/edgex-examples)](https://goreportcard.com/report/github.com/edgexfoundry/edgex-examples) [![GitHub Pull Requests](https://img.shields.io/github/issues-pr-raw/edgexfoundry/edgex-examples)](https://github.com/edgexfoundry/edgex-examples/pulls) [![GitHub Contributors](https://img.shields.io/github/contributors/edgexfoundry/edgex-examples)](https://github.com/edgexfoundry/edgex-examples/contributors) [![GitHub Committers](https://img.shields.io/badge/team-committers-green)](https://github.com/orgs/edgexfoundry/teams/edgex-examples-committers/members) [![GitHub Commit Activity](https://img.shields.io/github/commit-activity/m/edgexfoundry/edgex-examples)](https://github.com/edgexfoundry/edgex-examples/commits)
+
 
 The purpose of this repository is to provide centralized example and sample code for EdgeX adopters and users.  The folders help organize the examples to make it easier to find samples associated to various parts of EdgeX.
 
