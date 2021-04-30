@@ -18,30 +18,20 @@ Port = 8500
 Type = 'consul'
 
 [Clients]
-  [Clients.CoreData]
+  [Clients.edgex-core-data]
   Protocol = 'http'
   Host = 'localhost'
   Port = 48080
 
-[Logging]
-EnableRemote = false
-File = ''
-
-[Binding]
-Type="messagebus"
-SubscribeTopic="events"
-PublishTopic=""
-
-[MessageBus]
-Type = 'zero'
-    [MessageBus.PublishHost]
-        Host = '*'
-        Port = 5564
-        Protocol = 'tcp'
-    [MessageBus.SubscribeHost]
-        Host = 'localhost'
-        Port = 5563
-        Protocol = 'tcp'
+[Trigger]
+Type="edgex-messagebus"
+SubscribeTopics="edgex/events/#"
+  [Trigger.EdgexMessageBus]
+  Type = "redisstreams"
+    [Trigger.EdgexMessageBus.SubscribeHost]
+    Host = "localhost"
+    Port = 6379
+    Protocol = "redis"
 
 [ApplicationSettings]
 IoTHub         = "EdgeX"
@@ -53,3 +43,10 @@ VaultHost      = "localhost"
 VaultPort      = "8200"
 CertPath       = "v1/secret/edgex/pki/tls/azure"
 DeviceNames    = "Random-Integer-Generator01"
+
+[MqttSecretConfig]
+BrokerAddress = "tcp://broker.hivemq.com:1883"
+ClientId = "azure-export"
+AutoReconnect = true
+Topic = "edgex-export"
+AuthMode = "none"

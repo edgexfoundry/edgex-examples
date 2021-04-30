@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019 Intel Corporation
+// Copyright (c) 2021 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,70 +18,75 @@ package functions
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
-	"github.com/edgexfoundry/app-functions-sdk-go/appcontext"
+	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/interfaces"
 )
 
 const (
 	jsonSwitchOn  = "{\"SwitchButton\": \"true\"}"
 	jsonSwitchOff = "{\"SwitchButton\": \"false\"}"
-
-	appConfigDeviceID  = "DeviceID"
-	appConfigCommandID = "CommandID"
 )
 
 type Switch struct {
 	Status string `json:"status"`
 }
 
-func SendSwitchCommand(edgexcontext *appcontext.Context, params ...interface{}) (bool, interface{}) {
-	edgexcontext.LoggingClient.Debug("Sending Switch Command")
+type SwitchCommand struct {
+	deviceName  string
+	commandName string
+}
 
-	if len(params) < 1 {
-		// We didn't receive a result
-		return false, nil
+func NewSwitchCommand(deviceName, commandName string) *SwitchCommand {
+	return &SwitchCommand{
+		deviceName:  deviceName,
+		commandName: commandName,
+	}
+}
+
+func (s *SwitchCommand) SendSwitchCommand(funcCtx interfaces.AppFunctionContext, data interface{}) (bool, interface{}) {
+	lc := funcCtx.LoggingClient()
+
+	lc.Debug("Sending Switch Command")
+
+	if data == nil {
+		return false, errors.New("SendSwitchCommand: No data received")
 	}
 
-	if edgexcontext.CommandClient == nil {
-		edgexcontext.LoggingClient.Error("Command client is available")
-		return false, nil
+	if funcCtx.CommandClient == nil {
+		return false, errors.New("SendSwitchCommand: Command client is available")
 	}
 
-	sw, ok := params[0].(Switch)
-
+	sw, ok := data.(Switch)
 	if !ok {
-		edgexcontext.LoggingClient.Error("Invalid switch")
-		return false, nil
+		return false, errors.New("SendSwitchCommand: Data received is not the expected 'Switch' type")
 	}
 
-	deviceId := edgexcontext.Configuration.ApplicationSettings[appConfigDeviceID]
-	commandId := edgexcontext.Configuration.ApplicationSettings[appConfigCommandID]
-	var cmd string
+	var commandBody string
 
 	ctx := context.WithValue(context.Background(), "", "")
 
 	switch status := sw.Status; status {
 	case "on":
-		edgexcontext.LoggingClient.Info("Switch On")
-		cmd = jsonSwitchOn
+		lc.Info("Switch On")
+		commandBody = jsonSwitchOn
 	case "off":
-		edgexcontext.LoggingClient.Info("Switch Off")
-		cmd = jsonSwitchOff
+		lc.Info("Switch Off")
+		commandBody = jsonSwitchOff
 	default:
-		edgexcontext.LoggingClient.Error("Invalid switch status: " + status)
+		lc.Error("Invalid switch status: " + status)
 		return false, nil
 	}
 
-	edgexcontext.LoggingClient.Info("Device ID: " + deviceId)
-	edgexcontext.LoggingClient.Info("Command ID: " + commandId)
-	r, err := edgexcontext.CommandClient.Put(ctx, deviceId, commandId, cmd)
+	lc.Infof("Sending command '%s' for device '%s'", s.deviceName, s.commandName)
+	r, err := funcCtx.CommandClient().PutDeviceCommandByNames(ctx, s.deviceName, s.commandName, commandBody)
 
 	if err == nil {
-		edgexcontext.LoggingClient.Debug("Response : " + r)
+		lc.Debug("Response : " + r)
 	} else {
-		edgexcontext.LoggingClient.Error("Error sending request: " + err.Error())
-
+		return false, fmt.Errorf("Error sending command request: %s", err.Error())
 	}
 
-	return true, cmd
+	return true, commandBody
 }

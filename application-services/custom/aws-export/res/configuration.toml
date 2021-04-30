@@ -18,34 +18,20 @@ Port = 8500
 Type = 'consul'
 
 [Clients]
-  [Clients.CoreData]
+  [Clients.edgex-core-data]
   Protocol = 'http'
   Host = 'localhost'
   Port = 48080
-  [Clients.Logging]
-  Protocol = "http"
-  Host = "localhost"
-  Port = 48061
 
-[MessageBus]
-Type = 'zero'
-    [MessageBus.PublishHost]
-        Host = '*'
-        Port = 5564
-        Protocol = 'tcp'
-    [MessageBus.SubscribeHost]
-        Host = 'localhost'
-        Port = 5563
-        Protocol = 'tcp'
-
-[Logging]
-EnableRemote = false
-File = ''
-
-[Binding]
-Type="messagebus"
-SubscribeTopic="events"
-PublishTopic=""
+[Trigger]
+Type="edgex-messagebus"
+SubscribeTopics="edgex/events/#"
+  [Trigger.EdgexMessageBus]
+  Type = "redisstreams"
+    [Trigger.EdgexMessageBus.SubscribeHost]
+    Host = "localhost"
+    Port = 6379
+    Protocol = "redis"
 
 [ApplicationSettings]
 AwsIoTMQTTHost      = "***.iot.us-west-2.amazonaws.com"

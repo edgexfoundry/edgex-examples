@@ -26,7 +26,7 @@ Please refer to the [Application Functions SDK documentation](https://docs.edgex
 
 3. The default configuration is for running natively and we use environment overrides in the compose files for use in docker.
 
-4. Add the secrets example application service to your EdgeX docker compose file. This includes the environment overrides for the SecretStore and SecretStoreExclusive configurations:
+4. Add the secrets example application service to your EdgeX docker compose file. This includes the environment overrides for the SecretStore configurations:
 
    ```yml
      app-service-secrets-example:

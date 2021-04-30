@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 Intel Corporation
+// Copyright (c) 2021 Intel Corporation
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -16,9 +16,9 @@
 package functions
 
 import (
-	"fmt"
+	"errors"
 
-	"github.com/edgexfoundry/app-functions-sdk-go/appcontext"
+	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/interfaces"
 )
 
 type secretsInfo struct {
@@ -27,12 +27,12 @@ type secretsInfo struct {
 }
 
 var expectedSecrets = []secretsInfo{
-	secretsInfo{
+	{
 		// Get secrets for valid sub-path, empty keys list should return all secrets
 		path: "/mqtt",
 		keys: []string{},
 	},
-	secretsInfo{
+	{
 		// Get secrets for valid sub-path with single key
 		path: "/mqtt",
 		keys: []string{"password"},
@@ -40,25 +40,26 @@ var expectedSecrets = []secretsInfo{
 }
 
 // GetSecretsToConsole ...
-func GetSecretsToConsole(edgexcontext *appcontext.Context, params ...interface{}) (bool, interface{}) {
-	if len(params) < 1 {
-		// We didn't receive a result
-		return false, nil
+func GetSecretsToConsole(ctx interfaces.AppFunctionContext, data interface{}) (bool, interface{}) {
+	if data == nil {
+		return false, errors.New("GetSecretsToConsole: No data received")
 	}
+
+	lc := ctx.LoggingClient()
 
 	for _, secretInfo := range expectedSecrets {
 		// this is just an example. NEVER log your secrets to console
-		edgexcontext.LoggingClient.Info(fmt.Sprintf("--- Get secrets at location %v, keys: %v  ---", secretInfo.path, secretInfo.keys))
-		secrets, err := edgexcontext.GetSecrets(secretInfo.path, secretInfo.keys...)
+		lc.Infof("--- Get secrets at location %v, keys: %v  ---", secretInfo.path, secretInfo.keys)
+		secrets, err := ctx.GetSecret(secretInfo.path, secretInfo.keys...)
 		if err != nil {
-			edgexcontext.LoggingClient.Error(err.Error())
+			lc.Error(err.Error())
 			return false, nil
 		}
 		for k, v := range secrets {
-			edgexcontext.LoggingClient.Info(fmt.Sprintf("key:%v, value:%v", k, v))
+			lc.Infof("key:%v, value:%v", k, v)
 		}
 	}
 
-	edgexcontext.Complete([]byte(params[0].(string)))
+	ctx.SetResponseData([]byte(data.(string)))
 	return false, nil
 }

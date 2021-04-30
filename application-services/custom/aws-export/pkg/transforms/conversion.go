@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/edgexfoundry/app-functions-sdk-go/appcontext"
-	"github.com/edgexfoundry/go-mod-core-contracts/models"
+	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/interfaces"
+	"github.com/edgexfoundry/go-mod-core-contracts/v2/v2/dtos"
 )
 
 // Conversion Struct
@@ -19,27 +19,29 @@ func NewConversion() Conversion {
 }
 
 // TransformToAWS converts the event into AWS readable format
-func (f Conversion) TransformToAWS(edgexcontext *appcontext.Context, params ...interface{}) (continuePipeline bool, stringType interface{}) {
-	if len(params) < 1 {
-		return false, errors.New("No Event Received")
+func (f Conversion) TransformToAWS(ctx interfaces.AppFunctionContext, data interface{}) (continuePipeline bool, stringType interface{}) {
+	lc := ctx.LoggingClient()
+	lc.Debug("Transforming to AWS format")
+
+	if data == nil {
+		return false, errors.New("TransformToAWS: No data received")
 	}
 
-	edgexcontext.LoggingClient.Debug("Transforming to AWS format")
-
-	if event, ok := params[0].(models.Event); ok {
-		readings := map[string]interface{}{}
-
-		for _, reading := range event.Readings {
-			readings[reading.Name] = reading.Value
-		}
-
-		msg, err := json.Marshal(readings)
-		if err != nil {
-			return false, errors.New(fmt.Sprintf("Failed to transform AWS data: %s", err))
-		}
-
-		return true, string(msg)
+	event, ok := data.(dtos.Event)
+	if !ok {
+		return false, errors.New("TransformToAWS: didn't receive expect Event type")
 	}
 
-	return false, errors.New("Unexpected type received")
+	readings := map[string]interface{}{}
+
+	for _, reading := range event.Readings {
+		readings[reading.ResourceName] = reading.Value
+	}
+
+	msg, err := json.Marshal(readings)
+	if err != nil {
+		return false, fmt.Errorf("Failed to transform AWS data: %s", err.Error())
+	}
+
+	return true, string(msg)
 }

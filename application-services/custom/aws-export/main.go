@@ -1,14 +1,15 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
 
-	"github.com/edgexfoundry/app-functions-sdk-go/appcontext"
-	"github.com/edgexfoundry/app-functions-sdk-go/appsdk"
-	"github.com/edgexfoundry/app-functions-sdk-go/pkg/transforms"
-	"github.com/edgexfoundry/app-functions-sdk-go/pkg/util"
+	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg"
+	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/interfaces"
+	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/transforms"
+	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/util"
 
 	awsTransforms "aws-export/pkg/transforms"
 )
@@ -19,41 +20,43 @@ const (
 
 func main() {
 	// turn off secure mode for examples. Not recommended for production
-	os.Setenv("EDGEX_SECURITY_SECRET_STORE", "false")
+	_ = os.Setenv("EDGEX_SECURITY_SECRET_STORE", "false")
 
-	// 1) First thing to do is to create an instance of the EdgeX SDK and initialize it.
-	edgexSdk := &appsdk.AppFunctionsSDK{ServiceKey: serviceKey}
-	if err := edgexSdk.Initialize(); err != nil {
-		edgexSdk.LoggingClient.Error(fmt.Sprintf("SDK initialization failed: %v\n", err))
+	// 1) First thing to do is to create an new instance of an EdgeX Application Service.
+	service, ok := pkg.NewAppService(serviceKey)
+	if !ok {
 		os.Exit(-1)
 	}
 
+	// Leverage the built in logging service in EdgeX
+	lc := service.LoggingClient()
+
 	// 2) Load AWS-specific MQTT configuration from App SDK
 	// You can also create AWSMQTTConfig struct yourself
-	config, err := awsTransforms.LoadAWSMQTTConfig(edgexSdk)
+	config, err := awsTransforms.LoadAWSMQTTConfig(service)
 	if err != nil {
-		edgexSdk.LoggingClient.Error(fmt.Sprintf("Failed to load AWS MQTT configurations: %v\n", err))
+		lc.Error(fmt.Sprintf("Failed to load AWS MQTT configurations: %v\n", err))
 		os.Exit(-1)
 	}
 
 	// 3) Get DeviceNameFilter from config
 	deviceNamesCleaned := util.DeleteEmptyAndTrim(strings.FieldsFunc(config.DeviceNames, util.SplitComma))
-	edgexSdk.LoggingClient.Debug(fmt.Sprintf("Device names read %s\n", deviceNamesCleaned))
+	lc.Debug(fmt.Sprintf("Device names read %s\n", deviceNamesCleaned))
 
 	// 4) This is our pipeline configuration, the collection of functions to
 	// execute every time an event is triggered.
-	edgexSdk.SetFunctionsPipeline(
-		transforms.NewFilter(deviceNamesCleaned).FilterByDeviceName,
+	service.SetFunctionsPipeline(
+		transforms.NewFilterFor(deviceNamesCleaned).FilterByDeviceName,
 		awsTransforms.NewConversion().TransformToAWS,
 		printAWSDataToConsole,
-		awsTransforms.NewAWSMQTTSender(edgexSdk.LoggingClient, config).MQTTSend,
+		awsTransforms.NewAWSMQTTSender(lc, config).MQTTSend,
 	)
 
 	// 5) Lastly, we'll go ahead and tell the SDK to "start" and begin listening for events
 	// to trigger the pipeline.
-	err = edgexSdk.MakeItRun()
+	err = service.MakeItRun()
 	if err != nil {
-		edgexSdk.LoggingClient.Error("MakeItRun returned error: ", err.Error())
+		lc.Error("MakeItRun returned error: ", err.Error())
 		os.Exit(-1)
 	}
 
@@ -62,19 +65,19 @@ func main() {
 	os.Exit(0)
 }
 
-func printAWSDataToConsole(edgexcontext *appcontext.Context, params ...interface{}) (bool, interface{}) {
+func printAWSDataToConsole(ctx interfaces.AppFunctionContext, data interface{}) (bool, interface{}) {
+	// Leverage the built in logging service in EdgeX
+	lc := ctx.LoggingClient()
 
-	if len(params) < 1 {
-		// We didn't receive a result
-		return false, nil
+	if data == nil {
+		return false, errors.New("printAWSDataToConsole: No data received")
 	}
 
-	fmt.Println(params[0].(string))
+	fmt.Println(data.(string))
 
 	// Leverage the built in logging service in EdgeX
-	edgexcontext.LoggingClient.Debug("Printed to console")
+	lc.Debug("Printed to console")
 
-	edgexcontext.Complete([]byte(params[0].(string)))
+	ctx.SetResponseData([]byte(data.(string)))
 	return false, nil
-
 }
