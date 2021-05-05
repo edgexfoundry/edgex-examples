@@ -17,7 +17,6 @@ import (
 )
 
 const (
-	serviceKey         = "AzureExport"
 	appConfigIoTHub    = "IoTHub"
 	appConfigIoTDevice = "IoTDevice"
 	appConfigMQTTCert  = "MQTTCert"
@@ -50,7 +49,11 @@ type certPair struct {
 }
 
 type auth struct {
-	Token string `json:"root_token"`
+	ClientToken string `json:"client_token"`
+}
+
+type token struct {
+	Auth auth `json:"auth"`
 }
 
 func getAppSetting(settings map[string]string, name string) string {
@@ -65,7 +68,7 @@ func getAppSetting(settings map[string]string, name string) string {
 }
 
 func retrieveKeyCertPair(tokenPath string, vaultHost string, vaultPort string, certPath string) (*sdkTransforms.KeyCertPair, error) {
-	a := auth{}
+	token := token{}
 	content, err := ioutil.ReadFile(tokenPath)
 
 	if err != nil {
@@ -73,10 +76,9 @@ func retrieveKeyCertPair(tokenPath string, vaultHost string, vaultPort string, c
 		return nil, err
 	}
 
-	err = json.Unmarshal(content, &a)
+	err = json.Unmarshal(content, &token)
 
-	// we have a.Token here
-	s := sling.New().Set(vaultToken, a.Token)
+	s := sling.New().Set(vaultToken, token.Auth.ClientToken)
 	vaultUrl := fmt.Sprintf("https://%s:%s/", vaultHost, vaultPort)
 	req, err := s.New().Base(vaultUrl).Get(certPath).Request()
 
@@ -145,8 +147,12 @@ func LoadAzureMQTTConfig(sdk *appsdk.AppFunctionsSDK) (*AzureMQTTConfig, error) 
 	vaultPort := getAppSetting(appSettings, appConfigVaultPort)
 	certPath := getAppSetting(appSettings, appConfigCertPath)
 
-	if len(iotHub) == 0 || len(iotDevice) == 0 {
-		return nil, errors.New("Required configurations " + appConfigIoTHub + " or " + appConfigIoTDevice + " are missing")
+	if len(iotHub) == 0 {
+		return nil, errors.New("missing mandatory configuration: " + appConfigIoTHub)
+	}
+
+	if len(iotDevice) == 0 {
+		return nil, errors.New("missing mandatory configuration: " + appConfigIoTDevice)
 	}
 
 	config := AzureMQTTConfig{}
