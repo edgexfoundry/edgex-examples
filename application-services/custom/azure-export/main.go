@@ -18,26 +18,25 @@ const (
 var counter int
 
 func main() {
-	// turn off secure mode for examples. Not recommended for production
-	os.Setenv("EDGEX_SECURITY_SECRET_STORE", "false")
-	// 1) First thing to do is to create an instance of the EdgeX SDK and initialize it.
+	fmt.Println("Starting " + serviceKey + " Application Service...")
+
+	// 1) First thing to do is to create an instance of the EdgeX SDK, giving it a service key
 	edgexSdk := &appsdk.AppFunctionsSDK{ServiceKey: serviceKey}
+
+	// 2) Next, we need to initialize the SDK
 	if err := edgexSdk.Initialize(); err != nil {
 		edgexSdk.LoggingClient.Error(fmt.Sprintf("SDK initialization failed: %v\n", err))
 		os.Exit(-1)
 	}
 
-	// 2) Since our DeviceNameFilter Function requires the list of device names we would
-	// like to search for, we'll go ahead and define that now.
+	// 3) Shows how to access the application's specific configuration settings.  Since our DeviceNameFilter
+	// Function requires the list of device names we would like to search for, we'll go ahead and define that now.
 	deviceNames, err := edgexSdk.GetAppSettingStrings(appConfigDeviceNames)
 	if err != nil {
 		edgexSdk.LoggingClient.Error(err.Error())
 		os.Exit(-1)
 	}
-	edgexSdk.LoggingClient.Info(fmt.Sprintf("Filtering for devices %v", deviceNames))
-
-	// 3) This is our pipeline configuration, the collection of functions to
-	// execute every time an event is triggered.
+	edgexSdk.LoggingClient.Debug(fmt.Sprintf("Filtering for devices %v", deviceNames))
 
 	// Load Azure-specific MQTT configuration from App SDK
 	// You can also create AzureMQTTConfig struct yourself
@@ -48,6 +47,8 @@ func main() {
 		os.Exit(-1)
 	}
 
+	// 4) This is our pipeline configuration, the collection of functions to
+	// execute every time an event is triggered.
 	edgexSdk.SetFunctionsPipeline(
 		transforms.NewFilter(deviceNames).FilterByDeviceName,
 		azureTransforms.NewConversion().TransformToAzure,

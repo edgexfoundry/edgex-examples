@@ -45,11 +45,11 @@ Type = 'zero'
 
 [ApplicationSettings]
 IoTHub         = "EdgeX"
-IoTDevice      = "MyDevice"
+IoTDevice      = "TestDevice01"
 MQTTCert       = "/secret/rsa_cert.pem"
 MQTTKey        = "/secret/rsa_private.pem"
-TokenPath      = "/vault/config/assets/resp-init.json"
+TokenPath      = "/secret/secrets-token.json"
 VaultHost      = "localhost"
 VaultPort      = "8200"
-CertPath       = "v1/secret/edgex/pki/tls/azure"
-DeviceNames    = "Random-Integer-Generator01"
+CertPath       = "v1/secret/edgex/edgex-application-service/iothub"
+DeviceNames    = "Random-Integer-Device"
