@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-FROM golang:1.15-alpine AS builder
+FROM golang:1.16-alpine AS builder
 
 LABEL license='SPDX-License-Identifier: Apache-2.0' \
   copyright='Copyright (c) 2019: Intel'

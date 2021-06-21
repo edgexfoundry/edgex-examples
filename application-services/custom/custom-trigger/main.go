@@ -20,15 +20,17 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"github.com/edgexfoundry/app-functions-sdk-go/appcontext"
-	"github.com/edgexfoundry/app-functions-sdk-go/appsdk"
-	"github.com/edgexfoundry/app-functions-sdk-go/pkg/util"
-	"github.com/edgexfoundry/go-mod-bootstrap/bootstrap"
-	"github.com/edgexfoundry/go-mod-messaging/pkg/types"
 	"os"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/edgexfoundry/go-mod-bootstrap/v2/bootstrap"
+	"github.com/edgexfoundry/go-mod-messaging/v2/pkg/types"
+
+	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg"
+	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/interfaces"
+	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/util"
 )
 
 const (
@@ -36,10 +38,10 @@ const (
 )
 
 type stdinTrigger struct {
-	tc appsdk.TriggerConfig
+	tc interfaces.TriggerConfig
 }
 
-func (t *stdinTrigger) Initialize(wg *sync.WaitGroup, ctx context.Context, background <-chan types.MessageEnvelope) (bootstrap.Deferred, error) {
+func (t *stdinTrigger) Initialize(_ *sync.WaitGroup, ctx context.Context, _ <-chan interfaces.BackgroundMessage) (bootstrap.Deferred, error) {
 	msgs := make(chan []byte)
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -92,29 +94,28 @@ func (t *stdinTrigger) Initialize(wg *sync.WaitGroup, ctx context.Context, backg
 
 func main() {
 	// turn off secure mode for examples. Not recommended for production
-	os.Setenv("EDGEX_SECURITY_SECRET_STORE", "false")
-	// First thing to do is to create an instance of the EdgeX SDK and initialize it.
-	edgexSdk := &appsdk.AppFunctionsSDK{ServiceKey: serviceKey, TargetType: &[]byte{}}
+	_ = os.Setenv("EDGEX_SECURITY_SECRET_STORE", "false")
 
-	if err := edgexSdk.Initialize(); err != nil {
-		edgexSdk.LoggingClient.Error(fmt.Sprintf("SDK initialization failed: %v\n", err))
+	// First thing to do is to create an instance of the EdgeX SDK Service, which also runs the bootstrap initialization.
+	service, ok := pkg.NewAppServiceWithTargetType(serviceKey, &[]byte{})
+	if !ok {
 		os.Exit(-1)
 	}
 
-	edgexSdk.RegisterCustomTriggerFactory("custom-stdin", func(config appsdk.TriggerConfig) (appsdk.Trigger, error) {
+	service.RegisterCustomTriggerFactory("custom-stdin", func(config interfaces.TriggerConfig) (interfaces.Trigger, error) {
 		return &stdinTrigger{
 			tc: config,
 		}, nil
 	})
 
-	edgexSdk.SetFunctionsPipeline(
+	service.SetFunctionsPipeline(
 		printToConsole,
 	)
 
 	// Lastly, we'll go ahead and tell the SDK to "start" and begin listening for events
-	err := edgexSdk.MakeItRun()
+	err := service.MakeItRun()
 	if err != nil {
-		edgexSdk.LoggingClient.Error("MakeItRun returned error: ", err.Error())
+		service.LoggingClient().Error("MakeItRun returned error: ", err.Error())
 		os.Exit(-1)
 	}
 
@@ -122,11 +123,11 @@ func main() {
 	os.Exit(0)
 }
 
-func printToConsole(edgexcontext *appcontext.Context, params ...interface{}) (bool, interface{}) {
-	input, err := util.CoerceType(params[0])
+func printToConsole(appContext interfaces.AppFunctionContext, data interface{}) (bool, interface{}) {
+	input, err := util.CoerceType(data)
 
 	if err != nil {
-		edgexcontext.LoggingClient.Error(err.Error())
+		appContext.LoggingClient().Error(err.Error())
 		return false, err
 	}
 
@@ -134,7 +135,7 @@ func printToConsole(edgexcontext *appcontext.Context, params ...interface{}) (bo
 
 	time.Sleep(wait)
 
-	edgexcontext.LoggingClient.Info("PrintToConsole")
+	appContext.LoggingClient().Info("PrintToConsole")
 
 	os.Stdout.WriteString(fmt.Sprintf("'%s' received %s ago\n>", string(input), wait.String()))
 
