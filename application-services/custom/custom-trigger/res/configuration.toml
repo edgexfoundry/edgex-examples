@@ -2,24 +2,19 @@
 LogLevel = 'INFO'
 
 [Service]
-BootTimeout = '30s'
-ClientMonitor = '15s'
-CheckInterval = '10s'
+HealthCheckInterval = '10s'
 Host = 'localhost'
-Port = 48095
-Protocol = 'http'
-ReadMaxLimit = 100
-StartupMsg = 'Cloud Event Transforms'
-Timeout = '5s'
+Port = 59780 # Adjust if running multiple examples at the same time to avoid duplicate port conflicts
+ServerBindAddr = "" # if blank, uses default Go behavior https://golang.org/pkg/net/#Listen
+StartupMsg = 'Custom Trigger Example'
+MaxResultCount = 0 # Not curently used by App Services.
+MaxRequestSize = 0 # Not curently used by App Services.
+RequestTimeout = '5s'
 
 [Registry]
 Host = 'localhost'
 Port = 8500
 Type = 'consul'
 
-[Logging]
-EnableRemote = false
-File = ''
-
-[Binding]
+[Trigger]
 Type="custom-stdin"
