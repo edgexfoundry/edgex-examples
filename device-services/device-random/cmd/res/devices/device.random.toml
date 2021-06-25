@@ -1,0 +1,22 @@
+# Pre-define Devices
+[[DeviceList]]
+  Name = 'Random-Integer-Generator01'
+  ProfileName = 'Random-Integer-Generator'
+  Description = 'Example of Device Random'
+  Labels = [ 'device-random-example' ]
+  [DeviceList.Protocols]
+    [DeviceList.Protocols.other]
+    Address = 'simple01'
+    Port = '300'
+  [[DeviceList.AutoEvents]]
+    Interval = '20s'
+    OnChange = false
+    SourceName = 'GenerateRandomValue_Int8'
+  [[DeviceList.AutoEvents]]
+    Interval = '20s'
+    OnChange = false
+    SourceName = 'GenerateRandomValue_Int16'
+  [[DeviceList.AutoEvents]]
+    Interval = '20s'
+    OnChange = false
+    SourceName = 'GenerateRandomValue_Int32'
