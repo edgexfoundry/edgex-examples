@@ -7,7 +7,7 @@ MICROSERVICES=cmd/device-random
 
 .PHONY: $(MICROSERVICES)
 
-DOCKERS=docker_device_random_go
+DOCKERS=device_random
 .PHONY: $(DOCKERS)
 
 VERSION=$(shell cat ./VERSION 2>/dev/null || echo 0.0.0)
@@ -26,14 +26,13 @@ test:
 	$(GOCGO) vet ./...
 	gofmt -l .
 	[ "`gofmt -l .`" = "" ]
-	./bin/test-attribution-txt.sh
 
 clean:
 	rm -f $(MICROSERVICES)
 
 docker: $(DOCKERS)
 
-docker_device_random_go:
+device_random:
 	docker build \
 		--label "git_sha=$(GIT_SHA)" \
 		-t edgexfoundry/device-random:$(GIT_SHA) \

@@ -45,7 +45,6 @@ RUN apk add --update --no-cache zeromq dumb-init
 
 COPY --from=builder /device-random/cmd /
 COPY --from=builder /device-random/LICENSE /
-COPY --from=builder /device-random/Attribution.txt /
 
 EXPOSE 59988
 
