@@ -1,0 +1,106 @@
+name: "Random-Integer-Generator"
+manufacturer: "IOTech"
+model: "Device-Random-01"
+labels:
+- "device-random-example"
+description: "Example of Device-Random"
+
+deviceResources:
+-
+  name: "RandomValue_Int8"
+  description: "Generate random int8 value"
+  properties:
+    valueType: "Int8"
+    readWrite: "R"
+    minimum: "-128"
+    maximum: "127"
+    defaultValue: "0"
+-
+  name: "Min_Int8"
+  description: "Minimum of random int8 value"
+  properties:
+    valueType: "Int8"
+    readWrite: "RW"
+    minimum: "-128"
+    maximum: "127"
+    defaultValue: "-128"
+-
+  name: "Max_Int8"
+  description: "Maximum of random int8 value"
+  properties:
+    valueType: "Int8"
+    readWrite: "RW"
+    minimum: "-128"
+    maximum: "127"
+    defaultValue: "127"
+-
+  name: "RandomValue_Int16"
+  description: "Generate random int16 value"
+  properties:
+    valueType: "Int16"
+    readWrite: "R"
+    minimum: "-32768"
+    maximum: "32767"
+    defaultValue: "0"
+-
+  name: "Min_Int16"
+  description: "Minimum of random int16 value"
+  properties:
+    valueType: "Int16"
+    readWrite: "RW"
+    minimum: "-32768"
+    maximum: "32767"
+    defaultValue: "-32768"
+-
+  name: "Max_Int16"
+  description: "Maximum of random int16 value"
+  properties:
+    valueType: "Int16"
+    readWrite: "RW"
+    minimum: "-32768"
+    maximum: "32767"
+    defaultValue: "32767"
+-
+  name: "RandomValue_Int32"
+  description: "Generate random int32 value"
+  properties:
+    valueType: "Int32"
+    readWrite: "R"
+    minimum: "-2147483648"
+    maximum: "2147483647"
+    defaultValue: "0"
+-
+  name: "Min_Int32"
+  description: "Minimum of random int32 value"
+  properties:
+    valueType: "Int32"
+    readWrite: "RW"
+    minimum: "-2147483648"
+    maximum: "2147483647"
+    defaultValue: "-2147483648"
+-
+  name: "Max_Int32"
+  description: "Maximum of random int32 value"
+  properties:
+    valueType: "Int32"
+    readWrite: "RW"
+    minimum: "-2147483648"
+    maximum: "2147483647"
+    defaultValue: "2147483647"
+
+deviceCommands:
+-
+  name: "GenerateRandomValue_Int8"
+  readWrite: "R"
+  resourceOperations:
+  - { deviceResource: "RandomValue_Int8" }
+-
+  name: "GenerateRandomValue_Int16"
+  readWrite: "R"
+  resourceOperations:
+  - { deviceResource: "RandomValue_Int16" }
+-
+  name: "GenerateRandomValue_Int32"
+  readWrite: "R"
+  resourceOperations:
+  - { deviceResource: "RandomValue_Int32" }
