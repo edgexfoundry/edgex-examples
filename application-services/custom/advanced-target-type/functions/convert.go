@@ -1,5 +1,6 @@
 //
 // Copyright (c) 2019 Intel Corporation
+// Copyright (c) 2021 One Track Consulting
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,7 +21,7 @@ import (
 	"encoding/xml"
 	"fmt"
 
-	"github.com/edgexfoundry/app-functions-sdk-go/appcontext"
+	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/interfaces"
 )
 
 type PhoneInfo struct {
@@ -37,18 +38,18 @@ type Person struct {
 	PhoneDisplay string    `json:"phone_display"`
 }
 
-func FormatPhoneDisplay(edgexcontext *appcontext.Context, params ...interface{}) (bool, interface{}) {
+func FormatPhoneDisplay(ctx interfaces.AppFunctionContext, data interface{}) (bool, interface{}) {
 
-	edgexcontext.LoggingClient.Debug("Format Phone Number")
+	ctx.LoggingClient().Debug("Format Phone Number")
 
-	if len(params) < 1 {
+	if data == nil {
 		// We didn't receive a result
 		return false, nil
 	}
 
-	person, ok := params[0].(Person)
+	person, ok := data.(Person)
 	if !ok {
-		edgexcontext.LoggingClient.Error("type received is not a Person")
+		ctx.LoggingClient().Error("type received is not a Person")
 	}
 
 	person.PhoneDisplay = fmt.Sprintf("+%02d(%03d) %03d-%04d",
@@ -57,17 +58,17 @@ func FormatPhoneDisplay(edgexcontext *appcontext.Context, params ...interface{})
 	return true, person
 }
 
-func ConvertToXML(edgexcontext *appcontext.Context, params ...interface{}) (bool, interface{}) {
-	edgexcontext.LoggingClient.Debug("Convert to XML")
+func ConvertToXML(ctx interfaces.AppFunctionContext, data interface{}) (bool, interface{}) {
+	ctx.LoggingClient().Debug("Convert to XML")
 
-	if len(params) < 1 {
+	if data == nil {
 		// We didn't receive a result
 		return false, nil
 	}
 
-	person, ok := params[0].(Person)
+	person, ok := data.(Person)
 	if !ok {
-		edgexcontext.LoggingClient.Error("type received is not a Person")
+		ctx.LoggingClient().Error("type received is not a Person")
 	}
 
 	result, err := xml.MarshalIndent(person, "", "   ")
