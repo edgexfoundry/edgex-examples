@@ -1,51 +1,45 @@
 [Writable]
-LogLevel = 'DEBUG'
-    [Writable.StoreAndForward]
-    Enabled = false
-    RetryInterval = '5m'
-    MaxRetryCount = 10
+LogLevel = "DEBUG"
+[Writable.StoreAndForward]
+  Enabled = false
+  RetryInterval = "5m"
+  MaxRetryCount = 10
+  [Writable.InsecureSecrets]
+    [Writable.InsecureSecrets.DB]
+    path = "redisdb"
+      [Writable.InsecureSecrets.DB.Secrets]
+      username = ""
+      password = ""
 
 [Service]
-BootTimeout = '30s'
-ClientMonitor = '15s'
-CheckInterval = '10s'
-Host = 'localhost'
-Port = 48095
-Protocol = 'http'
-ReadMaxLimit = 100
-StartupMsg = 'This is a sample Application Service which use of TargetType'
-Timeout = '30s'
+HealthCheckInterval = "10s"
+Host = "localhost"
+ServerBindAddr = "" # if blank, uses default Go behavior https://golang.org/pkg/net/#Listen
+Port = 59780 # Adjust if running multiples examples at the same time to avoid duplicate port conflicts
+StartupMsg = "This is a sample Application Service which explains use of TargetType"
+RequestTimeout = "30s"
+MaxRequestSize = 0
+MaxResultCount = 0
 
 [Registry]
-Host = 'localhost'
+Host = "localhost"
 Port = 8500
-Type = 'consul'
-
-[Logging]
-EnableRemote = false
-File = ''
+Type = "consul"
 
 [Database]
 Type = "redisdb"
 Host = "localhost"
 Port = 6379
 Timeout = "30s"
-Username = ""
-Password = ""
 
 [Clients]
-  [Clients.CoreData]
-  Protocol = 'http'
-  Host = 'localhost'
-  Port = 48080
-
-  [Clients.Logging]
+  [Clients.core-metadata]
   Protocol = "http"
   Host = "localhost"
-  Port = 48061
+  Port = 59881
 
 # This example expect custom type via HTTP Trigger
-[Binding]
+[Trigger]
 Type="http"
 
 [ApplicationSettings]

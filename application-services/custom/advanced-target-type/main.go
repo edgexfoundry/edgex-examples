@@ -1,5 +1,6 @@
 //
 // Copyright (c) 2019 Intel Corporation
+// Copyright (c) 2021 One Track Consulting
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,11 +18,9 @@
 package main
 
 import (
-	"fmt"
+	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg"
+	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/transforms"
 	"os"
-
-	"github.com/edgexfoundry/app-functions-sdk-go/appsdk"
-	"github.com/edgexfoundry/app-functions-sdk-go/pkg/transforms"
 
 	"advanced-target-type/functions"
 )
@@ -33,33 +32,33 @@ const (
 func main() {
 	// turn off secure mode for examples. Not recommended for production
 	os.Setenv("EDGEX_SECURITY_SECRET_STORE", "false")
-	// 1) First thing to do is to create an instance of the EdgeX SDK with your TargetType set
+	// 1) First thing to do is to create an instance of an edgex service with your TargetType set
 	//    and initialize it. Note that the TargetType is a pointer to an instance of the type.
-	edgexSdk := &appsdk.AppFunctionsSDK{ServiceKey: serviceKey, TargetType: &functions.Person{}}
-	if err := edgexSdk.Initialize(); err != nil {
-		edgexSdk.LoggingClient.Error(fmt.Sprintf("SDK initialization failed: %v\n", err))
+	appService, ok := pkg.NewAppServiceWithTargetType(serviceKey, &functions.Person{})
+	if !ok {
+		appService.LoggingClient().Errorf("App Service initialization failed for %s", serviceKey)
 		os.Exit(-1)
 	}
 
 	// 2) This is our functions pipeline configuration, the collection of functions to
 	// execute every time an event is triggered.
-	err := edgexSdk.SetFunctionsPipeline(
+	err := appService.SetFunctionsPipeline(
 		functions.FormatPhoneDisplay,             // Expects a Person as set by TargetType
 		functions.ConvertToXML,                   // Expects a Person
 		functions.PrintXmlToConsole,              // Expects XML string
-		transforms.NewOutputData().SetOutputData, // Expects string or []byte. Returns XML formatted Person with PhoneDisplay set sent as the trigger response
+		transforms.NewResponseData().SetResponseData, // Expects string or []byte. Returns XML formatted Person with PhoneDisplay set sent as the trigger response
 	)
 
 	if err != nil {
-		edgexSdk.LoggingClient.Error("Setting Functions Pipeline failed: " + err.Error())
+		appService.LoggingClient().Errorf("Setting Functions Pipeline failed: %s" + err.Error())
 		os.Exit(-1)
 	}
 
-	// 3) Lastly, we'll go ahead and tell the SDK to "start" and begin listening for Persons
+	// 3) Lastly, we'll go ahead and tell the service to "start" and begin listening for Persons
 	// to trigger the pipeline.
-	err = edgexSdk.MakeItRun()
+	err = appService.MakeItRun()
 	if err != nil {
-		edgexSdk.LoggingClient.Error("MakeItRun returned error: ", err.Error())
+		appService.LoggingClient().Errorf("MakeItRun returned error: %s", err.Error())
 		os.Exit(-1)
 	}
 

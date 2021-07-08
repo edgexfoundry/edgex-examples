@@ -1,5 +1,6 @@
 //
 // Copyright (c) 2019 Intel Corporation
+// Copyright (c) 2021 One Track Consulting
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,19 +19,18 @@ package functions
 
 import (
 	"fmt"
-
-	"github.com/edgexfoundry/app-functions-sdk-go/appcontext"
+	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/interfaces"
 )
 
-func PrintXmlToConsole(edgexcontext *appcontext.Context, params ...interface{}) (bool, interface{}) {
-	edgexcontext.LoggingClient.Debug("PrintXmlToConsole")
+func PrintXmlToConsole(ctx interfaces.AppFunctionContext, data interface{}) (bool, interface{}) {
+	ctx.LoggingClient().Debug("PrintXmlToConsole")
 
-	if len(params) < 1 {
+	if data == nil {
 		// We didn't receive a result
 		return false, nil
 	}
 
-	fmt.Println(params[0].(string))
+	fmt.Println(data.(string))
 
-	return true, params[0]
+	return true, data
 }
