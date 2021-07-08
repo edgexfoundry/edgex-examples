@@ -41,9 +41,9 @@ Timeout = "30s"
 Type = 'vault'
 Host = 'localhost'
 Port = 8200
-Path = '/v1/secret/edgex/app-sample-filter-xml/'
+Path = '/v1/secret/edgex/app-simple-filter-xml/'
 Protocol = 'http'
-TokenFile = '/tmp/edgex/secrets/app-sample-filter-xml/secrets-token.json'
+TokenFile = '/tmp/edgex/secrets/app-simple-filter-xml/secrets-token.json'
 RootCaCertPath = ''
 ServerName = ''
   [SecretStore.Authentication]
@@ -53,7 +53,7 @@ ServerName = ''
   [Clients.core-metadata]
   Protocol = 'http'
   Host = 'localhost'
-  Port = 48080
+  Port = 59881
 
 # Choose either the http trigger or edgex-messagebus trigger
 
@@ -75,5 +75,8 @@ Type="edgex-messagebus"
     Protocol = "redis"
     PublishTopic="example"
 
+# App Service specifc simple settings
+# Great for single string settings. For more complex structured custom configuration
+# See https://docs.edgexfoundry.org/2.0/microservices/application/AdvancedTopics/#custom-configuration
 [ApplicationSettings]
-DeviceNames = "Random-Float-Device"
+DeviceNames = "Random-Float-Device, Random-Integer-Device"

@@ -27,7 +27,7 @@ import (
 )
 
 const (
-	serviceKey = "app-sample-filter-xml"
+	serviceKey = "app-simple-filter-xml"
 )
 
 func main() {
@@ -58,7 +58,7 @@ func main() {
 		transforms.NewConversion().TransformToXML,
 		printXMLToConsole,
 	); err != nil {
-		lc.Error("SetFunctionsPipeline returned error: ", err.Error())
+		lc.Errorf("SetFunctionsPipeline returned error: %s", err.Error())
 		os.Exit(-1)
 	}
 
@@ -66,7 +66,7 @@ func main() {
 	// to trigger the pipeline.
 	err = service.MakeItRun()
 	if err != nil {
-		lc.Error("MakeItRun returned error: ", err.Error())
+		lc.Errorf("MakeItRun returned error: %s", err.Error())
 		os.Exit(-1)
 	}
 

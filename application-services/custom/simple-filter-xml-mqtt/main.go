@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019 Intel Corporation
+// Copyright (c) 2021 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,79 +17,72 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
+	"strings"
 
-	"github.com/edgexfoundry/app-functions-sdk-go/pkg/transforms"
-
-	"github.com/edgexfoundry/app-functions-sdk-go/appcontext"
-	"github.com/edgexfoundry/app-functions-sdk-go/appsdk"
-	"github.com/edgexfoundry/go-mod-core-contracts/models"
+	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg"
+	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/interfaces"
+	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/transforms"
 )
 
 const (
-	serviceKey = "sampleFilterXmlMqtt"
+	serviceKey = "app-simple-filter-xml-mqtt"
 )
 
 func main() {
 	// turn off secure mode for examples. Not recommended for production
-	os.Setenv("EDGEX_SECURITY_SECRET_STORE", "false")
-	// 1) First thing to do is to create an instance of the EdgeX SDK and initialize it.
-	edgexSdk := &appsdk.AppFunctionsSDK{ServiceKey: serviceKey}
-	if err := edgexSdk.Initialize(); err != nil {
-		edgexSdk.LoggingClient.Error(fmt.Sprintf("SDK initialization failed: %v\n", err))
+	_ = os.Setenv("EDGEX_SECURITY_SECRET_STORE", "false")
+
+	// 1) First thing to do is to create an new instance of an EdgeX Application Service.
+	service, ok := pkg.NewAppService(serviceKey)
+	if !ok {
 		os.Exit(-1)
 	}
 
-	// 2) shows how to access the application's specific configuration settings.
-	deviceNames, err := edgexSdk.GetAppSettingStrings("DeviceNames")
+	// Leverage the built in logging service in EdgeX
+	lc := service.LoggingClient()
+
+	// 2) shows how to access the application's specific simple configuration settings.
+	deviceNames, err := service.GetAppSettingStrings("DeviceNames")
 	if err != nil {
-		edgexSdk.LoggingClient.Error(err.Error())
+		lc.Error(err.Error())
 		os.Exit(-1)
 	}
-	edgexSdk.LoggingClient.Info(fmt.Sprintf("Filtering for devices %v", deviceNames))
 
-	// Since we are using MQTT, we'll also need to set up the addressable model to
-	// configure it to send to our broker. If you don't have a broker setup you can pull one from docker i.e:
-	// docker run -it -p 1883:1883 -p 9001:9001  eclipse-mosquitto
-	addressable := models.Addressable{
-		Address:   "localhost",
-		Port:      1883,
-		Protocol:  "tcp",
-		Publisher: "MyApp",
-		User:      "",
-		Password:  "",
-		Topic:     "sampleTopic",
+	lc.Info(fmt.Sprintf("Filtering for devices %v", deviceNames))
+
+	// 3) Configure pipeline functions that require more complex configuration. Here we
+	//    use the advanced structure custom configuration
+	config := ServiceConfig{}
+	if err := service.LoadCustomConfig(&config, "MqttSecretConfig"); err != nil {
+		lc.Errorf("LoadCustomConfig returned error: %s", err.Error())
+		os.Exit(-1)
 	}
 
-	// Using default settings, so not changing any fields in MqttConfig
-	mqttConfig := transforms.MqttConfig{}
-
-	// Make sure you change KeyFile and CertFile here to point to actual key/cert files
-	// or an error will be logged for failing to load key/cert files
-	// If you don't use key/cert for MQTT authentication, just pass nil to NewMQTTSender() as following:
-	// mqttSender := transforms.NewMQTTSender(edgexSdk.LoggingClient, addressable, nil, mqttConfig)
-	pair := transforms.KeyCertPair{
-		KeyFile:  "PATH_TO_YOUR_KEY_FILE",
-		CertFile: "PATH_TO_YOUR_CERT_FILE",
+	if err := config.Validate(); err != nil {
+		lc.Errorf("Custom Config failed validation: %s", err.Error())
+		os.Exit(-1)
 	}
 
-	mqttSender := transforms.NewMQTTSender(edgexSdk.LoggingClient, addressable, &pair, mqttConfig, false)
-
-	// 3) This is our pipeline configuration, the collection of functions to
+	// 4) This is our pipeline configuration, the collection of functions to
 	// execute every time an event is triggered.
-	edgexSdk.SetFunctionsPipeline(
-		transforms.NewFilter(deviceNames).FilterByDeviceName,
+	if err := service.SetFunctionsPipeline(
+		transforms.NewFilterFor(deviceNames).FilterByDeviceName,
 		transforms.NewConversion().TransformToXML,
 		printXMLToConsole,
-		mqttSender.MQTTSend,
-	)
+		transforms.NewMQTTSecretSender(config.MqttExportConfig, false).MQTTSend,
+	); err != nil {
+		lc.Errorf("SetFunctionsPipeline returned error: %s", err.Error())
+		os.Exit(-1)
+	}
 
-	// 4) Lastly, we'll go ahead and tell the SDK to "start" and begin listening for events
+	// 5) Lastly, we'll go ahead and tell the SDK to "start" and begin listening for events
 	// to trigger the pipeline.
-	err = edgexSdk.MakeItRun()
+	err = service.MakeItRun()
 	if err != nil {
-		edgexSdk.LoggingClient.Error("MakeItRun returned error: ", err.Error())
+		lc.Errorf("MakeItRun returned error: %s", err.Error())
 		os.Exit(-1)
 	}
 
@@ -98,14 +91,59 @@ func main() {
 	os.Exit(0)
 }
 
-func printXMLToConsole(edgexcontext *appcontext.Context, params ...interface{}) (bool, interface{}) {
-	if len(params) < 1 {
-		// We didn't receive a result
-		return false, nil
+func printXMLToConsole(ctx interfaces.AppFunctionContext, data interface{}) (bool, interface{}) {
+	// Leverage the built in logging service in EdgeX
+	lc := ctx.LoggingClient()
+
+	if data == nil {
+		return false, errors.New("printXMLToConsole: No data received")
 	}
 
-	// Leverage the built in logging service in EdgeX
-	edgexcontext.LoggingClient.Debug(params[0].(string))
-	edgexcontext.Complete(([]byte)(params[0].(string)))
-	return true, params[0].(string)
+	xml, ok := data.(string)
+	if !ok {
+		return false, errors.New("printXMLToConsole: Data received is not the expected 'string' type")
+
+	}
+
+	lc.Debug(xml)
+	ctx.SetResponseData([]byte(xml))
+	return true, xml
+}
+
+// Service's custom configuration which is loaded from the configuration.toml
+type ServiceConfig struct {
+	MqttExportConfig transforms.MQTTSecretConfig
+}
+
+// UpdateFromRaw updates the service's full configuration from raw data received from
+// the Configuration Provider. Can just be a dummy 'return true' if never using the Configuration Provider
+func (c *ServiceConfig) UpdateFromRaw(rawConfig interface{}) bool {
+	configuration, ok := rawConfig.(*ServiceConfig)
+	if !ok {
+		return false //errors.New("unable to cast raw config to type 'ServiceConfig'")
+	}
+
+	*c = *configuration
+
+	return true
+}
+
+func (c *ServiceConfig) Validate() error {
+	if len(strings.TrimSpace(c.MqttExportConfig.BrokerAddress)) == 0 {
+		return errors.New("Configuration missing value for MqttSecretConfig.BrokerAddress")
+	}
+
+	if len(strings.TrimSpace(c.MqttExportConfig.ClientId)) == 0 {
+		return errors.New("Configuration missing value for MqttSecretConfig.ClientId")
+	}
+
+	if len(strings.TrimSpace(c.MqttExportConfig.Topic)) == 0 {
+		return errors.New("Configuration missing value for MqttSecretConfig.Topic")
+	}
+
+	if len(strings.TrimSpace(c.MqttExportConfig.AuthMode)) == 0 {
+		return errors.New("Configuration missing value for MqttSecretConfig.AuthMode")
+	}
+
+	return nil
 }
