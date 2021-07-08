@@ -1,0 +1,45 @@
+{
+	"info": {
+		"_postman_id": "d095dfc1-ea7f-41ce-ae6f-7376928b5fff",
+		"name": "App Services",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "App Service V2 Event Trigger (Random-Float-Device)",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"requestId\": \"82eb2e26-0f24-48ba-ae4c-de9dac3fb9bc\",\n    \"apiVersion\": \"v2\",\n    \"event\": {\n        \"apiVersion\": \"v2\",\n        \"deviceName\": \"Random-Float-Device\",\n        \"profileName\": \"Random-Float-Device\",\n        \"sourceName\" : \"Float32\",\n        \"origin\": 1540855006456,\n        \"id\": \"94eb2e26-0f24-5555-2222-de9dac3fb228\",\n        \"readings\": [\n            {\n                \"apiVersion\": \"v2\",\n                \"resourceName\": \"Float32\",\n                \"profileName\": \"Random-Float-Device\",\n                \"deviceName\": \"Random-Float-Device\",\n                \"value\": \"76677\",\n                \"origin\": 1540855006469,\n                \"ValueType\": \"Float32\",\n                \"id\": \"82eb2e36-0f24-48aa-ae4c-de9dac3fb920\"\n            }\n        ]\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "127.0.0.1:59780/api/v2/trigger",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "59780",
+					"path": [
+						"api",
+						"v2",
+						"trigger"
+					]
+				},
+				"description": "This request will send a valid EdgeX event to Applications Function SDK via HTTP in order to trigger a configure pipeline. The default is :9090."
+			},
+			"response": []
+		}
+	]
+}
