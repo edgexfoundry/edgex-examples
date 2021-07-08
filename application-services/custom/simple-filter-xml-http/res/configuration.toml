@@ -1,20 +1,25 @@
 [Writable]
 LogLevel = 'INFO'
-    [Writable.StoreAndForward]
-    Enabled = false
-    RetryInterval = '5m'
-    MaxRetryCount = 10
+  [Writable.StoreAndForward]
+  Enabled = false
+  RetryInterval = '5m'
+  MaxRetryCount = 10
+  [Writable.InsecureSecrets]
+    [Writable.InsecureSecrets.DB]
+    path = "redisdb"
+      [Writable.InsecureSecrets.DB.Secrets]
+      username = ""
+      password = ""
 
 [Service]
-BootTimeout = '30s'
-ClientMonitor = '15s'
-CheckInterval = '10s'
+HealthCheckInterval = '10s'
 Host = 'localhost'
-Port = 48095
-Protocol = 'http'
-ReadMaxLimit = 100
-StartupMsg = 'This is a sample Filter/XML/Post Transform Application Service'
-Timeout = '30s'
+Port = 59780 # Adjust if running multiple examples at the same time to avoid duplicate port conflicts
+ServerBindAddr = "" # if blank, uses default Go behavior https://golang.org/pkg/net/#Listen
+StartupMsg = 'This is a sample Filter/XML/HTTP Transform Application Service'
+RequestTimeout = '30s'
+MaxRequestSize = 0
+MaxResultCount = 0
 
 [Registry]
 Host = 'localhost'
@@ -27,64 +32,52 @@ Type = "redisdb"
 Host = "localhost"
 Port = 6379
 Timeout = "30s"
-Username = ""
-Password = ""
 
 # SecretStore is required when Store and Forward is enabled and running with security
-# so Databse credentails can be pulled from Vault.
+# so Database credentials can be pulled from Vault.
+# Note when running in docker from compose file set the following environment variables:
+#   - SecretStore_Host: edgex-vault
 [SecretStore]
-  Host = 'localhost'
-  Port = 8200
-  Path = '/v1/secret/edgex/application-service/'
-  Protocol = 'https'
-
+Type = 'vault'
+Host = 'localhost'
+Port = 8200
+Path = '/v1/secret/edgex/app-simple-filter-xml-http/'
+Protocol = 'http'
+TokenFile = '/tmp/edgex/secrets/app-simple-filter-xml-http/secrets-token.json'
+RootCaCertPath = ''
+ServerName = ''
   [SecretStore.Authentication]
   AuthType = 'X-Vault-Token'
-  AuthToken = 'edgex'
-
-[Logging]
-EnableRemote = false
-File = ''
 
 [Clients]
-  [Clients.CoreData]
+  [Clients.core-metadata]
   Protocol = 'http'
   Host = 'localhost'
-  Port = 48080
+  Port = 59881
 
-  [Clients.Logging]
-  Protocol = "http"
-  Host = "localhost"
-  Port = 48061
+# Choose either an HTTP trigger or edgex-messagebus trigger
 
-  # Required when using Store and Forward
-  [Clients.Scheduler]
-  Protocol = 'http'
-  Host = 'localhost'
-  Port = 48085
-
-[MessageBus]
-Type = 'zero'
-    [MessageBus.PublishHost]
-        Host = '*'
-        Port = 5563
-        Protocol = 'tcp'
-    [MessageBus.SubscribeHost]
-        Host = 'localhost'
-        Port = 5563
-        Protocol = 'tcp'
-
-# Choose either an HTTP trigger or MessageBus trigger (aka Binding)
-
-#[Binding]
+#[Trigger]
 #Type="http"
 
-[Binding]
-Type="messagebus"
-SubscribeTopic="events"
-PublishTopic="somewhere"
+[Trigger]
+Type="edgex-messagebus"
+  [Trigger.EdgexMessageBus]
+  Type = "redis"
+    [Trigger.EdgexMessageBus.SubscribeHost]
+    Host = "localhost"
+    Port = 6379
+    Protocol = "redis"
+    SubscribeTopics="edgex/events/#"
+    [Trigger.EdgexMessageBus.PublishHost]
+    Host = "localhost"
+    Port = 6379
+    Protocol = "redis"
+    PublishTopic="example"
 
+# App Service specifc simple settings
+# Great for single string settings. For more complex structured custom configuration
+# See https://docs.edgexfoundry.org/2.0/microservices/application/AdvancedTopics/#custom-configuration
 [ApplicationSettings]
-DeviceNames = "Random-Float-Device"
-
-
+DeviceNames = "Random-Float-Device, Random-Integer-Device"
+HttpExportUrl = "https://56d332b7-0819-422c-8eaa-740971bcbee3.mock.pstmn.io" # TODO: Replace with your endpoint
