@@ -25,7 +25,7 @@ import (
 	"github.com/edgexfoundry/go-mod-core-contracts/v2/models"
 	"os"
 
-	cloudevents "github.com/cloudevents/sdk-go"
+	cloudevents "github.com/cloudevents/sdk-go/v2"
 
 	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg"
 	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/transforms"
@@ -34,7 +34,7 @@ import (
 )
 
 const (
-	serviceKey = "advancedCloudEventTransform"
+	serviceKey = "app-cloud-event"
 )
 
 func main() {
@@ -50,7 +50,7 @@ func main() {
 
 	// Setup cloudEvent client
 	ctx := context.Background()
-	c, err := cloudevents.NewDefaultClient()
+	c, err := cloudevents.NewClientHTTP()
 	if err != nil {
 		appService.LoggingClient().Errorf("failed to create cloud events client, %s", err.Error())
 	}
@@ -105,19 +105,16 @@ func sendCloudEvents(exctx interfaces.AppFunctionContext, data interface{}) (boo
 		return false, errors.New("Cloud event not received")
 	}
 	ctx := cloudevents.ContextWithTarget(context.Background(), "http://localhost:8080/")
-	ctx = cloudevents.ContextWithHeader(ctx, "demo", "header value")
-	c, err := cloudevents.NewDefaultClient()
+
+	c, err := cloudevents.NewClientHTTP()
 	if err != nil {
 		exctx.LoggingClient().Errorf("failed to create client, %s", err.Error())
 		return false, nil
 	}
 	for _, cloudevent := range events {
-		if _, resp, err := c.Send(ctx, cloudevent); err != nil {
+		if result := c.Send(ctx, cloudevent); result != nil {
 			exctx.LoggingClient().Errorf("failed to send: %s", err.Error())
 			return false, nil
-		} else if resp != nil {
-			// don't need a response back, in this example we aren't expecting/sending one
-			exctx.LoggingClient().Infof("got back a response: %s", resp)
 		}
 	}
 	return true, events

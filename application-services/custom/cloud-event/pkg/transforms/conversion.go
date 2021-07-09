@@ -23,7 +23,7 @@ import (
 	"github.com/edgexfoundry/go-mod-core-contracts/v2/common"
 	"time"
 
-	cloudevents "github.com/cloudevents/sdk-go"
+	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/interfaces"
 	"github.com/edgexfoundry/go-mod-core-contracts/v2/models"
 )
@@ -74,13 +74,11 @@ func (f Conversion) TransformToCloudEvent(ctx interfaces.AppFunctionContext, dat
 		switch r := reading.(type) {
 		case models.SimpleReading:
 			cloudevent.SetDataContentType(common.ContentTypeJSON)
-			if err := cloudevent.SetData(r.Value); err != nil {
+			if err := cloudevent.SetData(common.ContentTypeJSON, r.Value); err != nil {
 				return false, fmt.Errorf("Error setting data field for cloud event, %s", err)
 			}
 		case models.BinaryReading:
-			if err := cloudevent.SetData(r.BinaryValue); err != nil {
-				return false, fmt.Errorf("Error setting data field for cloud event, %s", err)
-			}
+			cloudevent.SetData("", r.BinaryValue)
 		default:
 			return false, fmt.Errorf("Unknown reading type: %T", r)
 		}
@@ -123,17 +121,19 @@ func (f Conversion) TransformFromCloudEvent(ctx interfaces.AppFunctionContext, d
 
 		var reading models.Reading
 
-		dataBytes, dataBinary := (cloudevent.Data).([]byte)
-		if cloudevent.DataBinary && dataBinary {
-			reading = models.BinaryReading{BaseReading: baseReading, BinaryValue: dataBytes}
+		if cloudevent.DataBase64 {
+			reading = models.BinaryReading{BaseReading: baseReading, BinaryValue: cloudevent.Data()}
 		} else {
-			simpleReading := models.SimpleReading{baseReading, "" }
+			sr := models.SimpleReading{BaseReading: baseReading, Value: ""}
+			tempStr := ""
 
-			if err := cloudevent.DataAs(&simpleReading.Value); err != nil {
-				return false, fmt.Errorf("Can't unmarshal cloud event data, %s", err)
+			if err := cloudevent.DataAs(&tempStr); err != nil {
+				panic(err)
+			} else {
+				sr.Value = tempStr
 			}
 
-			reading = simpleReading
+			reading = sr
 		}
 
 		event.Readings = append(event.Readings, reading)
