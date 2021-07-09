@@ -1,44 +1,61 @@
 [Writable]
 LogLevel = 'DEBUG'
-    [Writable.StoreAndForward]
-    Enabled = false
-    RetryInterval = '5m'
-    MaxRetryCount = 10
+  [Writable.StoreAndForward]
+  Enabled = false
+  RetryInterval = '5m'
+  MaxRetryCount = 10
+  [Writable.InsecureSecrets]
+    [Writable.InsecureSecrets.DB]
+    path = "redisdb"
+      [Writable.InsecureSecrets.DB.Secrets]
+      username = ""
+      password = ""
 
 [Service]
-BootTimeout = '30s'
-ClientMonitor = '15s'
-CheckInterval = '10s'
+HealthCheckInterval = '10s'
 Host = 'localhost'
-Port = 48095
-Protocol = 'http'
-ReadMaxLimit = 100
+Port = 59780 # Adjust if running multiple examples at the same time to avoid duplicate port conflicts
+ServerBindAddr = "" # if blank, uses default Go behavior https://golang.org/pkg/net/#Listen
 StartupMsg = 'This is a sample Application Service to receive HTTP request as trigger'
-Timeout = '30s'
+RequestTimeout = '30s'
+MaxRequestSize = 0
+MaxResultCount = 0
 
 [Registry]
 Host = 'localhost'
 Port = 8500
 Type = 'consul'
 
-[Logging]
-EnableRemote = false
-File = ''
+# SecretStore is required when Store and Forward is enabled and running with security
+# so Database credentials can be pulled from Vault.
+# Note when running in docker from compose file set the following environment variables:
+#   - SecretStore_Host: edgex-vault
+[SecretStore]
+Type = 'vault'
+Host = 'localhost'
+Port = 8200
+Path = '/v1/secret/edgex/app-send-command/'
+Protocol = 'http'
+TokenFile = '/tmp/edgex/secrets/app-send-command/secrets-token.json'
+RootCaCertPath = ''
+ServerName = ''
+  [SecretStore.Authentication]
+  AuthType = 'X-Vault-Token'
 
 [Clients]
-  [Clients.Logging]
-  Protocol = "http"
-  Host = "localhost"
-  Port = 48061
-  [Clients.Command]
+  [Clients.core-metadata]
   Protocol = 'http'
   Host = 'localhost'
-  Port = 48082
+  Port = 59881
+
+  [Clients.core-command]
+  Protocol = 'http'
+  Host = 'localhost'
+  Port = 59882
 
 # This example expect custom type via HTTP Trigger
-[Binding]
+[Trigger]
 Type="http"
 
 [ApplicationSettings]
-DeviceID = "a0fa03eb-1ecc-4726-9017-fa21444020d9"
-CommandID = "384afb70-ead6-4ff8-a7a0-d96690002f76"
+
