@@ -18,19 +18,18 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "http://localhost:48082/api/v1/device/name/Simple-Device01/command/Switch",
+					"raw": "http://localhost:59999/api/v2/device/name/Simple-Device01/Switch",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "48082",
+					"port": "59999",
 					"path": [
 						"api",
-						"v1",
+						"v2",
 						"device",
 						"name",
 						"Simple-Device01",
-						"command",
 						"Switch"
 					]
 				}
@@ -54,19 +53,18 @@
 					"raw": "{\n\t\"SwitchButton\": \"true\"\n}"
 				},
 				"url": {
-					"raw": "http://localhost:48082/api/v1/device/name/Simple-Device01/command/Switch",
+					"raw": "http://localhost:59999/api/v2/device/name/Simple-Device01/Switch",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "48082",
+					"port": "59999",
 					"path": [
 						"api",
-						"v1",
+						"v2",
 						"device",
 						"name",
 						"Simple-Device01",
-						"command",
 						"Switch"
 					]
 				},
@@ -91,19 +89,18 @@
 					"raw": "{\n\t\"SwitchButton\": \"false\"\n}"
 				},
 				"url": {
-					"raw": "http://localhost:48082/api/v1/device/name/Simple-Device01/command/Switch",
+					"raw": "http://localhost:59999/api/v2/device/name/Simple-Device01/Switch",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "48082",
+					"port": "59999",
 					"path": [
 						"api",
-						"v1",
+						"v2",
 						"device",
 						"name",
 						"Simple-Device01",
-						"command",
 						"Switch"
 					]
 				},

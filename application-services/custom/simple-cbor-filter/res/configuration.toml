@@ -1,19 +1,25 @@
 [Writable]
 LogLevel = 'INFO'
-    [Writable.StoreAndForward]
-    Enabled = false
-    RetryInterval = '5m'
-    MaxRetryCount = 10
+  [Writable.StoreAndForward]
+  Enabled = false
+  RetryInterval = '5m'
+  MaxRetryCount = 10
+  [Writable.InsecureSecrets]
+    [Writable.InsecureSecrets.DB]
+    path = "redisdb"
+      [Writable.InsecureSecrets.DB.Secrets]
+      username = ""
+      password = ""
 
 [Service]
-BootTimeout = '30s'
-ClientMonitor = '15s'
-CheckInterval = '10s'
+HealthCheckInterval = '10s'
 Host = 'localhost'
-Port = 48095
-Protocol = 'http'
-ReadMaxLimit = 100
+Port = 59780 # Adjust if running multiple examples at the same time to avoid duplicate port conflicts
+ServerBindAddr = "" # if blank, uses default Go behavior https://golang.org/pkg/net/#Listen
 StartupMsg = 'Simple CBOR Filter Application Service started'
+RequestTimeout = '30s'
+MaxRequestSize = 0
+MaxResultCount = 0
 Timeout = '30s'
 
 [Registry]
@@ -21,52 +27,59 @@ Host = 'localhost'
 Port = 8500
 Type = 'consul'
 
-[Logging]
-EnableRemote = false
-File = ''
-
 [Database]
 Type = "redisdb"
 Host = "localhost"
 Port = 6379
 Timeout = "30s"
-Username = ""
-Password = ""
 
 [Clients]
-  [Clients.CoreData]
+  [Clients.core-metadata]
   Protocol = 'http'
   Host = 'localhost'
-  Port = 48080
+  Port = 59881
 
-  [Clients.Logging]
-  Protocol = "http"
-  Host = "localhost"
-  Port = 48061
+# SecretStore is required when Store and Forward is enabled and running with security
+# so Database credentials can be pulled from Vault.
+# Note when running in docker from compose file set the following environment variables:
+#   - SecretStore_Host: edgex-vault
+[SecretStore]
+Type = 'vault'
+Host = 'localhost'
+Port = 8200
+Path = '/v1/secret/edgex/app-sample-cbor-filter/'
+Protocol = 'http'
+TokenFile = '/tmp/edgex/secrets/app-sample-cbor-filter/secrets-token.json'
+RootCaCertPath = ''
+ServerName = ''
+  [SecretStore.Authentication]
+  AuthType = 'X-Vault-Token'
 
-[MessageBus]
-Type = 'zero'
-    [MessageBus.PublishHost]
-        Host = '*'
-        Port = 5564
-        Protocol = 'tcp'
-    [MessageBus.SubscribeHost]
-        Host = 'localhost'
-        Port = 5563
-        Protocol = 'tcp'
+# Choose either the http trigger or edgex-messagebus trigger
 
-# Choose either an HTTP trigger or MessageBus trigger (aka Binding)
-
-#[Binding]
+#[Trigger]
 #Type="http"
 
-[Binding]
-Type="messagebus"
-SubscribeTopic="events"
-PublishTopic="somewhere"
+[Trigger]
+Type="edgex-messagebus"
+  [Trigger.EdgexMessageBus]
+  Type = "redis"
+    [Trigger.EdgexMessageBus.SubscribeHost]
+    Host = "localhost"
+    Port = 6379
+    Protocol = "redis"
+    SubscribeTopics="edgex/events/#"
+    [Trigger.EdgexMessageBus.PublishHost]
+    Host = "localhost"
+    Port = 6379
+    Protocol = "redis"
+    PublishTopic="example"
 
+# App Service specifc simple settings
+# Great for single string settings. For more complex structured custom configuration
+# See https://docs.edgexfoundry.org/2.0/microservices/application/AdvancedTopics/#custom-configuration
 [ApplicationSettings]
-ValueDescriptors = "Image"
+ResourceNames = "Image"
 
 
 
