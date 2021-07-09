@@ -1,5 +1,6 @@
 //
 // Copyright (c) 2020 Intel Corporation
+// Copyright (c) 2021 One Track Consulting
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,21 +19,21 @@ package transforms
 
 import (
 	"encoding/base64"
+	"encoding/json"
+	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg"
+	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/interfaces"
+	"github.com/edgexfoundry/go-mod-core-contracts/v2/models"
+	"github.com/google/uuid"
+	"github.com/stretchr/testify/require"
 	"testing"
 
 	cloudevents "github.com/cloudevents/sdk-go"
-	"github.com/edgexfoundry/go-mod-core-contracts/clients"
-	"github.com/edgexfoundry/go-mod-core-contracts/clients/coredata"
-	"github.com/edgexfoundry/go-mod-core-contracts/clients/logger"
+	"github.com/edgexfoundry/go-mod-core-contracts/v2/clients/logger"
+	"github.com/edgexfoundry/go-mod-core-contracts/v2/common"
 	"github.com/stretchr/testify/assert"
-
-	"github.com/edgexfoundry/app-functions-sdk-go/appcontext"
-	"github.com/edgexfoundry/app-functions-sdk-go/pkg/urlclient"
-
-	"github.com/edgexfoundry/go-mod-core-contracts/models"
 )
 
-var context *appcontext.Context
+var context interfaces.AppFunctionContext
 var lc logger.LoggingClient
 
 const (
@@ -41,15 +42,9 @@ const (
 )
 
 func init() {
-	lc := logger.NewClient("app_functions_sdk_go", false, "./test.log", "DEBUG")
-	eventClient := coredata.NewEventClient(
-		urlclient.New(nil, nil, nil, "", "", 0, "http://test"+clients.ApiEventRoute),
-	)
+	lc := logger.NewMockClient()
 
-	context = &appcontext.Context{
-		LoggingClient: lc,
-		EventClient:   eventClient,
-	}
+	context = pkg.NewAppFuncContextForTest(uuid.NewString(), lc)
 }
 
 func TestTransformToCloudEvent(t *testing.T) {
@@ -60,19 +55,19 @@ func TestTransformToCloudEvent(t *testing.T) {
 	}
 
 	valueTypesToValues := map[string]string{
-		models.ValueTypeBool:    "true",
-		models.ValueTypeString:  "This is a string",
-		models.ValueTypeUint8:   "123",
-		models.ValueTypeUint16:  "123",
-		models.ValueTypeUint32:  "123",
-		models.ValueTypeUint64:  "123",
-		models.ValueTypeInt8:    "-123",
-		models.ValueTypeInt16:   "-123",
-		models.ValueTypeInt32:   "-123",
-		models.ValueTypeInt64:   "-123",
-		models.ValueTypeFloat32: "1.23",
-		models.ValueTypeFloat64: "1.23",
-		models.ValueTypeBinary:  "will be converted to bytes in test",
+		common.ValueTypeBool:    "true",
+		common.ValueTypeString:  "This is a string",
+		common.ValueTypeUint8:   "123",
+		common.ValueTypeUint16:  "123",
+		common.ValueTypeUint32:  "123",
+		common.ValueTypeUint64:  "123",
+		common.ValueTypeInt8:    "-123",
+		common.ValueTypeInt16:   "-123",
+		common.ValueTypeInt32:   "-123",
+		common.ValueTypeInt64:   "-123",
+		common.ValueTypeFloat32: "1.23",
+		common.ValueTypeFloat64: "1.23",
+		common.ValueTypeBinary:  "will be converted to bytes in test",
 	}
 
 	testCases := map[string]dataTest{}
@@ -80,23 +75,41 @@ func TestTransformToCloudEvent(t *testing.T) {
 
 		var dataBytes []byte
 		var want string
-		if valueType == models.ValueTypeBinary {
+
+		var reading models.Reading
+
+		if valueType == common.ValueTypeBinary {
 			dataBytes = []byte(value)
-			want = `{"data_base64":"` + base64.StdEncoding.EncodeToString(dataBytes) + `","eventid":"event-` + devID1 + `","floatencoding":"","id":"123-abc","source":"id1","specversion":"1.0","time":"1970-01-01T00:00:00Z","type":"test-reading","valuetype":"` + valueType + `"}`
+
+			reading = models.BinaryReading{
+				BaseReading: models.BaseReading{
+					Id:           "123-abc",
+					ResourceName: "test-reading",
+					ValueType:    valueType,
+				},
+				BinaryValue: dataBytes,
+			}
+
+			want = `{"data_base64":"` + base64.StdEncoding.EncodeToString(dataBytes) + `","eventid":"event-` + devID1 + `","id":"123-abc","source":"id1","specversion":"1.0","time":"1970-01-01T00:00:00Z","type":"test-reading","valuetype":"` + valueType + `"}`
 		} else {
-			want = `{"data":"` + value + `","datacontenttype":"application/json","eventid":"event-` + devID1 + `","floatencoding":"","id":"123-abc","source":"id1","specversion":"1.0","time":"1970-01-01T00:00:00Z","type":"test-reading","valuetype":"` + valueType + `"}`
+			reading = models.SimpleReading{
+				BaseReading: models.BaseReading{
+					Id:           "123-abc",
+					ResourceName: "test-reading",
+					ValueType:    valueType,
+				},
+				Value: value,
+			}
+			want = `{"data":"` + value + `","datacontenttype":"application/json","eventid":"event-` + devID1 + `","id":"123-abc","source":"id1","specversion":"1.0","time":"1970-01-01T00:00:00Z","type":"test-reading","valuetype":"` + valueType + `"}`
 		}
 
 		testCases["test to cloudevent: "+valueType] = dataTest{
 			event: models.Event{
-				ID:     "event-" + devID1,
-				Device: devID1,
-				Readings: []models.Reading{models.Reading{
-					Id:          "123-abc",
-					Name:        "test-reading",
-					Value:       value,
-					ValueType:   valueType,
-					BinaryValue: dataBytes}},
+				Id:     "event-" + devID1,
+				DeviceName: devID1,
+				Readings: []models.Reading{
+					reading,
+				},
 			},
 			valueType: valueType,
 			want:      want,
@@ -107,17 +120,24 @@ func TestTransformToCloudEvent(t *testing.T) {
 		t.Run(n, func(t *testing.T) {
 			conv := NewConversion()
 			continuePipeline, result := conv.TransformToCloudEvent(context, tc.event)
-			resultBytes := result.([][]byte)
-			resultString := string(resultBytes[0])
-			assert.NotNil(t, result)
+			resultEvent, ok := result.([]cloudevents.Event)
+
+			require.True(t, ok)
+
+			assert.NotNil(t, resultEvent)
 			assert.True(t, continuePipeline)
-			assert.Equal(t, tc.want, resultString)
+
+			have, err := json.Marshal(resultEvent[0])
+
+			require.NoError(t, err)
+
+			assert.Equal(t, tc.want, string(have))
 		})
 	}
 }
 
 func TestTransformToCloudEventWrongEvent(t *testing.T) {
-	eventIn := "Not a models.Event, a string"
+	eventIn := "Not a common.Event, a string"
 	conv := NewConversion()
 	continuePipeline, result := conv.TransformToCloudEvent(context, eventIn)
 	assert.Error(t, result.(error))
@@ -127,40 +147,49 @@ func TestTransformToCloudEventWrongEvent(t *testing.T) {
 func TestTransformToCloudEventMultipleEvents(t *testing.T) {
 	value1 := "1234"
 	value2 := "4321"
-	valueType := models.ValueTypeInt64
+	valueType := common.ValueTypeInt64
 	want := []string{
-		`{"data":"` + value1 + `","datacontenttype":"application/json","eventid":"event-` + devID1 + `","floatencoding":"","id":"123-abc","source":"id1","specversion":"1.0","time":"1970-01-01T00:00:00Z","type":"test-reading","valuetype":"` + valueType + `"}`,
-		`{"data":"` + value2 + `","datacontenttype":"application/json","eventid":"event-` + devID1 + `","floatencoding":"","id":"123-abc","source":"id1","specversion":"1.0","time":"1970-01-01T00:00:00Z","type":"test-reading","valuetype":"` + valueType + `"}`}
+		`{"data":"` + value1 + `","datacontenttype":"application/json","eventid":"event-` + devID1 + `","id":"123-abc","source":"id1","specversion":"1.0","time":"1970-01-01T00:00:00Z","type":"test-reading","valuetype":"` + valueType + `"}`,
+		`{"data":"` + value2 + `","datacontenttype":"application/json","eventid":"event-` + devID1 + `","id":"123-abc","source":"id1","specversion":"1.0","time":"1970-01-01T00:00:00Z","type":"test-reading","valuetype":"` + valueType + `"}`}
 	event := models.Event{
-		ID:     "event-" + devID1,
-		Device: devID1,
+		Id:         "event-" + devID1,
+		DeviceName: devID1,
 		Readings: []models.Reading{
-			models.Reading{
-				Id:        "123-abc",
-				Name:      "test-reading",
-				Value:     value1,
-				ValueType: valueType},
-			models.Reading{
-				Id:        "123-abc",
-				Name:      "test-reading",
-				Value:     value2,
-				ValueType: valueType}}}
+			models.SimpleReading{
+				BaseReading: models.BaseReading{
+					Id:           "123-abc",
+					ResourceName: "test-reading",
+					ValueType:    valueType,
+				},
+				Value: value1,
+			},
+			models.SimpleReading{
+				BaseReading: models.BaseReading{
+					Id:           "123-abc",
+					ResourceName: "test-reading",
+					ValueType:    valueType,
+				},
+				Value: value2,
+			},
+		},
+	}
 
 	conv := NewConversion()
 	continuePipeline, result := conv.TransformToCloudEvent(context, event)
 	assert.NotNil(t, result)
 	assert.True(t, continuePipeline)
-	resultBytes := result.([][]byte)
-	for i, cloudEvent := range resultBytes {
-		resultString := string(cloudEvent)
-		assert.Equal(t, want[i], resultString)
+	cloudEvents := result.([]cloudevents.Event)
+	for i, cloudEvent := range cloudEvents {
+		resultBytes, err := json.Marshal(cloudEvent)
+		require.NoError(t, err)
+		assert.Equal(t, want[i], string(resultBytes))
 	}
 }
 
 func TestTransformToCloudEventNoReadings(t *testing.T) {
 	eventIn := models.Event{
-		ID:     "event-" + devID1,
-		Device: devID1,
+		Id:     "event-" + devID1,
+		DeviceName	: devID1,
 	}
 	conv := NewConversion()
 	continuePipeline, result := conv.TransformToCloudEvent(context, eventIn)
@@ -170,37 +199,43 @@ func TestTransformToCloudEventNoReadings(t *testing.T) {
 
 func TestTransformToCloudEventNoEvent(t *testing.T) {
 	conv := NewConversion()
-	continuePipeline, result := conv.TransformToCloudEvent(context)
+	continuePipeline, result := conv.TransformToCloudEvent(context, nil)
 	assert.Error(t, result.(error))
 	assert.False(t, continuePipeline)
 }
 
 func TestTransformFromCloudEvent(t *testing.T) {
 	value := "4321"
-	valueType := models.ValueTypeInt64
-	singleCloudEvent := []byte(`{"data":"` + value + `","datacontenttype":"application/json","floatencoding":"", "eventid":"` + "event-" + devID1 + `","id":"123-abc","source":"id1","specversion":"1.0","time":"1970-01-01T00:00:00Z","type":"test-reading","valuetype":"` + valueType + `"}`)
-	var cloudEvents [][]byte
-	cloudEvents = append(cloudEvents, singleCloudEvent)
+	valueType := common.ValueTypeInt64
+	cloudeventBytes := []byte(`{"data":"` + value + `","datacontenttype":"application/json","floatencoding":"", "eventid":"` + "event-" + devID1 + `","id":"123-abc","source":"id1","specversion":"1.0","time":"1970-01-01T00:00:00Z","type":"test-reading","valuetype":"` + valueType + `"}`)
+	cloudevent := cloudevents.Event{}
+	cloudevent.UnmarshalJSON(cloudeventBytes)
+
 	expectedEvent := models.Event{
-		ID:     "event-" + devID1,
-		Device: devID1,
+		Id:         "event-" + devID1,
+		DeviceName: devID1,
 		Readings: []models.Reading{
-			models.Reading{
-				Id:        "123-abc",
-				Name:      "test-reading",
-				Value:     value,
-				ValueType: valueType}}}
+			models.SimpleReading{
+				BaseReading: models.BaseReading{
+					Id:        "123-abc",
+					ResourceName:      "test-reading",
+					ValueType: valueType},
+				Value: value,
+			},
+		},
+	}
 
 	conv := NewConversion()
-	continuePipeline, result := conv.TransformFromCloudEvent(context, cloudEvents)
+	continuePipeline, result := conv.TransformFromCloudEvent(context, []cloudevents.Event { cloudevent })
+
 	edgexEvent, ok := result.(models.Event)
 	assert.NotNil(t, result)
 	assert.True(t, ok)
 	assert.True(t, continuePipeline)
-	assert.Equal(t, expectedEvent.ID, edgexEvent.ID)
-	assert.Equal(t, expectedEvent.Readings[0].Id, edgexEvent.Readings[0].Id)
-	assert.Equal(t, expectedEvent.Readings[0].Name, edgexEvent.Readings[0].Name)
-	assert.Equal(t, expectedEvent.Readings[0].Value, edgexEvent.Readings[0].Value)
+	assert.Equal(t, expectedEvent.Id, edgexEvent.Id)
+	assert.Equal(t, expectedEvent.Readings[0].GetBaseReading().ValueType, edgexEvent.Readings[0].GetBaseReading().ValueType)
+	assert.Equal(t, expectedEvent.Readings[0].GetBaseReading().ResourceName, edgexEvent.Readings[0].GetBaseReading().ResourceName)
+	assert.Equal(t, expectedEvent.Readings[0].(models.SimpleReading).Value, edgexEvent.Readings[0].(models.SimpleReading).Value)
 }
 
 func TestTransformFromCloudEventEmptyCloudEvent(t *testing.T) {
