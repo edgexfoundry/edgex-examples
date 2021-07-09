@@ -1,5 +1,6 @@
 //
 // Copyright (c) 2020 Intel Corporation
+// Copyright (c) 2021 One Track Consulting
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,11 +20,12 @@ package transforms
 import (
 	"errors"
 	"fmt"
+	"github.com/edgexfoundry/go-mod-core-contracts/v2/common"
 	"time"
 
-	cloudevents "github.com/cloudevents/sdk-go"
-	"github.com/edgexfoundry/app-functions-sdk-go/appcontext"
-	"github.com/edgexfoundry/go-mod-core-contracts/models"
+	cloudevents "github.com/cloudevents/sdk-go/v2"
+	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/interfaces"
+	"github.com/edgexfoundry/go-mod-core-contracts/v2/models"
 )
 
 // Conversion houses various conversion
@@ -37,12 +39,12 @@ func NewConversion() Conversion {
 
 // TransformToCloudEvent will transform a models.Event to a Cloud Event
 // It will return an error and stop the pipeline if a non-edgex event is received or if no data is received.
-func (f Conversion) TransformToCloudEvent(edgexcontext *appcontext.Context, params ...interface{}) (continuePipeline bool, stringType interface{}) {
-	if len(params) < 1 {
+func (f Conversion) TransformToCloudEvent(ctx interfaces.AppFunctionContext, data interface{}) (continuePipeline bool, stringType interface{}) {
+	if data == nil {
 		return false, errors.New("No Event Received")
 	}
-	edgexcontext.LoggingClient.Debug("Transforming to CloudEvent")
-	event, ok := params[0].(models.Event)
+	ctx.LoggingClient().Debug("Transforming to CloudEvent")
+	event, ok := data.(models.Event)
 	if !ok {
 		return false, errors.New("Unexpected type received")
 	}
@@ -50,76 +52,90 @@ func (f Conversion) TransformToCloudEvent(edgexcontext *appcontext.Context, para
 		return false, errors.New("No event readings to transform")
 	}
 
-	var cloudeventReadings []cloudevents.Event
+	var cloudEvents []cloudevents.Event
 	for _, reading := range event.Readings {
 		cloudevent := cloudevents.NewEvent(cloudevents.VersionV1)
-		cloudevent.SetID(reading.Id)
-		cloudevent.SetType(reading.Name)
-		cloudevent.SetSource(event.Device)
-		unixTime := time.Unix(0, reading.Origin) // assuming time is formatted as nanoseconds if seconds time.Unix(reading.Origin, 0)
+		baseReading := reading.GetBaseReading()
+		cloudevent.SetID(baseReading.Id)
+		cloudevent.SetType(baseReading.ResourceName)
+		cloudevent.SetSource(event.DeviceName)
+		unixTime := time.Unix(0, baseReading.Origin) // assuming time is formatted as nanoseconds if seconds time.Unix(reading.Origin, 0)
 		timeRFC3339, err := time.Parse(
 			time.RFC3339,
 			unixTime.Format(time.RFC3339))
 		if err != nil {
-			return false, fmt.Errorf("Failed to parse reading.Origin as RFC3339 time: %d, %s", reading.Origin, err)
+			return false, fmt.Errorf("Failed to parse reading.Origin as RFC3339 time: %d, %s", baseReading.Origin, err)
 		}
 		cloudevent.SetTime(timeRFC3339)
 		// extension names are always lowercase
-		cloudevent.SetExtension("eventid", event.ID)
-		cloudevent.SetExtension("valuetype", reading.ValueType)
-		cloudevent.SetExtension("floatencoding", reading.FloatEncoding)
-		if len(reading.BinaryValue) > 0 {
-			// if reading.BinaryValue is set that becomes data and reading.Value is ignored
-			if err := cloudevent.SetData(reading.BinaryValue); err != nil {
+		cloudevent.SetExtension("eventid", event.Id)
+		cloudevent.SetExtension("valuetype", baseReading.ValueType)
+
+		switch r := reading.(type) {
+		case models.SimpleReading:
+			cloudevent.SetDataContentType(common.ContentTypeJSON)
+			if err := cloudevent.SetData(common.ContentTypeJSON, r.Value); err != nil {
 				return false, fmt.Errorf("Error setting data field for cloud event, %s", err)
 			}
-		} else {
-			cloudevent.SetDataContentType("application/json")
-			if err := cloudevent.SetData(reading.Value); err != nil {
-				return false, fmt.Errorf("Error setting data field for cloud event, %s", err)
-			}
+		case models.BinaryReading:
+			cloudevent.SetData("", r.BinaryValue)
+		default:
+			return false, fmt.Errorf("Unknown reading type: %T", r)
 		}
-		cloudeventReadings = append(cloudeventReadings, cloudevent)
+
+		cloudEvents = append(cloudEvents, cloudevent)
 	}
-	return true, cloudeventReadings
+	return true, cloudEvents
 }
 
 // TransformFromCloudEvent will transform a Cloud Event to an Edgex models.Event
 // It will return an error and stop the pipeline if a non-edgex event is received or if no data is received.
-func (f Conversion) TransformFromCloudEvent(edgexcontext *appcontext.Context, params ...interface{}) (continuePipeline bool, stringType interface{}) {
-	if len(params) < 1 {
+func (f Conversion) TransformFromCloudEvent(ctx interfaces.AppFunctionContext, data interface{}) (continuePipeline bool, stringType interface{}) {
+	if data == nil {
 		return false, errors.New("No Event Received")
 	}
-	edgexcontext.LoggingClient.Debug("Transforming from CloudEvent to models.Event")
-	result, ok := params[0].([]cloudevents.Event)
+	ctx.LoggingClient().Debug("Transforming from CloudEvent to models.Event")
+	result, ok := data.([]cloudevents.Event)
 	if !ok {
 		return false, errors.New("Unexpected type received")
 	}
 	event := models.Event{}
 	for _, cloudevent := range result {
-		event.Device = cloudevent.Source()
-		reading := models.Reading{}
-		reading.Id = cloudevent.ID()
-		reading.Name = cloudevent.Type()
-		reading.Origin = cloudevent.Time().Unix()
+		event.DeviceName = cloudevent.Source()
+
+		baseReading := models.BaseReading{
+			Id:           cloudevent.ID(),
+			Origin:       cloudevent.Time().Unix(),
+			DeviceName:   cloudevent.Source(),
+			ResourceName: cloudevent.Type(),
+		}
+
 		extensions := cloudevent.Extensions()
+
 		if val, ok := extensions["eventid"]; ok {
-			event.ID = val.(string)
+			event.Id = val.(string)
 		}
 		if val, ok := extensions["valuetype"]; ok {
-			reading.ValueType = val.(string)
+			baseReading.ValueType = val.(string)
 		}
-		if val, ok := extensions["floatencoding"]; ok {
-			reading.FloatEncoding = val.(string)
-		}
-		dataBytes, dataBinary := (cloudevent.Data).([]byte)
-		if cloudevent.DataBinary && dataBinary {
-			reading.BinaryValue = dataBytes
+
+		var reading models.Reading
+
+		if cloudevent.DataBase64 {
+			reading = models.BinaryReading{BaseReading: baseReading, BinaryValue: cloudevent.Data()}
 		} else {
-			if err := cloudevent.DataAs(&reading.Value); err != nil {
-				return false, fmt.Errorf("Can't unmarshal cloud event data, %s", err)
+			sr := models.SimpleReading{BaseReading: baseReading, Value: ""}
+			tempStr := ""
+
+			if err := cloudevent.DataAs(&tempStr); err != nil {
+				panic(err)
+			} else {
+				sr.Value = tempStr
 			}
+
+			reading = sr
 		}
+
 		event.Readings = append(event.Readings, reading)
 	}
 	if len(event.Readings) == 0 {

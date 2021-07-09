@@ -1,31 +1,45 @@
 [Writable]
-LogLevel = 'DEBUG'
+LogLevel = "DEBUG"
+[Writable.StoreAndForward]
+  Enabled = false
+  RetryInterval = "5m"
+  MaxRetryCount = 10
+  [Writable.InsecureSecrets]
+    [Writable.InsecureSecrets.DB]
+    path = "redisdb"
+      [Writable.InsecureSecrets.DB.Secrets]
+      username = ""
+      password = ""
 
 [Service]
-BootTimeout = '30s'
-ClientMonitor = '15s'
-CheckInterval = '10s'
-Host = 'localhost'
-Port = 48095
-Protocol = 'http'
-ReadMaxLimit = 100
-StartupMsg = 'Cloud Event Transforms'
-Timeout = '5s'
+HealthCheckInterval = "10s"
+Host = "localhost"
+ServerBindAddr = "" # if blank, uses default Go behavior https://golang.org/pkg/net/#Listen
+Port = 59780 # Adjust if running multiples examples at the same time to avoid duplicate port conflicts
+StartupMsg = "Cloud Event Transforms"
+RequestTimeout = "30s"
+MaxRequestSize = 0
+MaxResultCount = 0
 
 [Registry]
-Host = 'localhost'
+Host = "localhost"
 Port = 8500
-Type = 'consul'
+Type = "consul"
+
+[Database]
+Type = "redisdb"
+Host = "localhost"
+Port = 6379
+Timeout = "30s"
 
 [Clients]
-  [Clients.CoreData]
-  Protocol = 'http'
-  Host = 'localhost'
-  Port = 48080
+  [Clients.core-metadata]
+  Protocol = "http"
+  Host = "localhost"
+  Port = 59881
 
-[Logging]
-EnableRemote = false
-File = ''
-
-[Binding]
+# This example expect custom type via HTTP Trigger
+[Trigger]
 Type="http"
+
+[ApplicationSettings]

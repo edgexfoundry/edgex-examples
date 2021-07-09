@@ -34,7 +34,7 @@ import (
 )
 
 const (
-	serviceKey = "customTrigger"
+	serviceKey = "app-custom-trigger"
 )
 
 type stdinTrigger struct {

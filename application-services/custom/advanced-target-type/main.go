@@ -26,7 +26,7 @@ import (
 )
 
 const (
-	serviceKey = "advancedTargetType"
+	serviceKey = "app-target-type"
 )
 
 func main() {
