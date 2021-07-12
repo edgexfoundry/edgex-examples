@@ -1,77 +1,80 @@
-# HTTP Command Service #
+# Send Command Example #
 
-#### Overview ####
+## Overview ##
 
-Many IoT deployments require some form of integration with the cloud. The integration will be required for both north- and south bound integration.  For south-bound services, after analytic processing from the cloud, some device actions are notmally triggered as a result of gathered intelligence. This document demonstrates a sample EdgeX application service–HTTP Command Service that can receive commands from the Azure IoT Hub, consume the device data and invoke commands against devices. The entire technical architecture is illustrated below:
+This Application Service example demonstrates how to use the `Command` client to send `Set` and `Get` commands to a device. In this case we are using the a device from the Device Virtual service.
 
-![Technical Architecture](./Southbound.png)
-
-We sometimes want to trigger device actions from the cloud; that is, from the Azure IoT Hub to EdgeX. The EdgeX Core Command Service provides a comprehensive set of APIs to achieve this. However, in some cases, you might prefer not to expose all APIs and therefore require a finer-grained control over the APIs to be exposed. For example, you might want to control the commands on specific devices that can receive commands from outside of EdgeX, or to allow only certain values for a specific command.  HTTP Command Service provides a sample implementations to achieve such control.
-
-#### Prerequisites ####
+## Prerequisites ##
 
 * Obtain the code from the https://github.com/edgexfoundry/edgex-examples/application-services/custom/send-command 
-* Ensure that EdgeX is running with mandatory services, including core services and logging service
-* Ensure that the Virtual Device Service is running and managed by EdgeX with at least one pre-defined device, such as Random-Boolean-Device<br>
 
-If you are unfamiliar with the Azure IoT Hub, read the following documents first, as this document intentionally omits some details on Azure:
-* [Create an Azure IoT Hub on the Azure portal](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-create-through-portal)
-* [Set up X.509 security on Azure IoT Hub](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-security-x509-get-started)
+* Ensure that EdgeX is running including Device Virtual Service. Run the follow command to achieve this
 
-#### Steps ####
+  ```bash
+  curl https://raw.githubusercontent.com/edgexfoundry/edgex-compose/ireland/docker-compose-no-secty.yml -o docker-compose.yml; docker-compose -p edgex up -d
+  ```
 
-1. The HTTP Command Service exposes an HTTP service for the client to switch on / off of the device without knowing the underlying EdgeX APIs. For the service to send commands to correct device, you must set DeviceID and CommandID in the [res/configuration.toml](./res/configuration.toml) file.<br>
-    ```
-     [ApplicationSettings]
-     DeviceID = "9f178953-84e7-49f6-9829-5b86b7cbbcda"
-     CommandID = "15786a22-d89b-474b-a7de-18371c3d22c5"
-    ```
-   **Note:** For real use cases, the DeviceID must be associated with the actual device that is managed by EdgeX; the CommandID must be associated with the required command registered under the EdgeX Core Command Service, and the command must provide correct responses to consume the [switch on / off JSON document](./status-on-request.json). For simplicity, we can use the Virtual Device Service in this sample.
-   
-2. Build the HTTP command service 
+- Install PostMan (https://www.postman.com/)
 
-    ```
+## Steps
+
+1. Build the Send Command service 
+
+```
     make build
-    ```
+```
 
-3. Run the http-command service and you have an HTTP service that can switch on/off your device by sending a [JSON payload](./status-on-request.json) to the http://127.0.0.1:48095/api/v1/trigger endpoint.
+2. Run the Send Command service 
 
-    ```
-    ./app-serviced
-    ```
+   ```
+   ./app-service
+   ```
 
-4. With the HTTP Command Service ready, your Azure IoT Hub can use a direct method to control the device. Azure provides an IoT device SDK in various programming languages. Refer to [Quickstart: Control a device connected to an Azure IoT hub with Java](https://docs.microsoft.com/en-us/azure/iot-hub/quickstart-control-device-java) for more details of using the direct method.  To simplify the implementation, we supply modified code, which is ready to run with the Azure IoT hub:
-   * Under [iot-hub](./iot-hub) directory, there are two sample modules:
-     * [Quickstarts/proxy-device](./iot-hub/Quickstarts/proxy-device)<br>
-       This simulates an Azure device that is associated with the proxy device as defined in step 1, and this proxy device could be used to handle remote methods.
-     * [Quickstarts/back-end-application](./iot-hub/Quickstarts/back-end-application)<br>
-       This is a simulated Azure back-end application that issues remote method requests.
-   * Follow the steps as described [here](https://docs.microsoft.com/en-us/azure/iot-hub/quickstart-control-device-java#register-a-device) to register a proxy device on your Azure IoT hub
-   * Update the **connection string** and **device Id** as obtained from previous step for both following Java classes:
-     * [Quickstarts/proxy-device/src/main/java/com/microsoft/docs/iothub/samples/ProxyDevice.java](./iot-hub/Quickstarts/proxy-device/src/main/java/com/microsoft/docs/iothub/samples/ProxyDevice.java)<br>
-       ```java
-       public class ProxyDevice {
-              // The device connection string to authenticate the device with your IoT hub.
-              // Using the Azure CLI:
-              // az iot hub device-identity show-connection-string --hub-name {YourIoTHubName} --device-id {YourDeviceId} --output table
-              private static String connString = "{Your device connection string here}";
-       ```
-     * [Quickstarts/back-end-application/src/main/java/com/microsoft/docs/iothub/samples/BackEndApplication.java](./iot-hub/Quickstarts/back-end-application/src/main/java/com/microsoft/docs/iothub/samples/BackEndApplication.java)<br>
-       ```java
-        public class BackEndApplication {
-         
-          // Connection string for your IoT Hub
-          // az iot hub show-connection-string --hub-name {your iot hub name} --policy-name service
-          public static final String iotHubConnectionString = "{Your service connection string here}";
-           
-          // Device to call direct method on.
-          public static final String deviceId = "{Your device Id here}";
-       ```
-   * Run ``mvn clean package`` in both 2 modules
-   * Use following scripts to run the applications:
-     * [Quickstarts/proxy-device/run.sh](./iot-hub/Quickstarts/proxy-device/run.sh)<br>
-       This initiates the proxy device that is defined on the Azure IoT Hub. This device acts as a proxy to invoke the HTTP Command Service using the http://127.0.0.1:48095/api/v1/trigger endpoint
-     * [Quickstarts/back-end-application/on.sh](./iot-hub/Quickstarts/back-end-application/on.sh)<br>
-       This simulates the switch-on request from the Azure IoT Hub. A successful request makes a device method invocation to switch on the device.
-     * [Quickstarts/back-end-application/off.sh](./iot-hub/Quickstarts/back-end-application/off.sh)<br>
-       This simulates the switch-off request from the Azure IoT Hub. A successful request makes a device method invocation to switch off the device.
+3. Start PostMan and import the `Send Command Triggers.postman_collection.json` file
+
+   This collection has two requests. One to trigger a `Set` command and one to trigger a `Get` command. Both send a custom `ActionRequest` object to the application service's HTTP trigger. This `ActionRequest` contains the information needed to send the commands. Take a look at the JSON being sent and play around with the values to send different commands to devices defined by Device Virtual . 
+
+   See here for full list of devices: https://github.com/edgexfoundry/device-virtual-go/blob/v2.0.0/cmd/res/devices/devices.toml and here for all the profiles that define the resources for those devices: https://github.com/edgexfoundry/device-virtual-go/tree/v2.0.0/cmd/res/profiles
+
+4. Run the `Trigger Set Action` request from PostMan
+
+   Response should be:
+
+   ```json
+   {
+       "apiVersion": "v2",
+       "statusCode": 200
+   }
+   ```
+
+5. Run the `Trigger Get Action` request from PostMan
+
+   Response should be:
+
+   ```json
+   {
+       "apiVersion": "v2",
+       "statusCode": 200,
+       "event": {
+           "apiVersion": "v2",
+           "id": "2369f3f1-df20-4522-bd2a-1fbc20e7049e",
+           "deviceName": "Random-Integer-Device",
+           "profileName": "Random-Integer-Device",
+           "sourceName": "Int8",
+           "origin": 1625868240254928800,
+           "readings": [
+               {
+                   "id": "b37c67c6-1678-4d18-b07c-a6f148aeaefd",
+                   "origin": 1625868240254928800,
+                   "deviceName": "Random-Integer-Device",
+                   "resourceName": "Int8",
+                   "profileName": "Random-Integer-Device",
+                   "valueType": "Int8",
+                   "binaryValue": null,
+                   "mediaType": "",
+                   "value": "101"
+               }
+           ]
+       }
+   }
+   ```

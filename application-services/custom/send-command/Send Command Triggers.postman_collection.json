@@ -1,0 +1,69 @@
+{
+	"info": {
+		"_postman_id": "84251f20-5d98-485f-a0dd-da0c669862b8",
+		"name": "Send Command Triggers",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Trigger Set Action",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"action\" : \"set\",\r\n    \"deviceName\" : \"Random-Integer-Device\",\r\n    \"commandName\" : \"WriteInt8Value\",\r\n    \"resourceName\" : \"Int8\",\r\n    \"value\" : \"101\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:59780/api/v2/trigger",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "59780",
+					"path": [
+						"api",
+						"v2",
+						"trigger"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Trigger Get Action",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"action\" : \"get\",\r\n    \"deviceName\" : \"Random-Integer-Device\",\r\n    \"commandName\" : \"Int8\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:59780/api/v2/trigger",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "59780",
+					"path": [
+						"api",
+						"v2",
+						"trigger"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

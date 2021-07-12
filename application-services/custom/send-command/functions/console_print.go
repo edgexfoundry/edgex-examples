@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019 Intel Corporation
+// Copyright (c) 2021 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,20 +17,30 @@
 package functions
 
 import (
+	"errors"
 	"fmt"
 
-	"github.com/edgexfoundry/app-functions-sdk-go/appcontext"
+	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/interfaces"
+	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/util"
 )
 
-func PrintToConsole(edgexcontext *appcontext.Context, params ...interface{}) (bool, interface{}) {
-	edgexcontext.LoggingClient.Debug("PrintToConsole")
+func PrintToConsole(ctx interfaces.AppFunctionContext, data interface{}) (bool, interface{}) {
+	ctx.LoggingClient().Debug("PrintToConsole")
 
-	if len(params) < 1 {
-		// We didn't receive a result
-		return false, nil
+	if data == nil {
+		return false, errors.New("PrintToConsole: No data received")
 	}
 
-	fmt.Println(params[0].(string))
+	// Data is expected to be a JSON response to previous command executed.
+	bytes, err := util.CoerceType(data)
+	if err != nil {
+		return false, fmt.Errorf("PrintToConsole: CoerceType failed: %s", err.Error())
+	}
 
-	return true, params[0]
+	strData := string(bytes)
+	ctx.LoggingClient().Info(strData)
+
+	ctx.SetResponseContentType("application/json")
+
+	return true, data
 }
