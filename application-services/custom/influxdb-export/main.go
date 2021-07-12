@@ -7,59 +7,101 @@
 package main
 
 import (
-	"fmt"
+	"errors"
 	"os"
+	"strings"
+
+	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg"
+	sdkTransforms "github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/transforms"
 
 	influxTransforms "app-service-influx/pkg/transforms"
-
-	"github.com/edgexfoundry/app-functions-sdk-go/appsdk"
-	sdkTransforms "github.com/edgexfoundry/app-functions-sdk-go/pkg/transforms"
 )
 
+const serviceKey = "app-influx-export"
+
 func main() {
+	// turn off secure mode for examples. Not recommended for production
+	_ = os.Setenv("EDGEX_SECURITY_SECRET_STORE", "false")
 
-	// using insecure secrets from configuration.toml.  This can be removed if setting an env via export in the OS.
-	os.Setenv("EDGEX_SECURITY_SECRET_STORE", "false")
-
-	// 1) First thing to do is to create an instance of the EdgeX SDK, giving it a service key
-	edgexSdk := &appsdk.AppFunctionsSDK{
-		ServiceKey: "InfluxDBExport", // Key used by Registry (Aka Consul)
-	}
-
-	// 2) Next, we need to initialize the SDK
-	if err := edgexSdk.Initialize(); err != nil {
-		message := fmt.Sprintf("SDK initialization failed: %v\n", err)
-		edgexSdk.LoggingClient.Error(message)
+	// 1) First thing to do is to create an new instance of an EdgeX Application Service.
+	service, ok := pkg.NewAppService(serviceKey)
+	if !ok {
 		os.Exit(-1)
 	}
 
-	// 3) Initialize the MQTT addressable/configuration
-	mqttConfig := sdkTransforms.MQTTSecretConfig{}
-	err := influxTransforms.LoadMQTTConfig(edgexSdk, &mqttConfig)
+	// Leverage the built in logging service in EdgeX
+	lc := service.LoggingClient()
 
-	if err != nil {
-		edgexSdk.LoggingClient.Error(fmt.Sprintf("SDK MQTT Addressable initialize failed: %v\n", err))
+	// 3) Load the MQTT custom configuration
+	config := &ServiceConfig{}
+	if err := service.LoadCustomConfig(config, "MqttSecretConfig"); err != nil {
+		lc.Errorf("LoadCustomConfig failed: %s", err.Error())
 		os.Exit(-1)
 	}
-	mqttSender := sdkTransforms.NewMQTTSecretSender(mqttConfig, false)
+
+	if err := config.Validate(); err != nil {
+		lc.Errorf("Config validation failed: %s", err.Error())
+		os.Exit(-1)
+	}
 
 	// 4) This is our pipeline configuration, the collection of functions to
 	// execute every time an event is triggered.
-	if err := edgexSdk.SetFunctionsPipeline(
+	if err := service.SetFunctionsPipeline(
 		influxTransforms.NewConversion().TransformToInflux,
-		mqttSender.MQTTSend,
+		sdkTransforms.NewMQTTSecretSender(config.MqttConfig, false).MQTTSend,
 	); err != nil {
-		edgexSdk.LoggingClient.Error(fmt.Sprintf("SDK SetPipeline failed: %v\n", err))
+		lc.Errorf("SetFunctionsPipeline failed: %s", err.Error())
 		os.Exit(-1)
 	}
 
 	// 5) Lastly, we'll go ahead and tell the SDK to "start" and begin listening for events to trigger the pipeline.
-	err = edgexSdk.MakeItRun()
-	if err != nil {
-		edgexSdk.LoggingClient.Error("MakeItRun returned error: ", err.Error())
+	if err := service.MakeItRun(); err != nil {
+		lc.Errorf("MakeItRun returned error: %s", err.Error())
 		os.Exit(-1)
 	}
 
 	// Do any required cleanup here
 	os.Exit(0)
+}
+
+// Service's custom configuration which is loaded from the configuration.toml
+type ServiceConfig struct {
+	MqttConfig sdkTransforms.MQTTSecretConfig
+}
+
+// UpdateFromRaw updates the service's full configuration from raw data received from
+// the Configuration Provider. Can just be a dummy 'return true' if never using the Configuration Provider
+func (c *ServiceConfig) UpdateFromRaw(rawConfig interface{}) bool {
+	configuration, ok := rawConfig.(*ServiceConfig)
+	if !ok {
+		return false //errors.New("unable to cast raw config to type 'ServiceConfig'")
+	}
+
+	*c = *configuration
+
+	return true
+}
+
+func (c *ServiceConfig) Validate() error {
+	if len(strings.TrimSpace(c.MqttConfig.BrokerAddress)) == 0 {
+		return errors.New("configuration missing value for MqttSecretConfig.BrokerAddress")
+	}
+
+	if len(strings.TrimSpace(c.MqttConfig.ClientId)) == 0 {
+		return errors.New("configuration missing value for MqttSecretConfig.ClientId")
+	}
+
+	if len(strings.TrimSpace(c.MqttConfig.Topic)) == 0 {
+		return errors.New("configuration missing value for MqttSecretConfig.Topic")
+	}
+
+	if len(strings.TrimSpace(c.MqttConfig.AuthMode)) == 0 {
+		return errors.New("configuration missing value for MqttSecretConfig.AuthMode")
+	}
+
+	if len(strings.TrimSpace(c.MqttConfig.SecretPath)) == 0 {
+		return errors.New("configuration missing value for MqttSecretConfig.SecretPath")
+	}
+
+	return nil
 }
