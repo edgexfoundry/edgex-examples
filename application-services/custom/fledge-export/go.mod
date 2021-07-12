@@ -1,8 +1,8 @@
 module fledge-export
 
-go 1.15
+go 1.16
 
 require (
-	github.com/edgexfoundry/app-functions-sdk-go v1.3.0
-	github.com/edgexfoundry/go-mod-core-contracts v0.1.112
+	github.com/edgexfoundry/app-functions-sdk-go/v2 v2.0.0
+	github.com/edgexfoundry/go-mod-core-contracts/v2 v2.0.0
 )
