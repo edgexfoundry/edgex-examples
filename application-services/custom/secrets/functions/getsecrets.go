@@ -1,5 +1,7 @@
 //
 // Copyright (c) 2020 Intel Corporation
+// Copyright (c) 2021 One Track Consulting
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -16,9 +18,8 @@
 package functions
 
 import (
-	"fmt"
-
-	"github.com/edgexfoundry/app-functions-sdk-go/appcontext"
+	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/interfaces"
+	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/util"
 )
 
 type secretsInfo struct {
@@ -40,25 +41,31 @@ var expectedSecrets = []secretsInfo{
 }
 
 // GetSecretsToConsole ...
-func GetSecretsToConsole(edgexcontext *appcontext.Context, params ...interface{}) (bool, interface{}) {
-	if len(params) < 1 {
+func GetSecretsToConsole(ctx interfaces.AppFunctionContext, data interface{}) (bool, interface{}) {
+	if data == nil {
 		// We didn't receive a result
 		return false, nil
 	}
 
 	for _, secretInfo := range expectedSecrets {
 		// this is just an example. NEVER log your secrets to console
-		edgexcontext.LoggingClient.Info(fmt.Sprintf("--- Get secrets at location %v, keys: %v  ---", secretInfo.path, secretInfo.keys))
-		secrets, err := edgexcontext.GetSecrets(secretInfo.path, secretInfo.keys...)
+		ctx.LoggingClient().Infof("--- Get secrets at location %v, keys: %v  ---", secretInfo.path, secretInfo.keys)
+
+		secrets, err := ctx.GetSecret(secretInfo.path, secretInfo.keys...)
 		if err != nil {
-			edgexcontext.LoggingClient.Error(err.Error())
-			return false, nil
+			return false, err
 		}
 		for k, v := range secrets {
-			edgexcontext.LoggingClient.Info(fmt.Sprintf("key:%v, value:%v", k, v))
+			ctx.LoggingClient().Infof("key:%v, value:%v", k, v)
 		}
 	}
 
-	edgexcontext.Complete([]byte(params[0].(string)))
+	response, err := util.CoerceType(data)
+
+	if err != nil {
+		return false, err
+	}
+
+	ctx.SetResponseData(response)
 	return false, nil
 }
