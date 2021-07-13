@@ -8,12 +8,11 @@ package transforms
 
 import (
 	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 
-	"github.com/edgexfoundry/app-functions-sdk-go/appcontext"
-	"github.com/edgexfoundry/go-mod-core-contracts/models"
+	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/interfaces"
+	"github.com/edgexfoundry/go-mod-core-contracts/v2/dtos"
 )
 
 type Conversion struct {
@@ -23,23 +22,23 @@ func NewConversion() Conversion {
 	return Conversion{}
 }
 
-func (f Conversion) TransformToInflux(edgexcontext *appcontext.Context, params ...interface{}) (continuePipeline bool, stringType interface{}) {
-	if len(params) < 1 {
-		return false, errors.New("No Event Received")
+func (f Conversion) TransformToInflux(ctx interfaces.AppFunctionContext, data interface{}) (bool, interface{}) {
+	lc := ctx.LoggingClient()
+	lc.Debug("Transforming to InfluxDB Line Protocol format")
+
+	if data == nil {
+		return false, errors.New("TransformToInflux: No data received")
 	}
 
-	edgexcontext.LoggingClient.Debug("Transforming to InfluxDB Line Protocol format")
-
-	event, ok := params[0].(models.Event)
-
+	event, ok := data.(dtos.Event)
 	if !ok {
-		return false, errors.New("Unexpected type received")
+		return false, errors.New("TransformToInflux: didn't receive expect Event type")
 	}
 
 	var buffer strings.Builder
 
 	// write device name as measurement
-	buffer.WriteString(event.Device)
+	buffer.WriteString(event.DeviceName)
 	// write tags if any, comma separated
 	// see Influx docs for syntax and example
 	// https://docs.influxdata.com/influxdb/v2.0/reference/syntax/line-protocol/
@@ -59,7 +58,7 @@ func (f Conversion) TransformToInflux(edgexcontext *appcontext.Context, params .
 		if j > 0 {
 			buffer.WriteString(",")
 		}
-		buffer.WriteString(reading.Name)
+		buffer.WriteString(reading.ResourceName)
 		buffer.WriteString("=")
 		buffer.WriteString(reading.Value)
 	}
@@ -68,6 +67,6 @@ func (f Conversion) TransformToInflux(edgexcontext *appcontext.Context, params .
 	// write timestamp in nanosecond form
 	buffer.WriteString(strconv.Itoa(int(event.Origin)))
 	msg := buffer.String()
-	edgexcontext.LoggingClient.Debug(fmt.Sprintf("InfluxDB Payload: %s", msg))
-	return true, string(msg)
+	lc.Debugf("InfluxDB Payload: %s", msg)
+	return true, msg
 }
