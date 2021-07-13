@@ -1,8 +1,8 @@
 [Writable]
-LogLevel = 'DEBUG'
+LogLevel = "DEBUG"
   [Writable.StoreAndForward]
   Enabled = false
-  RetryInterval = '5m'
+  RetryInterval = "5m"
   MaxRetryCount = 10
   [Writable.InsecureSecrets]
     [Writable.InsecureSecrets.DB]
@@ -12,45 +12,45 @@ LogLevel = 'DEBUG'
       password = ""
 
 [Service]
-HealthCheckInterval = '10s'
-Host = 'localhost'
+HealthCheckInterval = "10s"
+Host = "localhost"
 Port = 59780 # Adjust if running multiple examples at the same time to avoid duplicate port conflicts
 ServerBindAddr = "" # if blank, uses default Go behavior https://golang.org/pkg/net/#Listen
-StartupMsg = 'This is a sample Application Service to receive HTTP request as trigger'
-RequestTimeout = '30s'
+StartupMsg = "This is a sample Application Service to receive HTTP request as trigger"
+RequestTimeout = "30s"
 MaxRequestSize = 0
 MaxResultCount = 0
 
 [Registry]
-Host = 'localhost'
+Host = "localhost"
 Port = 8500
-Type = 'consul'
+Type = "consul"
 
 # SecretStore is required when Store and Forward is enabled and running with security
 # so Database credentials can be pulled from Vault.
 # Note when running in docker from compose file set the following environment variables:
 #   - SecretStore_Host: edgex-vault
 [SecretStore]
-Type = 'vault'
-Host = 'localhost'
+Type = "vault"
+Host = "localhost"
 Port = 8200
-Path = '/v1/secret/edgex/app-send-command/'
-Protocol = 'http'
-TokenFile = '/tmp/edgex/secrets/app-send-command/secrets-token.json'
-RootCaCertPath = ''
-ServerName = ''
+Path = "app-send-command/"
+Protocol = "http"
+TokenFile = "/tmp/edgex/secrets/app-send-command/secrets-token.json"
+RootCaCertPath = ""
+ServerName = ""
   [SecretStore.Authentication]
-  AuthType = 'X-Vault-Token'
+  AuthType = "X-Vault-Token"
 
 [Clients]
   [Clients.core-metadata]
-  Protocol = 'http'
-  Host = 'localhost'
+  Protocol = "http"
+  Host = "localhost"
   Port = 59881
 
   [Clients.core-command]
-  Protocol = 'http'
-  Host = 'localhost'
+  Protocol = "http"
+  Host = "localhost"
   Port = 59882
 
 # This example expect custom type via HTTP Trigger

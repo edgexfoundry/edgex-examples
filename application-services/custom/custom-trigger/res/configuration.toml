@@ -1,20 +1,38 @@
 [Writable]
-LogLevel = 'INFO'
+LogLevel = "INFO"
+  [Writable.InsecureSecrets]
+    [Writable.InsecureSecrets.DB]
+    path = "redisdb"
+      [Writable.InsecureSecrets.DB.Secrets]
+      username = ""
+      password = ""
 
 [Service]
-HealthCheckInterval = '10s'
-Host = 'localhost'
+HealthCheckInterval = "10s"
+Host = "localhost"
 Port = 59780 # Adjust if running multiple examples at the same time to avoid duplicate port conflicts
 ServerBindAddr = "" # if blank, uses default Go behavior https://golang.org/pkg/net/#Listen
-StartupMsg = 'Custom Trigger Example'
+StartupMsg = "Custom Trigger Example"
 MaxResultCount = 0 # Not curently used by App Services.
 MaxRequestSize = 0 # Not curently used by App Services.
-RequestTimeout = '5s'
+RequestTimeout = "5s"
 
 [Registry]
-Host = 'localhost'
+Host = "localhost"
 Port = 8500
-Type = 'consul'
+Type = "consul"
+
+[SecretStore]
+  Type = "vault"
+  Protocol = "http"
+  Host = "localhost"
+  Port = 8200
+  Path = "app-custom-trigger/"
+  TokenFile = "/tmp/edgex/secrets/app-custom-trigger/secrets-token.json"
+  RootCaCertPath = ""
+  ServerName = ""
+  [SecretStore.Authentication]
+    AuthType = "X-Vault-Token"
 
 [Trigger]
 Type="custom-stdin"
