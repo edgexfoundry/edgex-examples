@@ -1,6 +1,6 @@
 # EdgeX Foundry application service InfluxDB
 
-EdgeX Foundry application service to export readings to InfluxDB via MQTT.  This service example was created with EdgeX Foundry version 1.3.0 (Hanoi).
+EdgeX Foundry application service to export readings to InfluxDB via MQTT.  This service example was created with EdgeX Foundry version 2.0.0 (Ireland).
 
 The pipeline simply consists of two functions:
 - conversion of EdgeX Event/Reading objects to Influx [line protocol](https://docs.influxdata.com/influxdb/v2.0/reference/syntax/line-protocol/)
@@ -13,6 +13,6 @@ No additional MQTT options (such as QOS or retry has been provided for with this
 
 InfluxDB installation and tooling is not provided with this example.
 
-![image](./app-service-influx.png)
+![image](app-service-influx.png)
 
 Please note, this example assumes "Insecure Secrets" are being used (i.e. that a username and password are required to access the MQTT broker/topic and these are provided by the configuration.)  Be sure to set `EDGEX_SECURITY_SECRET_STORE` to false by some means.  In this example, the env is set in the code via main.go (`os.Setenv("EDGEX_SECURITY_SECRET_STORE", "false")`).  This can also be done with an export (export EDGEX_SECURITY_SECRET_STORE=false).
