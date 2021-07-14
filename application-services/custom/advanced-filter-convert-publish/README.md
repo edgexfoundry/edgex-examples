@@ -15,12 +15,12 @@ Using the following setup, this example advanced **App Functions Service** can b
 
 1. Start **EdgeX** stack
 
-   - [ ] down load Geneva compose file from [here](https://github.com/edgexfoundry/developer-scripts/blob/master/releases/geneva/compose-files/docker-compose-geneva-redis-no-secty.yml)
+   - [ ] download Ireland non-secure compose file from [here](https://github.com/edgexfoundry/edgex-compose/blob/ireland/docker-compose-no-secty.yml)
 
-   - [ ] start edgex 
+   - [ ] start edgex which includes Device Virtual
 
        ```
-       docker-compose -p edgex -f docker-compose-geneva-redis-no-secty.yml up -d
+       docker-compose -p edgex -f docker-no-secty.yml up -d
        ```
 
 2. Build & run **Advanced App Functions** example
@@ -34,88 +34,39 @@ Using the following setup, this example advanced **App Functions Service** can b
 
    - [ ] cd **application-services/custom/simple-filter-xml** folder
 
-   - [ ] edit **res/configuration.toml** so the **MessageBus** and **Binding** sections are as follows:
+   - [ ] edit **res/configuration.toml** so the **Port** and **SubscribeTopics** sections are as follows:
 
      ```toml
-             [MessageBus]
-             Type = 'zero'
-                 [MessageBus.PublishHost]
-                     Host = '*'
-                     Port = 5565
-                     Protocol = 'tcp'
-                 [MessageBus.SubscribeHost]
-                     Host = 'localhost'
-                     Port = 5564
-                     Protocol = 'tcp'
-
-             [Binding]
-             Type="messagebus"
-             SubscribeTopic="converted"
-             PublishTopic="xml"
+     [Service]
+     HealthCheckInterval = "10s"
+     Host = "localhost"
+     Port = 59781 <= Change to avoid conflict
+     
+     [Trigger]
+     Type="edgex-messagebus"
+       [Trigger.EdgexMessageBus]
+       Type = "redis"
+         [Trigger.EdgexMessageBus.SubscribeHost]
+         Host = "localhost"
+         Port = 6379
+         Protocol = "redis"
+         SubscribeTopics="converted" <= Change so receives Events from this example
      ```
-
+     
    - [ ] run "**make build**"
 
    - [ ] run "./**app-service**"
 
-4. Run **Device Virtual** service
-
-   - [ ] Clone **<https://github.com/edgexfoundry/device-virtual-go>** repo
-
-   - [ ] run "**make build**"
-
-   - [ ] cd to **cmd**/res folder
-
-   - [ ] Edit the `device.virtual.float.yaml` file
-
-      This app functions example expects the float encoding for all random floats to be `Base64` and needs to restrict the range of values that are generated so they are easy to read. By default the device-virtual is using `Base64` for Float32 & `eNotation` for Float64 and doesn't set any range limits. Make the following changes to the `deviceResources` section to meet these needs.
-
-      For `RandomValue_Float32` change the `value` property to:
-
-      ```
-      { type: "Float32", readWrite: "R", defaultValue: "0", floatEncoding: "Base64", minimum: "1.0", maximum: "1.9" }
-      ```
-
-      For `RandomValue_Float64` change the `value` property to:
-
-      ```
-      { type: "Float64", readWrite: "R", defaultValue: "0", floatEncoding: "Base64", minimum: "2.0", maximum: "2.9" }
-      ```
-
-   - [ ] If you previously ran the Device Virtual service, run the follow `curl` commands to clear the old profile so that the new changes are used when the device service is started.
-
-      ```
-      curl -X DELETE http://localhost:48081/api/v1/deviceservice/name/device-virtual
-      curl -X DELETE http://localhost:48081/api/v1/deviceprofile/name/Random-Float-Device
-      ```
-
-   - [ ] cd to **cmd** folder
-
-   - [ ] run "./**device-virtual**"
-
-      first time this is run, the output will have these messages :
-        ```text
-        level=INFO ts=2019-04-17T22:42:08.238390389Z app=device-virtual source=service.go:138 msg="**Device Service  doesn't exist, creating a new one**"
-        level=INFO ts=2019-04-17T22:42:08.277064025Z app=device-virtual source=service.go:196 msg="**Addressable device-virtual doesn't exist, creating a new one**"
-        ```
-
-      One subsequent runs you will see this message:
-
-        ```text
-        level=INFO ts=2019-04-18T17:37:18.304805374Z app=device-virtual source=service.go:145 msg="Device Service device-virtual exists"
-        ```
-
-5. Now data will be flowing due to the auto-events configured in Device Virtual Go.
+4. Now data will be flowing due to the auto-events configured in Device Virtual.
 
    - In the terminal that you ran **advanced-filter-convert-publish** you will see the random float values printed.
 
         ```text
-        RandomValue_Float64 readable value from Random-Float-Device is '2.1742
-        RandomValue_Float32 readable value from Random-Float-Device is '1.3577
+        Float64 readable value from Random-Float-Device is 2.1742
+        Float32 readable value from Random-Float-Device is 1.3577
         ```
 
    - In the terminal that you ran **simple-filter-xml** you will see the xml representation of the events printed. Note the human readable float values in the event XML.
         ```xml
-        <Event><ID></ID><Pushed>0</Pushed><Device>Random-Float-Device</Device><Created>0</Created><Modified>0</Modified><Origin>1555609767442</Origin><Readings><Id>835c5541-d4d2-42a8-8937-8b24b4308d3f</Id><Pushed>0</Pushed><Created>0</Created><Origin>1555609767411</Origin><Modified>0</Modified><Device>Random-Float-Device</Device><Name>RandomValue_Float64</Name><Value>2.1742</Value><BinaryValue></BinaryValue></Readings></Event>
-        <Event><ID></ID><Pushed>0</Pushed><Device>Random-Float-Device</Device><Created>0</Created><Modified>0</Modified><Origin>1555609797452</Origin><Readings><Id>21c8ccdc-3438-4baa-8fab-23a63bf4fa18</Id><Pushed>0</Pushed><Created>0</Created><Origin>1555609797419</Origin><Modified>0</Modified><Device>Random-Float-Device</Device><Name>RandomValue_Float32</Name><Value>1.3577</Value><BinaryValue></BinaryValue></Readings></Event>
+        <Event><ApiVersion>v2</ApiVersion><Id>8dc2ee9e-7824-4e57-a4a9-6ceb21229126</Id><DeviceName>Random-Float-Device</DeviceName><ProfileName>MyProfile</ProfileName><SourceName>MySource</SourceName><Origin>1626300284231075300</Origin><Readings><Id>1c1f399b-7cdd-47e8-9bbc-22efe0798ad0</Id><Origin>1626300284231075300</Origin><DeviceName>Random-Float-Device</DeviceName><ResourceName>Float64</ResourceName><ProfileName>Random-Float-Device</ProfileName><ValueType>Float64</ValueType><BinaryValue></BinaryValue><MediaType></MediaType><Value>2.1742</Value></Readings></Event>
         ```
