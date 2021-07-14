@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019 Intel Corporation
+// Copyright (c) 2021 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,42 +18,51 @@ package functions
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 
-	"github.com/edgexfoundry/app-functions-sdk-go/appcontext"
-	"github.com/edgexfoundry/go-mod-core-contracts/models"
+	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/interfaces"
+	"github.com/edgexfoundry/go-mod-core-contracts/v2/dtos"
 )
 
-func PrintFloatValuesToConsole(edgexcontext *appcontext.Context, params ...interface{}) (bool, interface{}) {
-	if len(params) < 1 {
-		// We didn't receive a result
-		return false, nil
+func PrintFloatValuesToConsole(ctx interfaces.AppFunctionContext, data interface{}) (bool, interface{}) {
+	lc := ctx.LoggingClient()
+	lc.Debug("Convert to Readable Float Values")
+
+	if data == nil {
+		return false, errors.New("PrintFloatValuesToConsole: No data received")
 	}
 
-	event := params[0].(models.Event)
+	event, ok := data.(dtos.Event)
+	if !ok {
+		return false, errors.New("PrintFloatValuesToConsole: didn't receive expect Event type")
+	}
 
 	for _, eventReading := range event.Readings {
-		fmt.Printf("%s readable value from %s is %s\n", eventReading.Name, event.Device, eventReading.Value)
+		fmt.Printf("%s readable value from %s is %s\n", eventReading.ResourceName, event.DeviceName, eventReading.Value)
 	}
 
 	return true, event
 
 }
 
-func Publish(edgexcontext *appcontext.Context, params ...interface{}) (bool, interface{}) {
+func Publish(ctx interfaces.AppFunctionContext, data interface{}) (bool, interface{}) {
+	lc := ctx.LoggingClient()
+	lc.Debug("Publish")
 
-	edgexcontext.LoggingClient.Debug("Publish")
-
-	if len(params) < 1 {
-		// We didn't receive a result
-		return false, nil
+	if data == nil {
+		return false, errors.New("Publish: No data received")
 	}
 
-	event := params[0].(models.Event)
+	event, ok := data.(dtos.Event)
+	if !ok {
+		return false, errors.New("Publish: didn't receive expect Event type")
+	}
+
 	payload, _ := json.Marshal(event)
 
-	// By calling Complete, the filtered and converted events will be posted back to the message bus on the new topic defined in the configuration.
-	edgexcontext.Complete(payload)
-
+	// By calling SetResponseData, the filtered and converted events will be posted back to the message bus on the new topic defined in the configuration.
+	ctx.SetResponseData(payload)
+	ctx.SetResponseContentType("application/json")
 	return false, nil
 }
