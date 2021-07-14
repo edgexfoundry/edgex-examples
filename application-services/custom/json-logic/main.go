@@ -1,5 +1,6 @@
 //
 // Copyright (c) 2020 Intel Corporation
+// Copyright (c) 2020 One Track Consulting
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,22 +18,19 @@
 package main
 
 import (
-	"bytes"
-	"encoding/base64"
-	"encoding/binary"
 	"fmt"
 	"os"
 	"strconv"
 	"strings"
 
-	"github.com/edgexfoundry/app-functions-sdk-go/appcontext"
-	"github.com/edgexfoundry/app-functions-sdk-go/appsdk"
-	"github.com/edgexfoundry/app-functions-sdk-go/pkg/transforms"
-	"github.com/edgexfoundry/go-mod-core-contracts/models"
+	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg"
+	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/interfaces"
+	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/transforms"
+	"github.com/edgexfoundry/go-mod-core-contracts/v2/models"
 )
 
 const (
-	serviceKey = "json-logic-example"
+	serviceKey = "app-json-logic"
 )
 
 var counter int
@@ -41,20 +39,20 @@ func main() {
 	// turn off secure mode for examples. Not recommended for production
 	os.Setenv("EDGEX_SECURITY_SECRET_STORE", "false")
 
-	// 1) First thing to do is to create an instance of the EdgeX SDK and initialize it.
-	edgexSdk := &appsdk.AppFunctionsSDK{ServiceKey: serviceKey}
-	if err := edgexSdk.Initialize(); err != nil {
-		edgexSdk.LoggingClient.Error(fmt.Sprintf("SDK initialization failed: %v\n", err))
+	// 1) First thing to do is to create an instance of the app service and initialize it.
+	appService, ok := pkg.NewAppService(serviceKey)
+	if !ok {
+		appService.LoggingClient().Error("SDK initialization failed")
 		os.Exit(-1)
 	}
 
 	// 2) shows how to access the application's specific configuration settings.
-	deviceNames, err := edgexSdk.GetAppSettingStrings("DeviceNames")
+	deviceNames, err := appService.GetAppSettingStrings("DeviceNames")
 	if err != nil {
-		edgexSdk.LoggingClient.Error(err.Error())
+		appService.LoggingClient().Error(err.Error())
 		os.Exit(-1)
 	}
-	edgexSdk.LoggingClient.Info(fmt.Sprintf("Filtering for devices %v", deviceNames))
+	appService.LoggingClient().Infof("Filtering for devices %v", deviceNames)
 	listOfDevices := strings.Join(deviceNames, "\",\"")
 
 	// Rule to look for a specific set of devices provided (similar to filterbydevicename)
@@ -68,18 +66,23 @@ func main() {
 
 	// 3) This is our pipeline configuration, the collection of functions to
 	// execute every time an event is triggered.
-	edgexSdk.SetFunctionsPipeline(
+	err = appService.SetFunctionsPipeline(
 		// ConvertToReadableFloatValues, // Used for when looking at float values
 		transforms.NewJSONLogic(jsonlogicrule).Evaluate,
 		transforms.NewConversion().TransformToXML,
 		printXMLToConsole,
 	)
 
+	if err != nil {
+		appService.LoggingClient().Errorf("SetFunctionsPipeline returned error: %s", err.Error())
+		os.Exit(-1)
+	}
+
 	// 4) Lastly, we'll go ahead and tell the SDK to "start" and begin listening for events
 	// to trigger the pipeline.
-	err = edgexSdk.MakeItRun()
+	err = appService.MakeItRun()
 	if err != nil {
-		edgexSdk.LoggingClient.Error("MakeItRun returned error: ", err.Error())
+		appService.LoggingClient().Errorf("MakeItRun returned error: %s", err.Error())
 		os.Exit(-1)
 	}
 
@@ -88,63 +91,64 @@ func main() {
 	os.Exit(0)
 }
 
-func printXMLToConsole(edgexcontext *appcontext.Context, params ...interface{}) (bool, interface{}) {
-	if len(params) < 1 {
+func printXMLToConsole(ctx interfaces.AppFunctionContext, data interface{}) (bool, interface{}) {
+	if data == nil {
 		// We didn't receive a result
 		return false, nil
 	}
 
-	fmt.Println(params[0].(string))
+	ds, ok := data.(string)
+
+	if !ok {
+		return false, fmt.Errorf("expected a string, got %T", data)
+	}
+
+	fmt.Println(ds)
 
 	// Leverage the built in logging service in EdgeX
-	edgexcontext.LoggingClient.Debug("XML printed to console")
+	ctx.LoggingClient().Debug("XML printed to console")
 
-	edgexcontext.Complete([]byte(params[0].(string)))
+	ctx.SetResponseData([]byte(ds))
 	return false, nil
 }
 
 var precision = 4
 
-func ConvertToReadableFloatValues(edgexcontext *appcontext.Context, params ...interface{}) (bool, interface{}) {
+//ConvertToReadableFloatValues is used to facilitate writing jsonlogic rules
+func ConvertToReadableFloatValues(ctx interfaces.AppFunctionContext, param interface{}) (bool, interface{}) {
 
-	edgexcontext.LoggingClient.Debug("Convert to Readable Float Values")
+	ctx.LoggingClient().Debug("Convert to Readable Float Values")
 
-	if len(params) < 1 {
+	if param == nil {
 		// We didn't receive a result
 		return false, nil
 	}
 
-	event := params[0].(models.Event)
+	event := param.(models.Event)
 	for index := range event.Readings {
-		eventReading := &event.Readings[index]
-		edgexcontext.LoggingClient.Debug(fmt.Sprintf("Event Reading for %s: %s is '%s'", event.Device, eventReading.Name, eventReading.Value))
+		if eventReading, ok := event.Readings[index].(models.SimpleReading); ok {
+			ctx.LoggingClient().Debugf("Event Reading for %s: %s is '%s'", event.DeviceName, eventReading.ResourceName, eventReading.Value)
 
-		data, err := base64.StdEncoding.DecodeString(eventReading.Value)
-		if err != nil {
-			return false, fmt.Errorf("unable to Base 64 decode float32/64 value ('%s'): %s", eventReading.Value, err.Error())
-		}
+			switch eventReading.ResourceName {
+			case "Float32":
+				f, err := strconv.ParseFloat(eventReading.Value, 32)
+				if err != nil {
+					return false, fmt.Errorf("unable to decode float32 value bytes: %s", err.Error())
+				}
 
-		switch eventReading.Name {
-		case "RandomValue_Float32":
-			var value float32
-			err = binary.Read(bytes.NewReader(data), binary.BigEndian, &value)
-			if err != nil {
-				return false, fmt.Errorf("unable to decode float32 value bytes: %s", err.Error())
+				eventReading.Value = strconv.FormatFloat(f, 'f', precision, 32)
+
+			case "Float64":
+				f, err := strconv.ParseFloat(eventReading.Value, 64)
+				if err != nil {
+					return false, fmt.Errorf("unable to decode float64 value bytes: %s", err.Error())
+				}
+
+				eventReading.Value = strconv.FormatFloat(f, 'f', precision, 64)
 			}
 
-			eventReading.Value = strconv.FormatFloat(float64(value), 'f', precision, 32)
-
-		case "RandomValue_Float64":
-			var value float64
-			err := binary.Read(bytes.NewReader(data), binary.BigEndian, &value)
-			if err != nil {
-				return false, fmt.Errorf("unable to decode float64 value bytes: %s", err.Error())
-			}
-
-			eventReading.Value = strconv.FormatFloat(value, 'f', precision, 64)
+			ctx.LoggingClient().Debugf("Converted Event Reading for %s: %s is '%s'", event.DeviceName, eventReading.ResourceName, eventReading.Value)
 		}
-
-		edgexcontext.LoggingClient.Debug(fmt.Sprintf("Converted Event Reading for %s: %s is '%s'", event.Device, eventReading.Name, eventReading.Value))
 	}
 
 	return true, event

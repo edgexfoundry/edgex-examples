@@ -38,6 +38,18 @@ Timeout = "30s"
   Host = "localhost"
   Port = 59881
 
+[SecretStore]
+  Type = "vault"
+  Protocol = "http"
+  Host = "localhost"
+  Port = 8200
+  Path = "app-target-type/"
+  TokenFile = "/tmp/edgex/secrets/app-target-type/secrets-token.json"
+  RootCaCertPath = ""
+  ServerName = ""
+  [SecretStore.Authentication]
+    AuthType = "X-Vault-Token"
+
 # This example expect custom type via HTTP Trigger
 [Trigger]
 Type="http"

@@ -1,8 +1,8 @@
 [Writable]
-LogLevel = 'INFO'
+LogLevel = "INFO"
   [Writable.StoreAndForward]
   Enabled = false
-  RetryInterval = '5m'
+  RetryInterval = "5m"
   MaxRetryCount = 10
   [Writable.InsecureSecrets]
     [Writable.InsecureSecrets.DB]
@@ -12,19 +12,19 @@ LogLevel = 'INFO'
       password = ""
 
 [Service]
-HealthCheckInterval = '10s'
-Host = 'localhost'
+HealthCheckInterval = "10s"
+Host = "localhost"
 Port = 59780 # Adjust if running multiple examples at the same time to avoid duplicate port conflicts
 ServerBindAddr = "" # if blank, uses default Go behavior https://golang.org/pkg/net/#Listen
-StartupMsg = 'This is a sample Filter/XML/HTTP Transform Application Service'
-RequestTimeout = '30s'
+StartupMsg = "This is a sample Filter/XML/HTTP Transform Application Service"
+RequestTimeout = "30s"
 MaxRequestSize = 0
 MaxResultCount = 0
 
 [Registry]
-Host = 'localhost'
+Host = "localhost"
 Port = 8500
-Type = 'consul'
+Type = "consul"
 
 # Database is require when Store and Forward is enabled
 [Database]
@@ -38,21 +38,21 @@ Timeout = "30s"
 # Note when running in docker from compose file set the following environment variables:
 #   - SecretStore_Host: edgex-vault
 [SecretStore]
-Type = 'vault'
-Host = 'localhost'
+Type = "vault"
+Host = "localhost"
 Port = 8200
-Path = '/v1/secret/edgex/app-simple-filter-xml-http/'
-Protocol = 'http'
-TokenFile = '/tmp/edgex/secrets/app-simple-filter-xml-http/secrets-token.json'
-RootCaCertPath = ''
-ServerName = ''
+Path = "app-simple-filter-xml-http/"
+Protocol = "http"
+TokenFile = "/tmp/edgex/secrets/app-simple-filter-xml-http/secrets-token.json"
+RootCaCertPath = ""
+ServerName = ""
   [SecretStore.Authentication]
-  AuthType = 'X-Vault-Token'
+  AuthType = "X-Vault-Token"
 
 [Clients]
   [Clients.core-metadata]
-  Protocol = 'http'
-  Host = 'localhost'
+  Protocol = "http"
+  Host = "localhost"
   Port = 59881
 
 # Choose either an HTTP trigger or edgex-messagebus trigger
