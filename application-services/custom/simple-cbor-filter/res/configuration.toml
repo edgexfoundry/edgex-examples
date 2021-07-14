@@ -1,8 +1,8 @@
 [Writable]
-LogLevel = 'INFO'
+LogLevel = "INFO"
   [Writable.StoreAndForward]
   Enabled = false
-  RetryInterval = '5m'
+  RetryInterval = "5m"
   MaxRetryCount = 10
   [Writable.InsecureSecrets]
     [Writable.InsecureSecrets.DB]
@@ -12,20 +12,20 @@ LogLevel = 'INFO'
       password = ""
 
 [Service]
-HealthCheckInterval = '10s'
-Host = 'localhost'
+HealthCheckInterval = "10s"
+Host = "localhost"
 Port = 59780 # Adjust if running multiple examples at the same time to avoid duplicate port conflicts
 ServerBindAddr = "" # if blank, uses default Go behavior https://golang.org/pkg/net/#Listen
-StartupMsg = 'Simple CBOR Filter Application Service started'
-RequestTimeout = '30s'
+StartupMsg = "Simple CBOR Filter Application Service started"
+RequestTimeout = "30s"
 MaxRequestSize = 0
 MaxResultCount = 0
-Timeout = '30s'
+Timeout = "30s"
 
 [Registry]
-Host = 'localhost'
+Host = "localhost"
 Port = 8500
-Type = 'consul'
+Type = "consul"
 
 [Database]
 Type = "redisdb"
@@ -35,8 +35,8 @@ Timeout = "30s"
 
 [Clients]
   [Clients.core-metadata]
-  Protocol = 'http'
-  Host = 'localhost'
+  Protocol = "http"
+  Host = "localhost"
   Port = 59881
 
 # SecretStore is required when Store and Forward is enabled and running with security
@@ -44,16 +44,16 @@ Timeout = "30s"
 # Note when running in docker from compose file set the following environment variables:
 #   - SecretStore_Host: edgex-vault
 [SecretStore]
-Type = 'vault'
-Host = 'localhost'
+Type = "vault"
+Host = "localhost"
 Port = 8200
-Path = '/v1/secret/edgex/app-sample-cbor-filter/'
-Protocol = 'http'
-TokenFile = '/tmp/edgex/secrets/app-sample-cbor-filter/secrets-token.json'
-RootCaCertPath = ''
-ServerName = ''
+Path = "app-sample-cbor-filter/"
+Protocol = "http"
+TokenFile = "/tmp/edgex/secrets/app-sample-cbor-filter/secrets-token.json"
+RootCaCertPath = ""
+ServerName = ""
   [SecretStore.Authentication]
-  AuthType = 'X-Vault-Token'
+  AuthType = "X-Vault-Token"
 
 # Choose either the http trigger or edgex-messagebus trigger
 
