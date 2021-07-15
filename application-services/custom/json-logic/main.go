@@ -56,10 +56,10 @@ func main() {
 	listOfDevices := strings.Join(deviceNames, "\",\"")
 
 	// Rule to look for a specific set of devices provided (similar to filterbydevicename)
-	jsonlogicrule := "{ \"in\" : [{ \"var\" : \"device\" }, [\"" + listOfDevices + "\"] ] }"
+	jsonlogicrule := "{ \"in\" : [{ \"var\" : \"deviceName\" }, [\"" + listOfDevices + "\"] ] }"
 
 	// Rule to filter out a single device and allow all others
-	//jsonlogicrule := "{ \"!\" : {\"in\" : [{ \"var\" : \"device\" }, [\"" + listOfDevices + "\"] ] }}"
+	//jsonlogicrule := "{ \"!\" : {\"in\" : [{ \"var\" : \"deviceName\" }, [\"" + listOfDevices + "\"] ] }}"
 
 	// Rule to look for values > 0 in float readings -- MUST CONVERT TO READABLE FLOATS FIRST! Uncomment "ConvertToReadableFloatValues"
 	//jsonlogicrule := "{ \"all\" : [ { \"var\" : \"readings\" } , {  \">\" : [ {\"var\":\"value\"}, 0 ] } ] }"
