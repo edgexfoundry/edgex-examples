@@ -4,9 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-
-	"github.com/edgexfoundry/app-functions-sdk-go/appcontext"
-	"github.com/edgexfoundry/go-mod-core-contracts/models"
+	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/interfaces"
+	"github.com/edgexfoundry/go-mod-core-contracts/v2/models"
 )
 
 // Conversion Struct
@@ -18,19 +17,25 @@ func NewConversion() Conversion {
 	return Conversion{}
 }
 
-// TransformToAWS converts the event into AWS readable format
-func (f Conversion) TransformToAWS(edgexcontext *appcontext.Context, params ...interface{}) (continuePipeline bool, stringType interface{}) {
-	if len(params) < 1 {
+// TransformToCloudFormat converts the event into AWS readable format
+func (f Conversion) TransformToCloudFormat(ctx interfaces.AppFunctionContext, data interface{}) (continuePipeline bool, stringType interface{}) {
+	if data == nil {
 		return false, errors.New("No Event Received")
 	}
 
-	edgexcontext.LoggingClient.Debug("Transforming to AWS format")
+	ctx.LoggingClient().Debug("Transforming to AWS format")
 
-	if event, ok := params[0].(models.Event); ok {
+	if event, ok := data.(models.Event); ok {
 		readings := map[string]interface{}{}
 
 		for _, reading := range event.Readings {
-			readings[reading.Name] = reading.Value
+			br, ok := reading.(models.SimpleReading)
+
+			if !ok {
+				continue
+			}
+
+			readings[br.ResourceName] = br.Value
 		}
 
 		msg, err := json.Marshal(readings)

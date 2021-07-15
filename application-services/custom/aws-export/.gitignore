@@ -1,4 +1,0 @@
-go.sum
-/log/
-examples/aws-export/*
-examples/aws-export/aws-export
