@@ -10,7 +10,7 @@ This example demonstrates a few different ways to leverage JSON logic to assist 
 This first example starts out simple to demonstrate how JSON logic can be used to accomplish the same thing provided by the FilterByDeviceName transform.
 
 ``` go
-jsonlogicrule := "{ \"in\" : [{ \"var\" : \"device\" }, [\"Random-Integer-Device\",\"Random-Float-Device\"] ] }"
+jsonlogicrule := "{ \"in\" : [{ \"var\" : \"deviceName\" }, [\"Random-Integer-Device\",\"Random-Float-Device\"] ] }"
 
 edgexSdk.SetFunctionsPipeline(		
     transforms.NewJSONLogic(jsonlogicrule).Evaluate,
@@ -27,7 +27,7 @@ But what if we wanted to perform an not operation?
 The following rule demonstrates how to filter OUT the list of devices instead of filtering FOR a specific device. 
 
 ``` go
-jsonlogicrule := "{ \"!\" : {\"in\" : [{ \"var\" : \"device\" }, [\"Random-Integer-Device\"] ] }}"
+jsonlogicrule := "{ \"!\" : {\"in\" : [{ \"var\" : \"deviceN\" }, [\"Random-Integer-Device\"] ] }}"
 
 edgexSdk.SetFunctionsPipeline(		
     transforms.NewJSONLogic(jsonlogicrule).Evaluate,
