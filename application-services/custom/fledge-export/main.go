@@ -1,50 +1,50 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
-	"github.com/edgexfoundry/app-functions-sdk-go/appsdk"
-	"github.com/edgexfoundry/app-functions-sdk-go/pkg/transforms"
+	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg"
+	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/transforms"
 
 	fledgeTransforms "fledge-export/pkg/transforms"
 )
 
+const serviceKey = "app-fledge-export"
+
 func main() {
+	// turn off secure mode for examples. Not recommended for production
+	_ = os.Setenv("EDGEX_SECURITY_SECRET_STORE", "false")
 
-	// 1) First thing to do is to create an instance of the EdgeX SDK, giving it a service key
-	edgexSdk := &appsdk.AppFunctionsSDK{
-		ServiceKey: "FledgeExport", // Key used by Registry (Aka Consul)
-	}
-
-	// 2) Next, we need to initialize the SDK
-	if err := edgexSdk.Initialize(); err != nil {
-		message := fmt.Sprintf("SDK initialization failed: %v\n", err)
-		edgexSdk.LoggingClient.Error(message)
+	// 1) First thing to do is to create an new instance of an EdgeX Application Service.
+	service, ok := pkg.NewAppService(serviceKey)
+	if !ok {
 		os.Exit(-1)
 	}
 
-	// 3) Shows how to access the application's specific configuration settings.
-	fledgeEndpoint, err := edgexSdk.GetAppSettingStrings("FledgeSouthHTTPEndpoint")
+	// Leverage the built in logging service in EdgeX
+	lc := service.LoggingClient()
+
+	// 2) Shows how to access the application's specific configuration settings.
+	fledgeEndpoint, err := service.GetAppSetting("FledgeSouthHTTPEndpoint")
 	if err != nil {
-		edgexSdk.LoggingClient.Error(err.Error())
+		lc.Error(err.Error())
 		os.Exit(-1)
 	}
 
-	// 4) This is our pipeline configuration, the collection of functions to
+	// 3) This is our pipeline configuration, the collection of functions to
 	// execute every time an event is triggered.
-	if err := edgexSdk.SetFunctionsPipeline(
+	if err := service.SetFunctionsPipeline(
 		fledgeTransforms.NewConversion().TransformToFledge,
-		transforms.NewHTTPSender(fledgeEndpoint[0], "application/json", false).HTTPPost,
+		transforms.NewHTTPSender(fledgeEndpoint, "application/json", false).HTTPPost,
 	); err != nil {
-		edgexSdk.LoggingClient.Error(fmt.Sprintf("SDK SetPipeline failed: %v\n", err))
+		lc.Errorf("SDK SetPipeline failed: %s\n", err.Error())
 		os.Exit(-1)
 	}
 
-	// 5) Lastly, we'll go ahead and tell the SDK to "start" and begin listening for events to trigger the pipeline.
-	err = edgexSdk.MakeItRun()
+	// 4) Lastly, we'll go ahead and tell the SDK to "start" and begin listening for events to trigger the pipeline.
+	err = service.MakeItRun()
 	if err != nil {
-		edgexSdk.LoggingClient.Error("MakeItRun returned error: ", err.Error())
+		lc.Errorf("MakeItRun returned error: %s", err.Error())
 		os.Exit(-1)
 	}
 

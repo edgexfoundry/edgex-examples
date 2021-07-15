@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/edgexfoundry/app-functions-sdk-go/appcontext"
-	"github.com/edgexfoundry/go-mod-core-contracts/models"
+	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/interfaces"
+	"github.com/edgexfoundry/go-mod-core-contracts/v2/dtos"
 )
 
 type Conversion struct {
@@ -31,31 +31,34 @@ func newFledgeReading(stamp int64, asset string) FledgeReading {
 }
 
 // TransformToFledge ...
-func (f Conversion) TransformToFledge(edgexcontext *appcontext.Context, params ...interface{}) (continuePipeline bool, stringType interface{}) {
-	if len(params) < 1 {
-		return false, errors.New("No Event Received")
+func (f Conversion) TransformToFledge(ctx interfaces.AppFunctionContext, data interface{}) (continuePipeline bool, stringType interface{}) {
+	lc := ctx.LoggingClient()
+
+	lc.Debug("Transforming to Fledge format")
+
+	if data == nil {
+		return false, errors.New("TransformToFledge: No data received")
 	}
 
-	edgexcontext.LoggingClient.Debug("Transforming to Fledge format")
-
-	if event, ok := params[0].(models.Event); ok {
-		payload := make([]FledgeReading, 1)
-		fReading := newFledgeReading(event.Created, event.Device)
-
-		for _, reading := range event.Readings {
-			fReading.Readings[reading.Name] = reading.Value
-		}
-		payload[0] = fReading
-
-		msg, err := json.Marshal(payload)
-		if err != nil {
-			return false, errors.New(fmt.Sprintf("Failed to transform Fledge data: %s", err))
-		}
-
-		edgexcontext.LoggingClient.Debug(fmt.Sprintf("Fledge Payload: %s", msg))
-
-		return true, string(msg)
+	event, ok := data.(dtos.Event)
+	if !ok {
+		return false, errors.New("TransformToFledge: didn't receive expect Event type")
 	}
 
-	return false, errors.New("Unexpected type received")
+	payload := make([]FledgeReading, 1)
+	fReading := newFledgeReading(event.Origin, event.DeviceName)
+
+	for _, reading := range event.Readings {
+		fReading.Readings[reading.ResourceName] = reading.Value
+	}
+	payload[0] = fReading
+
+	msg, err := json.Marshal(payload)
+	if err != nil {
+		return false, errors.New(fmt.Sprintf("Failed to transform Fledge data: %s", err))
+	}
+
+	lc.Debugf("Fledge Payload: %s", msg)
+
+	return true, string(msg)
 }

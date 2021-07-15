@@ -17,6 +17,7 @@ GOFLAGS=-ldflags "-X github.com/edgexfoundry/app-functions-sdk-go/internal.SDKVe
 GIT_SHA=$(shell git rev-parse HEAD)
 
 build:
+	go mod tidy
 	$(GO) build $(GOFLAGS) -o $(MICROSERVICE)	.
 
 clean:
