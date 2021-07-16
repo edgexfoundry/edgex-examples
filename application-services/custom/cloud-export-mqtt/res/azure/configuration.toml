@@ -1,0 +1,92 @@
+[Writable]
+LogLevel = "INFO"
+  [Writable.StoreAndForward]
+  Enabled = false
+  RetryInterval = "5m"
+  MaxRetryCount = 10
+  [Writable.InsecureSecrets]
+    [Writable.InsecureSecrets.DB]
+    path = "redisdb"
+      [Writable.InsecureSecrets.DB.Secrets]
+      username = ""
+      password = ""
+    [Writable.InsecureSecrets.mqtt]
+    path = "mqtt"
+      [Writable.InsecureSecrets.mqtt.Secrets]
+      username = "user-name"
+      password = "p@ssword"
+
+[Service]
+HealthCheckInterval = "10s"
+Host = "localhost"
+Port = 59780 # Adjust if running multiple examples at the same time to avoid duplicate port conflicts
+ServerBindAddr = "" # if blank, uses default Go behavior https://golang.org/pkg/net/#Listen
+StartupMsg = "This is a sample cloud export to Azure"
+RequestTimeout = "30s"
+MaxRequestSize = 0
+MaxResultCount = 0
+
+[Registry]
+Host = "localhost"
+Port = 8500
+Type = "consul"
+
+# Database is require when Store and Forward is enabled
+[Database]
+Type = "redisdb"
+Host = "localhost"
+Port = 6379
+Timeout = "30s"
+
+# SecretStore is required when Store and Forward is enabled and running with security
+# so Database credentials can be pulled from Vault.
+# Note when running in docker from compose file set the following environment variables:
+#   - SecretStore_Host: edgex-vault
+[SecretStore]
+Type = "vault"
+Host = "localhost"
+Port = 8200
+Path = "app-cloud-export-mqtt/"
+Protocol = "http"
+TokenFile = "/tmp/edgex/secrets/app-cloud-export-mqtt/secrets-token.json"
+RootCaCertPath = ""
+ServerName = ""
+  [SecretStore.Authentication]
+  AuthType = "X-Vault-Token"
+
+[Clients]
+  [Clients.core-metadata]
+  Protocol = "http"
+  Host = "localhost"
+  Port = 59881
+
+# Choose either an HTTP trigger or edgex-messagebus trigger
+
+#[Trigger]
+#Type="http"
+
+[Trigger]
+Type="edgex-messagebus"
+  [Trigger.EdgexMessageBus]
+  Type = "redis"
+    [Trigger.EdgexMessageBus.SubscribeHost]
+    Host = "localhost"
+    Port = 6379
+    Protocol = "redis"
+    SubscribeTopics="edgex/events/#"
+    [Trigger.EdgexMessageBus.PublishHost]
+    Host = "localhost"
+    Port = 6379
+    Protocol = "redis"
+    PublishTopic="example"
+
+# Example of App Service specific structured custom configuration.
+# This map into the transforms.MQTTSecretConfig structure
+# See https://docs.edgexfoundry.org/2.0/microservices/application/AdvancedTopics/#custom-configuration
+[MqttExportConfig]
+BrokerAddress = "tcp://my-iot-hub.azure-devices.net:1883"
+ClientId = "my-iot-device"
+AutoReconnect = true
+Topic = "devices/my-iot-device/messages/events/" # iot device name MUST match client ID
+AuthMode = "none" # Change if auth required. See https://docs.edgexfoundry.org/2.0/microservices/application/BuiltIn/#mqtt-export for details
+SecretPath = "mqtt"
