@@ -88,5 +88,5 @@ BrokerAddress = "tcps://***.iot.us-west-2.amazonaws.com:8883"
 ClientId = "testThing"
 AutoReconnect = true
 Topic = "$aws/things/testThing/shadow/update" # iot device name MUST match client ID
-AuthMode = "none"
+AuthMode = "none"  # Change if auth required. See https://docs.edgexfoundry.org/2.0/microservices/application/BuiltIn/#mqtt-export for details
 SecretPath = "mqtt"

@@ -88,5 +88,5 @@ BrokerAddress = "tcp://my-iot-hub.azure-devices.net:1883"
 ClientId = "my-iot-device"
 AutoReconnect = true
 Topic = "devices/my-iot-device/messages/events/" # iot device name MUST match client ID
-AuthMode = "none"
+AuthMode = "none" # Change if auth required. See https://docs.edgexfoundry.org/2.0/microservices/application/BuiltIn/#mqtt-export for details
 SecretPath = "mqtt"
