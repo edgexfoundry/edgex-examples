@@ -30,12 +30,12 @@ type secretsInfo struct {
 var expectedSecrets = []secretsInfo{
 	secretsInfo{
 		// Get secrets for valid sub-path, empty keys list should return all secrets
-		path: "/mqtt",
+		path: "mqtt",
 		keys: []string{},
 	},
 	secretsInfo{
 		// Get secrets for valid sub-path with single key
-		path: "/mqtt",
+		path: "mqtt",
 		keys: []string{"password"},
 	},
 }

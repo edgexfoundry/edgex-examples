@@ -1,6 +1,6 @@
 # JSON Logic Examples
 
-This example demonstrates a few different ways to leverage JSON logic to assist in a bit more flexible and advanced way to perform filtering operations without the need to write your own functions. If you have many rules or want an even more feature rich rules engine check out [EMQ X Kuiper](https://github.com/emqx/kuiper) here.
+This example demonstrates a few different ways to leverage JSON logic to assist in a bit more flexible and advanced way to perform filtering operations without the need to write your own functions. If you have many rules or want an even more feature rich rules engine check out [eKuiper](https://github.com/lf-edge/ekuiper) here.
 
 > Note: Only  operators that return true or false are supported. See http://jsonlogic.com/operations.html# for the complete list paying attention to return values. Any operator that returns manipulated data is currently not supported. 
 
@@ -27,7 +27,7 @@ But what if we wanted to perform an not operation?
 The following rule demonstrates how to filter OUT the list of devices instead of filtering FOR a specific device. 
 
 ``` go
-jsonlogicrule := "{ \"!\" : {\"in\" : [{ \"var\" : \"deviceN\" }, [\"Random-Integer-Device\"] ] }}"
+jsonlogicrule := "{ \"!\" : {\"in\" : [{ \"var\" : \"deviceName\" }, [\"Random-Integer-Device\"] ] }}"
 
 edgexSdk.SetFunctionsPipeline(		
     transforms.NewJSONLogic(jsonlogicrule).Evaluate,
