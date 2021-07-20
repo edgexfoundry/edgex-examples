@@ -8,4 +8,8 @@ In this example we introduce a trigger that listens for input on os.Stdin and se
 
 To run:
 
-`make docker && docker run -it edgexfoundry/docker-custom-trigger-example:dev`
+```console
+make build
+./app-service
+```
+

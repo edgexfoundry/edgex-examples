@@ -2,119 +2,85 @@
 
 This example demonstrates storing a secret to the secret store (Vault) and retrieving those secrets.
 
-If in secure mode, the secrets are stored and retrieved from Vault based on the *SecretStoreExclusive* section of the configuration file.
+When running in secure mode, the secrets are stored and retrieved from Vault based on the `SecretStore` section of the configuration file.
 
-Please refer to the [Application Functions SDK documentation](https://docs.edgexfoundry.org/1.2/microservices/application/AdvancedTopics/#secrets)  for more details on storing and getting secrets using the SDK.
+Please refer to the [Application Functions SDK documentation](https://docs.edgexfoundry.org/2.0/microservices/application/AdvancedTopics/#secrets)  for more details on storing and getting secrets using the SDK.
 
-## Run the app within EdgeX docker
+## Build and Run the app with Secure Edgex services
 
 **Steps:**
 
-1. From the app-service-examples root folder, build the docker image for the secrets example service.
+1. From the `secrets` folder under app-services/custom run:
 
-   ```
-   make docker_secrets_example
-   ```
-
-2. Add the environment variable `ADD_SECRETSTORE_TOKENS` to the vault-worker service in your EdgeX docker compose file. It takes a list of service keys that it generates Vault tokens for. This is used as the base path for the service's secrets in Vault.  `secrets-example` is the application service that we will be running.
-
-   ```yml
-   environment:
-         - "SECRETSTORE_SETUP_DONE_FLAG=/tmp/edgex/secrets/edgex-consul/.secretstore-setup-done"
-         - "ADD_SECRETSTORE_TOKENS=secrets-example"
+   ```console
+   make build
    ```
 
-3. The default configuration is for running natively and we use environment overrides in the compose files for use in docker.
+2. Down load default EdgeX secure compose file 
 
-4. Add the secrets example application service to your EdgeX docker compose file. This includes the environment overrides for the SecretStore and SecretStoreExclusive configurations:
+   Copy to https://github.com/edgexfoundry/edgex-compose/blob/ireland/docker-compose.yml to local folder.
 
-   ```yml
-     app-service-secrets-example:
-       image: edgexfoundry/docker-secrets-example:dev
-       container_name: app-service-secrets-example
-       hostname: app-service-secrets-example
-       ports:
-         - "48095:48095"
-       networks:
-         - edgex-network
-       environment:
-         <<: *common-variables
-         SecretStore_Protocol: https
-         SecretStore_TokenFile: /tmp/edgex/secrets/edgex-application-service/secrets-token.json
-         SecretStoreExclusive_Host: edgex-vault
-         SecretStoreExclusive_Protocol: https
-         SecretStoreExclusive_RootCaCertPath: /tmp/edgex/secrets/ca/ca.pem
-         SecretStoreExclusive_ServerName: edgex-vault
-         SecretStoreExclusive_TokenFile: /tmp/edgex/secrets/secrets-example/secrets-token.json
-       volumes:
-         - /tmp/edgex/secrets/ca:/tmp/edgex/secrets/ca:ro,z
-         - /tmp/edgex/secrets/edgex-application-service:/tmp/edgex/secrets/edgex-application-service:ro,z 
-         - /tmp/edgex/secrets/secrets-example:/tmp/edgex/secrets/secrets-example:ro,z 
+3. Modify compose file so this `Secrets`example service has access to Vault for it's SecretStore 
+
+   Add the service's service-key, `app-secrets`, to the `secretstore-setup` service's `ADD_SECRETSTORE_TOKENS` environment variable as shown below:
+
+   ```yaml
+     secretstore-setup:
+       container_name: edgex-security-secretstore-setup
        depends_on:
-         - vault-worker
-         - data
+       - security-bootstrapper
+       - vault
+       environment:
+         ADD_SECRETSTORE_TOKENS: 'app-secrets'
    ```
 
-5. Run EdgeX security services in docker to generate a Vault token for our app service:
+   This creates a Vault back SecretStore for our example and populates it with then known `redisdb` secret. In addition creating the SecretStore, service's can request known secrets and to be added to the API Gateway. See the [Configuring Add-on Service](https://docs.edgexfoundry.org/2.0/security/Ch-Configuring-Add-On-Services/) security documentation for complete details.
 
-   1. Run the secret store services in EdgeX using:
+4. Run the Edgex services in Docker using the modified compose file from above.
 
-      `docker-compose -f <docker-compose file name> up -d vault-worker`
+   Run the following command from the same folder the compose file resides.
 
-      Verify that the following services are running:
-         - edgex-secrets-setup
-         - edgex-vault
-         - edgex-vault-worker
-   2. Wait for about a minute to ensure tokens are created for the services that were specified in the docker compose section of vault-worker service for `ADD_SECRETSTORE_TOKENS` environment variable. Verify that the token `secrets-example` exist under `/tmp/edgex/secrets`.
-
-5. Run the secrets example service:  
-      ```
-      docker-compose -f <docker-compose file name> up -d app-service-secrets-example
-      ```
-
-      Check the app's logs to make sure no errors occurred during startup:
-   
-      ```
-      docker logs app-service-secrets-example
-      ```
-   
-6. Follow the instructions in [Storing and Getting Secrets](#storing-and-getting-secrets) in order to test storing and retrieving secrets from the secret store.
-
-## Run the app natively (for dev/debug)
-
-The default configuration settings are used for running natively. The application service is already configured for running Vault in dev-mode (with http).  We need to run Vault, enable its secrets engine, then run our service. 
-
-1. Run vault using the docker compose file in this directory. 
-
-   `docker-compose -f docker-compose.yml up -d`
-
-2. You will need to manually set the current Vault token in configuration.
-
-   - Find the root token for Vault in the logs of the container:
-
-     `docker logs <container-id>`
-
-   ![image-20200224130525112](./root-token.png)
-
-   - Copy the token to the *'root_token'* field in the token file (./res/*token.json*). Verify that `SecretStore.TokenFile` and  `SecretStoreExclusive.TokenFile` are already configured with ./res/*token.json* as the token file path.
-
-3. Use docker exec to run commands on the running vault container instance.
-
-   `docker exec -it <container_id> /bin/sh`
-
-4. Enable the secrets engine using the Vault command line
-
-   *Login into vault with the root token.*
-
-   ```
-   / # vault login
-   / # vault secrets disable secret
-   Success! Disabled the secrets engine (if it existed) at: secret/
-   / # vault secrets enable -version=1 -path=secret kv
-   Success! Enabled the kv secrets engine at: secret/
+   ```console
+   docker-compose -p edgex up -d
    ```
 
-5. Run the secrets service: `go run main.go`
+   Now all the EdgeX service will be running. This can be verified by running the following command:
+
+   ```console
+   docker-compose -p edgex ps
+   ```
+
+   Which will output the following:
+
+   ```console
+   edgex-app-rules-engine             /edgex-init/ready_to_run_w ...   Up       48095/tcp, 127.0.0.1:59701->59701/tcp
+   edgex-core-command                 /edgex-init/ready_to_run_w ...   Up       127.0.0.1:59882->59882/tcp
+   edgex-core-consul                  /edgex-init/consul_wait_in ...   Up       8300/tcp, 8301/tcp, 8301/udp, 8302/tcp, 8302/udp, 127.0.0.1:8500->8500/tcp, 8600/tcp, 8600/udp
+   edgex-core-data                    /edgex-init/ready_to_run_w ...   Up       127.0.0.1:5563->5563/tcp, 127.0.0.1:59880->59880/tcp
+   edgex-core-metadata                /edgex-init/ready_to_run_w ...   Up       127.0.0.1:59881->59881/tcp
+   edgex-device-rest                  /edgex-init/ready_to_run_w ...   Up       127.0.0.1:59986->59986/tcp
+   edgex-device-virtual               /edgex-init/ready_to_run_w ...   Up       127.0.0.1:59900->59900/tcp
+   edgex-kong                         /edgex-init/kong_wait_inst ...   Up       0.0.0.0:8000->8000/tcp,:::8000->8000/tcp, 8001/tcp, 127.0.0.1:8100->8100/tcp, 0.0.0.0:8443->8443/tcp,:::8443->8443/tcp, 8444/tcp
+   edgex-kong-db                      /edgex-init/postgres_wait_ ...   Up       127.0.0.1:5432->5432/tcp
+   edgex-kuiper                       /edgex-init/kuiper_wait_in ...   Up       20498/tcp, 127.0.0.1:59720->59720/tcp, 9081/tcp
+   edgex-redis                        /edgex-init/redis_wait_ins ...   Up       127.0.0.1:6379->6379/tcp
+   edgex-security-bootstrapper        /entrypoint.sh gate              Up
+   edgex-security-proxy-setup         /edgex-init/proxy_setup_wa ...   Exit 0
+   edgex-security-secretstore-setup   entrypoint.sh                    Up
+   edgex-support-notifications        /edgex-init/ready_to_run_w ...   Up       127.0.0.1:59860->59860/tcp
+   edgex-support-scheduler            /edgex-init/ready_to_run_w ...   Up       127.0.0.1:59861->59861/tcp
+   edgex-sys-mgmt-agent               /edgex-init/ready_to_run_w ...   Up       127.0.0.1:58890->58890/tcp
+   edgex-vault                        /edgex-init/vault_wait_ins ...   Up       127.0.0.1:8200->8200/tcp
+   ```
+
+5. Run the `secrets` example service as root
+
+   The service must run as root so that it can access it's SecretStore token. Also the environment variable `EDGEX_SECURITY_SECRET_STORE` must not be set to `false`. Either not set at all or set to `true`
+
+   ```console
+   sudo EDGEX_SECURITY_SECRET_STORE=true ./app-service
+   ```
+
 6. Follow the instructions in [Storing and Getting Secrets](#storing-and-getting-secrets) in order to test storing and retrieving secrets from the secret store.
 
 ## Storing and Getting Secrets
@@ -131,5 +97,12 @@ These tests use a collection of Postman requests, in *SecretsExample.postman_col
 
 4. View the service's logs to verify that the secrets were retrieved. We'll view the secrets in the application's console (in production, NEVER log your application's secrets. This is done in the example service to demonstrate the functionality).
 
-   1. Running in docker: `docker logs app-service-secrets-example`
-   2. Running natively: view the console
+   ```console
+   level=INFO ts=2021-07-19T21:29:44.2351952Z app=app-secrets source=getsecrets.go:52 msg="--- Get secrets at location /mqtt, keys: []  ---"
+   level=INFO ts=2021-07-19T21:29:44.2398679Z app=app-secrets source=getsecrets.go:59 msg="key:username, value:app-user"
+   level=INFO ts=2021-07-19T21:29:44.2399432Z app=app-secrets source=getsecrets.go:59 msg="key:password, value:SuperDuperSecretPassword"
+   level=INFO ts=2021-07-19T21:29:44.2399976Z app=app-secrets source=getsecrets.go:52 msg="--- Get secrets at location /mqtt, keys: [password]  ---"
+   level=INFO ts=2021-07-19T21:29:44.2400476Z app=app-secrets source=getsecrets.go:59 msg="key:password, value:SuperDuperSecretPassword"
+   ```
+
+   

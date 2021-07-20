@@ -1,6 +1,6 @@
 # Advanced Target Type  
 
-This **advanced-target-type** Application Service demonstrates how to create an Application Service that expects a custom type to feed to the functions pipeline. For more detail refer to the Application Functions SDK documentation section on [TargetType](https://docs.edgexfoundry.org/1.2/microservices/application/AdvancedTopics/#target-type)
+This **advanced-target-type** Application Service demonstrates how to create an Application Service that expects a custom type to feed to the functions pipeline. For more detail refer to the Application Functions SDK documentation section on [TargetType](https://docs.edgexfoundry.org/2.0/microservices/application/AdvancedTopics/#target-type)
 
 To run this example:
 
@@ -35,5 +35,4 @@ To run this example:
      ```
 
    - Note that the PhoneDisplay field that is not present in the XML sent from PostMan is now present and filled out.
-
 

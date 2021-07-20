@@ -2,9 +2,9 @@
 
 ## Overview
 
-This folder contains various examples of Application Services based on the App Functions SDK and Profiles that can be used with App Service Configurable. See the [Application Services](https://docs.edgexfoundry.org/1.2/microservices/application/ApplServices/.) documentation for complete details on Application services.
+This folder contains various examples of Application Services based on the `Ireland 2.0.x` App Functions SDK and Profiles that can be used with App Service Configurable. See the [Application Services](https://docs.edgexfoundry.org/2.0/microservices/application/ApplicationServices/) documentation for complete details on Application services.
 
-> *Note: All custom examples have their own `go.mod` file, `Makefile` and in some cases `Dockerfile` (e.g.`simple-filter-xml`). This allows for any example to be copied to your own repository and used as a template in creating your own new custom application service.*
+> *Note: All custom examples have their own `go.mod` file, `Makefile` and in some cases `Dockerfile` (e.g.`simple-filter-xml`). * These example are **not** designed to be templates for creating a new Application Service.  For this we have the [app-service-template in app-functions-sdk-go](https://github.com/edgexfoundry/app-functions-sdk-go/blob/main/app-service-template/README.md)
 
 ## Build Prerequisites
 
@@ -33,15 +33,15 @@ cd custom/simple-filter-xml
 
 ## Building App Service Docker Image
 
-The  `aws-export`, `cloud-event`, `secrets` and `simple-filter-xml` examples contain an example `Dockerfile` to demonstrate how to build a **Docker Image** for your Application Service. 
+The  `simple-filter-xml` example contains an example `Dockerfile` to demonstrate how to build a **Docker Image** for your Application Service. 
 
-The Makefile in each of those example folders also contains the `docker` target which will build the **Docker Image** for the example.
+The Makefile in this example also contains the `docker` target which will build the **Docker Image** for the example.
 
 ​	run `make docker`
 
-This command must be run from those example folders, i.e. not the top level Makefile.
+This command must be run from the example folder, i.e. not the top level Makefile.
 
-> *Note that Application Services no longer use docker profiles. They use Environment Overrides in the docker compose file to make the necessary changes to the configuration for running in Docker. See the **Environment Variable Overrides For Docker** section in [App Service Configurable's README](https://github.com/edgexfoundry/app-service-configurable/blob/master/README.md#environment-variable-overrides-for-docker)* for more details and an example. 
+> *Note that Application Services no longer use docker profiles. They use Environment Overrides in the docker compose file to make the necessary changes to the configuration for running in Docker. See the [Environment Variable Overrides](https://docs.edgexfoundry.org/2.0/microservices/application/AdvancedTopics/#environment-variable-overrides) section of the Application Services documentation for more details and an example. 
 
 ## Configurable Examples
 
