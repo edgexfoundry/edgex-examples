@@ -8,7 +8,7 @@ In this example we introduce a trigger that listens for input on os.Stdin and se
 
 To run:
 
-```
+```console
 make build
 ./app-service
 ```

@@ -12,7 +12,7 @@ Please refer to the [Application Functions SDK documentation](https://docs.edgex
 
 1. From the `secrets` folder under app-services/custom run:
 
-   ```
+   ```console
    make build
    ```
 
@@ -40,19 +40,19 @@ Please refer to the [Application Functions SDK documentation](https://docs.edgex
 
    Run the following command from the same folder the compose file resides.
 
-   ```
+   ```console
    docker-compose -p edgex up -d
    ```
 
    Now all the EdgeX service will be running. This can be verified by running the following command:
 
-   ```
+   ```console
    docker-compose -p edgex ps
    ```
 
    Which will output the following:
 
-   ```bash
+   ```console
    edgex-app-rules-engine             /edgex-init/ready_to_run_w ...   Up       48095/tcp, 127.0.0.1:59701->59701/tcp
    edgex-core-command                 /edgex-init/ready_to_run_w ...   Up       127.0.0.1:59882->59882/tcp
    edgex-core-consul                  /edgex-init/consul_wait_in ...   Up       8300/tcp, 8301/tcp, 8301/udp, 8302/tcp, 8302/udp, 127.0.0.1:8500->8500/tcp, 8600/tcp, 8600/udp
@@ -77,7 +77,7 @@ Please refer to the [Application Functions SDK documentation](https://docs.edgex
 
    The service must run as root so that it can access it's SecretStore token. Also the environment variable `EDGEX_SECURITY_SECRET_STORE` must not be set to `false`. Either not set at all or set to `true`
 
-   ```
+   ```console
    sudo EDGEX_SECURITY_SECRET_STORE=true ./app-service
    ```
 
@@ -97,7 +97,7 @@ These tests use a collection of Postman requests, in *SecretsExample.postman_col
 
 4. View the service's logs to verify that the secrets were retrieved. We'll view the secrets in the application's console (in production, NEVER log your application's secrets. This is done in the example service to demonstrate the functionality).
 
-   ```bash
+   ```console
    level=INFO ts=2021-07-19T21:29:44.2351952Z app=app-secrets source=getsecrets.go:52 msg="--- Get secrets at location /mqtt, keys: []  ---"
    level=INFO ts=2021-07-19T21:29:44.2398679Z app=app-secrets source=getsecrets.go:59 msg="key:username, value:app-user"
    level=INFO ts=2021-07-19T21:29:44.2399432Z app=app-secrets source=getsecrets.go:59 msg="key:password, value:SuperDuperSecretPassword"
