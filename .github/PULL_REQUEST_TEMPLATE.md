@@ -1,29 +1,16 @@
+<!-- Expected Commit Message Description (imported automatically by GitHub) -->
+<!-- Must conform to [conventional commits guidelines](https://github.com/edgexfoundry/edgex-examples/blob/main/.github/Contributing.md) -->
+<!-- Expected Commit message must contain Closes/Fixes #IssueNumber statement when there is a related issue -->
+
+<!-- Add additional detailed description of need for change if no related issue -->
+
+**If your build fails**  due to your commit message not passing the build checks, please review the guidelines here: https://github.com/edgexfoundry/edgex-examples/blob/main/.github/Contributing.md
+
 ## PR Checklist
 Please check if your PR fulfills the following requirements:
 
-- [ ] Tests for the changes have been added (for bug fixes / features)
-- [ ] Docs have been added / updated (for bug fixes / features)
+- [ ] I have added unit tests for the new feature or bug fix (if not, why?)
+- [ ] I have fully tested (add details below) this the new feature or bug fix (if not, why?)
 
-**If your build fails** due to your commit message not passing the build checks, please review the guidelines here: https://github.com/edgexfoundry/edgex-examples/blob/master/.github/Contributing.md.
-
-## What is the current behavior?
-<!-- Please describe the current behavior and link to a relevant issue. -->
-
-
-## Issue Number:
-
-
-## What is the new behavior?
-
-
-## Does this PR introduce a breaking change?
-<!-- If this PR contains a breaking change, please describe the impact and migration path for existing applications below. -->
-
-- [ ] Yes
-- [ ] No
-
-## Specific Instructions
-Are there any specific instructions or things that should be known prior to reviewing?
-
-
-## Other information
+## Testing Instructions
+<!-- How can the reviewers test your change? -->
