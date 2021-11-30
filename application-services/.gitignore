@@ -11,4 +11,3 @@ app-service
 *.out
 *.dll
 *.exe
-go.sum
