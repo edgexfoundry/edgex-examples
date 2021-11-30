@@ -8,6 +8,7 @@ package transforms
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -47,7 +48,7 @@ func (f Conversion) TransformToInflux(ctx interfaces.AppFunctionContext, data in
 		buffer.WriteString(",")
 		buffer.WriteString(key)
 		buffer.WriteString("=")
-		buffer.WriteString(val)
+		buffer.WriteString(fmt.Sprintf("%v", val))
 	}
 	// write space
 	buffer.WriteString(" ")
