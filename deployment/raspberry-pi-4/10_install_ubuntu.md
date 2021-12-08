@@ -48,7 +48,7 @@ $ dmesg | grep Attached
 
 Balena etcher, Raspberry Pi OS Imager, or Ubuntu Imager can be used but let's try this commands below:
 ```sh
-$ cd ~/Downloads
+$ cd ~/Downloads 
 $ sudo -s
 
 # xzcat extracts the image as raw disk image format and passes to the dd commandlittle by little. Then the dd writes the coming data to the disk.  
