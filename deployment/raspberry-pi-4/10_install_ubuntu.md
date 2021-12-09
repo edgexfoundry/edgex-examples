@@ -19,7 +19,7 @@ The OS image file can be found from [https://ubuntu.com/download/raspberry-pi](h
 
 As mentioned earlier the 64 bit version of Ubuntu server 20.10 will be used so that click the button on the web page or run below command:
 ```sh
-$ cd ~/Downlaods
+$ cd ~/Downloads
 $ wget https://ubuntu.com/download/raspberry-pi/thank-you?version=20.10&architecture=server-arm64+raspi
 ```
 
