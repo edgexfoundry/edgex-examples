@@ -1,5 +1,6 @@
 //
 // Copyright (c) 2020 Technotects
+// Copyright (c) 2021 One Track Consulting
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,6 +21,7 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"github.com/google/uuid"
 	"os"
 	"strings"
 	"sync"
@@ -53,12 +55,13 @@ func (t *stdinTrigger) Initialize(_ *sync.WaitGroup, ctx context.Context, _ <-ch
 		rdr := bufio.NewReader(os.Stdin)
 		for receiveMessage {
 			s, err := rdr.ReadString('\n')
-			s = strings.TrimRight(s, "\n")
 
 			if err != nil {
 				t.tc.Logger.Error(err.Error())
 				continue
 			}
+
+			s = strings.TrimRight(s, "\n")
 
 			msgs <- []byte(s)
 		}
@@ -71,13 +74,21 @@ func (t *stdinTrigger) Initialize(_ *sync.WaitGroup, ctx context.Context, _ <-ch
 				receiveMessage = false
 			case m := <-msgs:
 				go func() {
-					env := types.MessageEnvelope{
-						Payload: m,
+					spoofTopic := "even"
+
+					if len(m)%2 == 1 {
+						spoofTopic = "odd"
 					}
 
-					ctx := t.tc.ContextBuilder(env)
+					env := types.MessageEnvelope{
+						CorrelationID: uuid.NewString(),
+						Payload:       m,
+						ReceivedTopic: spoofTopic,
+					}
 
-					err := t.tc.MessageProcessor(ctx, env)
+					t.tc.Logger.Tracef("sending message to runtime %+v", env)
+
+					err := t.tc.MessageReceived(nil, env, nil)
 
 					if err != nil {
 						t.tc.Logger.Error(err.Error())
@@ -108,22 +119,47 @@ func main() {
 		}, nil
 	})
 
-	service.SetFunctionsPipeline(
-		printToConsole,
+	var err error
+
+	//use this to process using default pipeline only
+	//err = service.SetDefaultFunctionsPipeline(printLowerToConsole)
+	//if err != nil {
+	//	service.LoggingClient().Errorf("SetDefaultFunctionsPipeline returned error: %s", err.Error())
+	//	os.Exit(-1)
+	//}
+
+	//use this to process using varied pipelines by topic (odd/even string length)
+	err = service.AddFunctionsPipelineForTopics("odd", []string{"odd"},
+		printLowerToConsole,
 	)
 
+	if err != nil {
+		service.LoggingClient().Errorf("AddFunctionsPipelineForTopic returned error: %s", err.Error())
+		os.Exit(-1)
+	}
+
+	err = service.AddFunctionsPipelineForTopics("even", []string{"even"},
+		printUpperToConsole,
+	)
+
+	if err != nil {
+		service.LoggingClient().Errorf("AddFunctionsPipelineForTopic returned error: %s", err.Error())
+		os.Exit(-1)
+	}
+
 	// Lastly, we'll go ahead and tell the SDK to "start" and begin listening for events
-	err := service.MakeItRun()
+	err = service.MakeItRun()
 	if err != nil {
 		service.LoggingClient().Error("MakeItRun returned error: ", err.Error())
 		os.Exit(-1)
 	}
 
+	service.LoggingClient().Info("Exiting service")
 	// Do any required cleanup here
 	os.Exit(0)
 }
 
-func printToConsole(appContext interfaces.AppFunctionContext, data interface{}) (bool, interface{}) {
+func printLowerToConsole(appContext interfaces.AppFunctionContext, data interface{}) (bool, interface{}) {
 	input, err := util.CoerceType(data)
 
 	if err != nil {
@@ -137,7 +173,26 @@ func printToConsole(appContext interfaces.AppFunctionContext, data interface{}) 
 
 	appContext.LoggingClient().Info("PrintToConsole")
 
-	os.Stdout.WriteString(fmt.Sprintf("'%s' received %s ago\n>", string(input), wait.String()))
+	os.Stdout.WriteString(fmt.Sprintf("'%s' received %s ago\n>", strings.ToLower(string(input)), wait.String()))
+
+	return false, nil
+}
+
+func printUpperToConsole(appContext interfaces.AppFunctionContext, data interface{}) (bool, interface{}) {
+	input, err := util.CoerceType(data)
+
+	if err != nil {
+		appContext.LoggingClient().Error(err.Error())
+		return false, err
+	}
+
+	wait := time.Millisecond * time.Duration(len(input))
+
+	time.Sleep(wait)
+
+	appContext.LoggingClient().Info("PrintToConsole")
+
+	os.Stdout.WriteString(fmt.Sprintf("'%s' received %s ago\n>", strings.ToUpper(string(input)), wait.String()))
 
 	return false, nil
 }
