@@ -1,0 +1,1 @@
+docker exec -u root -ti `docker ps  --filter name=device-virtual | awk '{ print $1 }' | tail -n 1` sh -c 'mkdir -p /tmp/edgex/secrets/device-virtual ; chmod 777 /tmp/edgex/secrets/device-virtual ; cat > /tmp/edgex/secrets/device-virtual/secrets-token.json'
