@@ -2,7 +2,7 @@
 
 # 2. How to install package required for EdgeX development
 
-The Ubuntu server 20.10 is running on the RPI and we can access via SSH. This chapter introduces some items to do before EdgeX installation. 
+The Ubuntu server 21.10 is running on the RPI and we can access via SSH. This chapter introduces some items to do before EdgeX installation. 
 
 <br/>
 
@@ -23,7 +23,7 @@ Also, the RPI has its timezone as UTC so that scheduled tasks based on local tim
 $ sudo dpkg-reconfigure tzdata
 
 # To confirm the new timezone
-$ timedatactl
+$ timedatectl
         Local time: Sun 2020-11-01 11:26:43 PST     
     Universal time: Sun 2020-11-01 19:26:43 UTC     
 ```
@@ -72,10 +72,10 @@ $ cd ~
 $ sudo mkdir /usr/local/go # This may exist
 
 # Download the SDK
-$ wget https://dl.google.com/go/go1.15.3.linux-arm64.tar.gz
+$ wget https://go.dev/dl/go1.18.5.linux-arm64.tar.gz
 
 # Extract and place the SDK under /usr/local/go
-$ sudo bash -c "tar -xf go1.15.3.linux-arm64.tar.gz --strip-components=1 -C /usr/local/go"
+$ sudo bash -c "tar -xf go1.18.5.linux-arm64.tar.gz --strip-components=1 -C /usr/local/go"
 
 # Go needs a directory for its libraries
 $ mkdir ~/go
@@ -88,7 +88,7 @@ $ source ~/.bashrc
 
 # To confirm the configurations
 $ go version
-go version go1.15.3 linux/arm64
+go version go1.18.5 linux/arm64
 
 # To install Delve
 $ go get -u github.com/go-delve/delve/cmd/dlv
@@ -96,8 +96,8 @@ $ go get -u github.com/go-delve/delve/cmd/dlv
 # To confirm Delve's version
 $ dlv version
 Delve Debugger
-Version: 1.5.0
-Build: $Id: ca5318932770ca063fc9885b4764c30bfaf8a199 $
+Version: 1.8.0
+Build: $Id: 6a6c9c332d5354ddf1f8a2da3cc477bd18d2be53 $
 ```
 
 <br/>
@@ -107,13 +107,13 @@ Build: $Id: ca5318932770ca063fc9885b4764c30bfaf8a199 $
 Docker is a containerization platform/tool. EdgeX' core services are conveniently packaged as docker containers so that we can leverage Docker to run EdgeX. To install Docker and Docker-compose:
 ```sh
 # Install Docker
-$ sudo apt install -y docker.io docker-compose
+$ sudo apt install -y docker.io
 
 # To confirm the versions installed 
 $ docker -v
-Docker version 19.03.8, build afacb8b7f0
+Docker version 20.10.7, build 20.10.7-0ubuntu5.1
 $ docker-compose -v
-docker-compose version 1.25.0, build unknown
+docker-compose version 1.27.4, build unknown
 
 # Enable and start the Docker daemon
 $ sudo systemctl enable docker

@@ -56,8 +56,8 @@ PublishTopicPrefix = 'edgex/events/device' # /<device-profile-name>/<device-name
 
 # Example SecretStore configuration.
 # Only used when EDGEX_SECURITY_SECRET_STORE=true
-# Must also add `ADD_SECRETSTORE_TOKENS: "device-simple"` to vault-worker environment so it generates
-# the token and secret store in vault for 'device-simple'
+# Must also add `ADD_SECRETSTORE_TOKENS: "device-echo"` to vault-worker environment so it generates
+# the token and secret store in vault for 'device-echo'
 [SecretStore]
 Type = 'vault'
 Host = 'localhost'
