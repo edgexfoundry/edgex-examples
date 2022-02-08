@@ -1,0 +1,19 @@
+# Copyright (C) 2022 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+{{- if .Values.edgex.security.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    org.edgexfoundry.service: {{.Values.edgex.app.vault}}
+  name: {{.Values.edgex.app.vault}}
+spec:
+  ports:
+  - name: "http"
+    port: 8200
+  selector:
+    org.edgexfoundry.service: {{.Values.edgex.app.vault}}
+  type: ClusterIP
+{{- end}}

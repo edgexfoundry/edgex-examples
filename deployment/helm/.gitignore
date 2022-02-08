@@ -1,0 +1,7 @@
+.DS_Store
+.idea/
+.gitmessage
+client.*
+client-ca.*
+server.*
+server-ca.*

@@ -1,0 +1,109 @@
+# Copyright (C) 2022 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    org.edgexfoundry.service: {{.Values.edgex.app.consul}}
+  name: {{.Values.edgex.app.consul}}
+spec:
+  replicas: {{.Values.edgex.replicas.consul}}
+  selector:
+    matchLabels:
+      org.edgexfoundry.service: {{.Values.edgex.app.consul}}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        org.edgexfoundry.service: {{.Values.edgex.app.consul}}
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - name: {{.Values.edgex.app.consul}}
+        image: {{.Values.edgex.image.consul.repository}}:{{.Values.edgex.image.consul.tag}}
+        imagePullPolicy: {{.Values.edgex.image.consul.pullPolicy}}
+      {{- if .Values.edgex.security.enabled }}
+        command: ["/edgex-init/consul_wait_install.sh"]
+      {{- end }}
+        args: ["agent", "-ui", "-bootstrap", "-server", "-client", "0.0.0.0"]
+        ports:
+        - containerPort: {{.Values.edgex.port.consul}}
+          hostPort: {{.Values.edgex.port.consul}}
+          hostIP: {{.Values.edgex.hostPortExternalBind}}
+      {{- if .Values.edgex.security.enabled }}
+        env:
+        - name: EDGEX_USER
+          value: "{{ .Values.edgex.security.runAsUser }}"
+        - name: EDGEX_GROUP
+          value: "{{ .Values.edgex.security.runAsGroup }}"
+        # uncomment and modify the following "ADD_REGISTRY_ACL_ROLES" to add additional registry ACL roles on the fly
+        # the list is comma-separated service keys for these services
+        #ADD_REGISTRY_ACL_ROLES: app-sample,app-rules-engine-redis, app-rules-engine-mqtt, app-push-to-core
+        - name: STAGEGATE_REGISTRY_ACL_SENTINELFILEPATH
+          value: /consul/config/consul_acl_done
+        - name: STAGEGATE_REGISTRY_ACL_BOOTSTRAPTOKENPATH
+          value: /tmp/edgex/secrets/consul-acl-token/bootstrap_token.json
+      {{- end }}
+        envFrom:
+        - configMapRef:
+            name: edgex-common-variables
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+        startupProbe:
+          tcpSocket:
+            port: {{.Values.edgex.port.consul}}
+          periodSeconds: 1
+          failureThreshold: 120
+        livenessProbe:
+          tcpSocket:
+            port: {{.Values.edgex.port.consul}}
+        volumeMounts:
+        - mountPath: /consul/config
+          name: consul-config
+        - mountPath: /consul/data
+          name: consul-data
+        {{- if .Values.edgex.security.enabled }}
+        - mountPath: /edgex-init
+          name: edgex-init
+        - mountPath: /tmp/edgex/secrets
+          name: edgex-secrets
+        - mountPath: /tmp/edgex/secrets/consul-acl-token
+          name: consul-acl-token
+        {{- end }}
+      {{- if .Values.edgex.resources.consul.enforceLimits }}
+        resources:
+          limits:
+            memory: {{ .Values.edgex.resources.consul.limits.memory }}
+            cpu: {{ .Values.edgex.resources.consul.limits.cpu }}
+          requests:
+            memory: {{ .Values.edgex.resources.consul.requests.memory }}
+            cpu: {{ .Values.edgex.resources.consul.requests.cpu }}
+      {{- end}}
+
+      hostname: {{.Values.edgex.app.consul}}
+      restartPolicy: Always
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+      volumes:
+      - name: consul-config
+        persistentVolumeClaim:
+          claimName: consul-config
+      - name: consul-data
+        persistentVolumeClaim:
+          claimName: consul-data
+      {{- if .Values.edgex.security.enabled }}
+      - name: edgex-init
+        persistentVolumeClaim:
+          claimName: edgex-init
+      - name: consul-acl-token
+        persistentVolumeClaim:
+          claimName: consul-acl-token
+      - name: edgex-secrets
+        persistentVolumeClaim:
+          claimName: edgex-secrets
+      {{- end}}

@@ -1,0 +1,29 @@
+# Copyright (C) 2022 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+Please wait for several minutes for EdgeX deployment to complete.
+Then you should be able to visit the EdgeX.
+
+Ping edgex-core-data
+curl http://localhost:{{ int .Values.edgex.port.core.data}}/api/v2/ping
+Ping edgex-core-metadata
+curl http://localhost:{{ int .Values.edgex.port.core.metadata}}/api/v2/ping
+Ping edgex-core-command
+curl http://localhost:{{ int .Values.edgex.port.core.command}}/api/v2/ping
+Ping edgex-support-notifications
+curl http://localhost:{{ int .Values.edgex.port.support.notifications}}/api/v2/ping
+Ping edgex-support-scheduler
+curl http://localhost:{{ int .Values.edgex.port.support.scheduler}}/api/v2/ping
+Ping edgex-support-ruleengine
+curl http://localhost:{{ int .Values.edgex.port.support.scheduler}}/
+Ping edgex-device-rest
+curl http://localhost:{{ int .Values.edgex.port.device.rest}}/api/v2/ping
+Ping edgex-device-virtual
+curl http://localhost:{{ int .Values.edgex.port.device.virtual}}/api/v2/ping
+Ping edgex-appservice-rules
+curl http://localhost:{{ int .Values.edgex.port.appservice.rules}}/api/v2/ping
+Ping edgex-system
+curl http://localhost:{{ int .Values.edgex.port.system}}/api/v2/ping
+Ping edgex-ui
+curl http://localhost:{{ int .Values.edgex.port.ui}}/

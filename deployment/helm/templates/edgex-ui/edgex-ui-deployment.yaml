@@ -1,0 +1,65 @@
+# Copyright (C) 2022 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    org.edgexfoundry.service: {{.Values.edgex.app.ui}}
+  name: {{.Values.edgex.app.ui}}
+spec:
+  replicas: {{.Values.edgex.replicas.ui}}
+  selector:
+    matchLabels:
+      org.edgexfoundry.service: {{.Values.edgex.app.ui}}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        org.edgexfoundry.service: {{.Values.edgex.app.ui}}
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - name: {{.Values.edgex.app.ui}}
+        image: {{.Values.edgex.image.ui.repository}}:{{.Values.edgex.image.ui.tag}}
+        imagePullPolicy: {{.Values.edgex.image.ui.pullPolicy}}
+        ports:
+        - containerPort: {{.Values.edgex.port.ui}}
+          hostPort: {{.Values.edgex.port.ui}}
+          hostIP: {{.Values.edgex.hostPortExternalBind}}
+        env:
+        - name: EDGEX_SECURITY_SECRET_STORE
+      {{- if .Values.edgex.security.enabled }}
+          value: "true"
+      {{- else }}
+          value: "false"
+      {{- end }}
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+        startupProbe:
+          httpGet:
+            path: /api/v2/ping
+            port: {{.Values.edgex.port.ui}}
+          periodSeconds: 1
+          failureThreshold: 120
+        livenessProbe:
+          httpGet:
+            path: /api/v2/ping
+            port: {{.Values.edgex.port.ui}}
+      {{- if .Values.edgex.resources.ui.enforceLimits }}
+        resources:
+          limits:
+            memory: {{ .Values.edgex.resources.ui.limits.memory }}
+            cpu: {{ .Values.edgex.resources.ui.limits.cpu }}
+          requests:
+            memory: {{ .Values.edgex.resources.ui.requests.memory }}
+            cpu: {{ .Values.edgex.resources.ui.requests.cpu }}
+      {{- end}}
+      hostname: {{.Values.edgex.app.ui}}
+      restartPolicy: Always
+      securityContext:
+        runAsUser: {{ .Values.edgex.security.runAsUser }}
+        runAsGroup: {{ .Values.edgex.security.runAsGroup }}

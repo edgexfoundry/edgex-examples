@@ -1,0 +1,100 @@
+# Copyright (C) 2022 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    org.edgexfoundry.service: {{.Values.edgex.app.ekuiper}}
+  name: {{.Values.edgex.app.ekuiper}}
+spec:
+  replicas: {{.Values.edgex.replicas.ekuiper}}
+  selector:
+    matchLabels:
+      org.edgexfoundry.service: {{.Values.edgex.app.ekuiper}}
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        org.edgexfoundry.service: {{.Values.edgex.app.ekuiper}}
+    spec:
+      automountServiceAccountToken: false
+      initContainers:
+      - name: prep-volumes
+        image: busybox:latest
+        command: [ "sh", "-c", "chown -Rh 1001:1001 /kuiper; exit 0" ]
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsUser: 0
+          runAsGroup: 0
+        volumeMounts:
+          - mountPath: /kuiper/log
+            name: kuiper-logs
+          - mountPath: /kuiper/data
+            name: kuiper-data
+      containers:
+      - name: {{.Values.edgex.app.ekuiper}}
+        image: {{.Values.edgex.image.ekuiper.repository}}:{{.Values.edgex.image.ekuiper.tag}}
+        imagePullPolicy: {{.Values.edgex.image.ekuiper.pullPolicy}}
+        ports:
+        - containerPort: {{.Values.edgex.port.ekuiper}}
+      {{- if not .Values.edgex.security.enabled }}
+          hostPort: {{.Values.edgex.port.ekuiper}}
+          hostIP: {{.Values.edgex.hostPortInternalBind}}
+      {{- end}}
+        env:
+#        - name: KUIPER__BASIC__DEBUG
+#          value: "true"
+        - name: KUIPER__BASIC__CONSOLELOG
+          value: "true"
+        - name: KUIPER__BASIC__RESTPORT
+          value: "{{.Values.edgex.port.ekuiper}}"
+        - name: EDGEX__DEFAULT__SERVER
+          value: {{.Values.edgex.app.redis}}
+        - name: EDGEX__DEFAULT__PROTOCOL
+          value: "redis"
+        - name: EDGEX__DEFAULT__PORT
+          value: "{{.Values.edgex.port.redis}}"
+        - name: EDGEX__DEFAULT__TOPIC
+          value: "rules-events"
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+        startupProbe:
+          tcpSocket:
+            port: {{.Values.edgex.port.ekuiper}}
+          periodSeconds: 1
+          failureThreshold: 120
+        livenessProbe:
+          tcpSocket:
+            port: {{.Values.edgex.port.ekuiper}}
+        volumeMounts:
+          - mountPath: /kuiper/log
+            name: kuiper-logs
+          - mountPath: /kuiper/data
+            name: kuiper-data
+      {{- if .Values.edgex.resources.ekuiper.enforceLimits }}
+        resources:
+          limits:
+            memory: {{ .Values.edgex.resources.ekuiper.limits.memory }}
+            cpu: {{ .Values.edgex.resources.ekuiper.limits.cpu }}
+          requests:
+            memory: {{ .Values.edgex.resources.ekuiper.requests.memory }}
+            cpu: {{ .Values.edgex.resources.ekuiper.requests.cpu }}
+      {{- end}}
+
+      hostname: {{.Values.edgex.app.ekuiper}}
+      restartPolicy: Always
+      securityContext:
+        runAsUser: 1001
+        runAsGroup: 1001
+      volumes:
+        - name: kuiper-data
+          persistentVolumeClaim:
+            claimName: kuiper-data
+        - name: kuiper-logs
+          emptyDir:
+            medium: Memory
+            sizeLimit: 64Mi

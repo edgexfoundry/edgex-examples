@@ -1,0 +1,23 @@
+# Copyright (C) 2022 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: v1
+name: EdgeX
+version: 2.1.0
+appVersion: "jakarta"
+description: A Helm Chart for EdgeX Jakarta release
+keywords:
+- Docker
+- EdgeX
+- Jakarta
+home: https://www.edgexfoundry.org
+icon: https://www.edgexfoundry.org/wp-content/uploads/sites/25/2017/04/logo_ef.png
+sources:
+- https://github.com/edgexfoundry/edgex-go
+- https://github.com/DaveZLB/edgex-helm
+maintainers:
+- name: Libin Zhang
+  email: zlibin@vmware.com
+engine: gotpl
+
