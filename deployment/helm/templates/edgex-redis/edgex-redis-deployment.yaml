@@ -1,0 +1,99 @@
+# Copyright (C) 2022 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    org.edgexfoundry.service: {{.Values.edgex.app.redis}}
+  name: {{.Values.edgex.app.redis}}
+spec:
+  replicas: {{.Values.edgex.replicas.redis}}
+  selector:
+    matchLabels:
+      org.edgexfoundry.service: {{.Values.edgex.app.redis}}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        org.edgexfoundry.service: {{.Values.edgex.app.redis}}
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - name: {{.Values.edgex.app.redis}}
+        image: {{.Values.edgex.image.redis.repository}}:{{.Values.edgex.image.redis.tag}}
+        imagePullPolicy: {{.Values.edgex.image.redis.pullPolicy}}
+      {{- if .Values.edgex.security.enabled }}
+        command: ["/edgex-init/redis_wait_install.sh"]
+      {{- end}}
+        ports:
+          - containerPort: {{.Values.edgex.port.redis}}
+        envFrom:
+          - configMapRef:
+              name: edgex-common-variables
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+        startupProbe:
+          tcpSocket:
+            port: {{.Values.edgex.port.redis}}
+          periodSeconds: 1
+          failureThreshold: 120
+        livenessProbe:
+          tcpSocket:
+            port: {{.Values.edgex.port.redis}}
+        volumeMounts:
+        - mountPath: /data
+          name: db-data
+        {{- if .Values.edgex.security.enabled }}
+        - mountPath: /edgex-init
+          name: edgex-init
+        - mountPath: /run
+          name: run-tmp
+        - mountPath: /run/redis/conf
+          name: redis-config
+        - mountPath: /tmp/edgex/secrets
+          name: edgex-secrets
+        {{- end}}
+      {{- if .Values.edgex.resources.redis.enforceLimits }}
+        resources:
+          limits:
+            memory: {{ .Values.edgex.resources.redis.limits.memory }}
+            cpu: {{ .Values.edgex.resources.redis.limits.cpu }}
+          requests:
+            memory: {{ .Values.edgex.resources.redis.requests.memory }}
+            cpu: {{ .Values.edgex.resources.redis.requests.cpu }}
+      {{- end}}
+      {{- if .Values.edgex.security.enabled }}
+        env:
+        - name: DATABASECONFIG_PATH
+          value: /run/redis/conf
+        - name: DATABASECONFIG_NAME
+          value: redis.conf
+      {{- end}}
+      hostname: {{.Values.edgex.app.redis}}
+      restartPolicy: Always
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+      volumes:
+      - name: db-data
+        persistentVolumeClaim:
+          claimName: db-data
+      {{- if .Values.edgex.security.enabled }}
+      - name: edgex-init
+        persistentVolumeClaim:
+          claimName: edgex-init
+      - name: redis-config
+        persistentVolumeClaim:
+          claimName: redis-config
+      - name: edgex-secrets
+        persistentVolumeClaim:
+          claimName: edgex-secrets
+      - name: run-tmp
+        emptyDir:
+          medium: Memory
+          sizeLimit: 64Mi
+      {{- end}}

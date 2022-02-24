@@ -1,0 +1,34 @@
+# Copyright (C) 2022 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+{{- if .Values.edgex.security.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  labels:
+    org.edgexfoundry.service: {{.Values.edgex.app.core.command}}
+  name: {{.Values.edgex.app.core.command}}
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
+    nginx.ingress.kubernetes.io/auth-tls-secret: "edgex/edgex-client-ca"
+    nginx.ingress.kubernetes.io/auth-tls-verify-depth: "1"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: "{{.Values.edgex.security.tlsHost}}"
+    http:
+      paths:
+      - path: /core-command/(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: {{.Values.edgex.app.core.command}}
+            port:
+              name: http
+  tls:
+  - secretName: edgex-tls
+    hosts:
+    - "{{.Values.edgex.security.tlsHost}}"
+{{- end}}

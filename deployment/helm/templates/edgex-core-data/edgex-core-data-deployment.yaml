@@ -1,0 +1,91 @@
+# Copyright (C) 2022 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    org.edgexfoundry.service: {{.Values.edgex.app.core.data}}
+  name: {{.Values.edgex.app.core.data}}
+spec:
+  replicas: {{.Values.edgex.replicas.core.data}}
+  selector:
+    matchLabels:
+      org.edgexfoundry.service: {{.Values.edgex.app.core.data}}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        org.edgexfoundry.service: {{.Values.edgex.app.core.data}}
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - name: {{.Values.edgex.app.core.data}}
+        image: {{.Values.edgex.image.core.data.repository}}:{{.Values.edgex.image.core.data.tag}}
+        imagePullPolicy: {{.Values.edgex.image.core.data.pullPolicy}}
+      {{- if .Values.edgex.security.enabled }}
+        command: ["/edgex-init/ready_to_run_wait_install.sh"]
+        args: ["/core-data", "-cp=consul.http://edgex-core-consul:8500", "--registry", "--confdir=/res"]
+      {{- end}}
+        ports:
+        - containerPort: {{.Values.edgex.port.core.data}}
+      {{- if not .Values.edgex.security.enabled }}
+          hostPort: {{.Values.edgex.port.core.data}}
+          hostIP: {{.Values.edgex.hostPortInternalBind}}
+      {{- end}}
+        env:
+        - name: SERVICE_HOST
+          value: {{.Values.edgex.app.core.data}}
+      {{- if .Values.edgex.security.enabled }}
+        - name: SECRETSTORE_TOKENFILE
+          value: /tmp/edgex/secrets/core-data/secrets-token.json
+      {{- end}}
+        envFrom:
+        - configMapRef:
+            name: edgex-common-variables
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+        startupProbe:
+          httpGet:
+            path: /api/v2/ping
+            port: {{.Values.edgex.port.core.data}}
+          periodSeconds: 1
+          failureThreshold: 120
+        livenessProbe:
+          httpGet:
+            path: /api/v2/ping
+            port: {{.Values.edgex.port.core.data}}
+      {{- if .Values.edgex.security.enabled }}
+        volumeMounts:
+        - mountPath: /edgex-init
+          name: edgex-init
+        - mountPath: /tmp/edgex/secrets
+          name: edgex-secrets
+      {{- end }}
+      {{- if .Values.edgex.resources.core.data.enforceLimits }}
+        resources:
+          limits:
+            memory: {{ .Values.edgex.resources.core.data.limits.memory }}
+            cpu: {{ .Values.edgex.resources.core.data.limits.cpu }}
+          requests:
+            memory: {{ .Values.edgex.resources.core.data.requests.memory }}
+            cpu: {{ .Values.edgex.resources.core.data.requests.cpu }}
+      {{- end}}
+      hostname: {{.Values.edgex.app.core.data}}
+      restartPolicy: Always
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: {{ .Values.edgex.security.runAsUser }}
+        runAsGroup: {{ .Values.edgex.security.runAsGroup }}
+    {{- if .Values.edgex.security.enabled }}
+      volumes:
+      - name: edgex-init
+        persistentVolumeClaim:
+          claimName: edgex-init
+      - name: edgex-secrets
+        persistentVolumeClaim:
+          claimName: edgex-secrets
+    {{- end}}

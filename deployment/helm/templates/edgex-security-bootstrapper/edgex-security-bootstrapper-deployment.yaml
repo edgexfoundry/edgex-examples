@@ -1,0 +1,75 @@
+# Copyright (C) 2022 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+{{- if .Values.edgex.security.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    org.edgexfoundry.service: {{.Values.edgex.app.bootstrapper}}
+  name: {{.Values.edgex.app.bootstrapper}}
+spec:
+  replicas: {{.Values.edgex.replicas.vault}}
+  selector:
+    matchLabels:
+      org.edgexfoundry.service: {{.Values.edgex.app.bootstrapper}}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        org.edgexfoundry.service: {{.Values.edgex.app.bootstrapper}}
+    spec:
+      automountServiceAccountToken: false
+      initContainers:
+      - name: prep-edgex-init
+        image: {{.Values.edgex.image.bootstrapper.repository}}:{{.Values.edgex.image.bootstrapper.tag}}
+        imagePullPolicy: {{.Values.edgex.image.bootstrapper.pullPolicy}}
+        command: [ "sh", "-c", "cp -rpd /edgex-init/* /edgex-init-volume/; exit 0" ]
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsUser: 0
+          runAsGroup: 0
+        volumeMounts:
+          - mountPath: /edgex-init-volume
+            name: edgex-init
+      containers:
+      - name: {{.Values.edgex.app.bootstrapper}}
+        image: {{.Values.edgex.image.bootstrapper.repository}}:{{.Values.edgex.image.bootstrapper.tag}}
+        imagePullPolicy: {{.Values.edgex.image.bootstrapper.pullPolicy}}
+        env:
+        - name: EDGEX_USER
+          value: "{{ .Values.edgex.security.runAsUser }}"
+        - name: EDGEX_GROUP
+          value: "{{ .Values.edgex.security.runAsGroup }}"
+        envFrom:
+        - configMapRef:
+            name: edgex-common-variables
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+        volumeMounts:
+          - mountPath: /edgex-init
+            name: edgex-init
+      {{- if .Values.edgex.resources.vault.enforceLimits }}
+        resources:
+          limits:
+            memory: {{ .Values.edgex.resources.vault.limits.memory }}
+            cpu: {{ .Values.edgex.resources.vault.limits.cpu }}
+          requests:
+            memory: {{ .Values.edgex.resources.vault.requests.memory }}
+            cpu: {{ .Values.edgex.resources.vault.requests.cpu }}
+      {{- end}}
+      hostname: {{.Values.edgex.app.bootstrapper}}
+      restartPolicy: Always
+      securityContext:
+        runAsNonRoot: false
+        runAsUser: 0
+        runAsGroup: 0
+      volumes:
+        - name: edgex-init
+          persistentVolumeClaim:
+            claimName: edgex-init
+{{- end}}

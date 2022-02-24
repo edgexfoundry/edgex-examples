@@ -1,0 +1,309 @@
+# Copyright (C) 2022 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Default values for Edgex.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+expose:
+  # Option value: ClusterIP/NodePort/LoadBalancer
+  type: ClusterIP
+
+# edgex defines a set of configuration properties for application-level concerns
+edgex:
+
+  # app defines a single point in naming/referring to an application. For each application, the value
+  # define its label name, resource name or base of the resource name, and service name.
+  app:
+    core:
+      command: edgex-core-command
+      data: edgex-core-data
+      metadata: edgex-core-metadata
+    support:
+      notifications: edgex-support-notifications
+      scheduler: edgex-support-scheduler
+    appservice:
+      rules: edgex-app-rules-engine
+    device:
+      virtual: edgex-device-virtual
+      rest: edgex-device-rest
+    ui: edgex-ui
+    system: edgex-sys-mgmt-agent
+    consul: edgex-core-consul
+    redis: edgex-redis
+    ekuiper: edgex-kuiper
+    vault: edgex-vault
+    bootstrapper: edgex-security-bootstrapper
+    secretstoresetup: edgex-security-secretstore-setup
+
+  # image defines configuration properties for docker-image-level concerns
+  image:
+    core:
+      command:
+        repository: edgexfoundry/core-command
+        tag: "2.1.0"
+        pullPolicy: IfNotPresent
+      data:
+        repository: edgexfoundry/core-data
+        tag: "2.1.0"
+        pullPolicy: IfNotPresent
+      metadata:
+        repository: edgexfoundry/core-metadata
+        tag: "2.1.0"
+        pullPolicy: IfNotPresent
+    support:
+      notifications:
+        repository: edgexfoundry/support-notifications
+        tag: "2.1.0"
+        pullPolicy: IfNotPresent
+      scheduler:
+        repository: edgexfoundry/support-scheduler
+        tag: "2.1.0"
+        pullPolicy: IfNotPresent
+    appservice:
+      rules:
+        repository: edgexfoundry/app-service-configurable
+        tag: "2.1.0"
+        pullPolicy: IfNotPresent
+    device:
+      virtual:
+        repository: edgexfoundry/device-virtual
+        tag: "2.1.0"
+        pullPolicy: IfNotPresent
+      rest:
+        repository: edgexfoundry/device-rest
+        tag: "2.1.0"
+        pullPolicy: IfNotPresent
+    ui:
+      repository: edgexfoundry/edgex-ui
+      tag: "2.1.0"
+      pullPolicy: IfNotPresent
+    system:
+      repository: edgexfoundry/sys-mgmt-agent
+      tag: "2.1.0"
+      pullPolicy: IfNotPresent
+    consul:
+      repository: consul
+      tag: "1.10"
+      pullPolicy: IfNotPresent
+    redis:
+      repository: redis
+      tag: "6.2-alpine"
+      pullPolicy: IfNotPresent
+    ekuiper:
+      repository: lfedge/ekuiper
+      tag: "1.3.1-alpine"
+      pullPolicy: IfNotPresent
+    vault:
+      repository: vault
+      tag: "1.8.5"
+      pullPolicy: IfNotPresent
+    bootstrapper:
+      repository: edgexfoundry/security-bootstrapper
+      tag: "2.1.0"
+      pullPolicy: IfNotPresent
+    secretstoresetup:
+      repository: edgexfoundry/security-secretstore-setup
+      tag: "2.1.0"
+      pullPolicy: IfNotPresent
+
+  # port defines configuration properties for container, target and host ports
+  port:
+    core:
+      data: 59880
+      metadata: 59881
+      command: 59882
+    support:
+      notifications: 59860
+      scheduler: 59861
+    appservice:
+      rules: 59701
+    device:
+      virtual: 59900
+      rest: 59986
+    system: 58890
+    ui: 4000
+    consul: 8500
+    redis: 6379
+    ekuiper: 59720
+
+  # ports used by security bootstrapping for stage gating edgex init
+  bootstrap:
+    port:
+      start: 54321
+      readytorun: 54329
+      secretstoretokensready: 54322
+      databaseready: 54323
+      registryready: 54324
+      kongdbready: 54325
+
+  # Duplicate default IP binding choice of docker-compose
+  hostPortInternalBind: 127.0.0.1
+  hostPortExternalBind: 0.0.0.0
+
+  # replicas defines the number of replicas in a Deployment for the respective application
+  replicas:
+    core:
+      command: 1
+      data: 1
+      metadata: 1
+    support:
+      notifications: 1
+      scheduler: 1
+    appservice:
+      rules: 1
+    device:
+      virtual: 1
+      rest: 1
+    ui: 1
+    system: 1
+    consul: 1
+    redis: 1
+    ekuiper: 1
+
+  # UID/GID for container user
+  security:
+    enabled: false
+    runAsUser: 2002
+    runAsGroup: 2001
+    tlsHost: edgex
+
+  # resources defines the cpu and memory limits and requests for the respective application
+  resources:
+    core:
+      command:
+        enforceLimits: false
+        limits:
+          cpu: 1
+          memory: 512Mi
+        requests:
+          cpu: 0.5
+          memory: 256Mi
+      data:
+        enforceLimits: false
+        limits:
+          cpu: 1
+          memory: 512Mi
+        requests:
+          cpu: 0.5
+          memory: 256Mi
+      metadata:
+        enforceLimits: false
+        limits:
+          cpu: 1
+          memory: 512Mi
+        requests:
+          cpu: 0.5
+          memory: 256Mi
+    support:
+      notifications:
+        enforceLimits: false
+        limits:
+          cpu: 1
+          memory: 512Mi
+        requests:
+          cpu: 0.5
+          memory: 256Mi
+      scheduler:
+        enforceLimits: false
+        limits:
+          cpu: 1
+          memory: 512Mi
+        requests:
+          cpu: 0.5
+          memory: 256Mi
+    appservice:
+      rules:
+        enforceLimits: false
+        limits:
+          cpu: 1
+          memory: 512Mi
+        requests:
+          cpu: 0.5
+          memory: 256Mi
+    device:
+      virtual:
+        enforceLimits: false
+        limits:
+          cpu: 1
+          memory: 512Mi
+        requests:
+          cpu: 0.5
+          memory: 256Mi
+      rest:
+        enforceLimits: false
+        limits:
+          cpu: 1
+          memory: 512Mi
+        requests:
+          cpu: 0.5
+          memory: 256Mi
+    ui:
+      enforceLimits: false
+      limits:
+        cpu: 1
+        memory: 512Mi
+      requests:
+        cpu: 0.5
+        memory: 256Mi
+    system:
+      enforceLimits: false
+      limits:
+        cpu: 1
+        memory: 512Mi
+      requests:
+        cpu: 0.5
+        memory: 256Mi
+    consul:
+      enforceLimits: false
+      limits:
+        cpu: 1
+        memory: 512Mi
+      requests:
+        cpu: 0.5
+        memory: 256Mi
+    redis:
+      enforceLimits: false
+      limits:
+        cpu: 1
+        memory: 512Mi
+      requests:
+        cpu: 0.5
+        memory: 256Mi
+    ekuiper:
+      enforceLimits: false
+      limits:
+        cpu: 1
+        memory: 512Mi
+      requests:
+        cpu: 0.5
+        memory: 256Mi
+    vault:
+      enforceLimits: false
+      limits:
+        cpu: 1
+        memory: 512Mi
+      requests:
+        cpu: 0.5
+        memory: 256Mi
+    bootstrapper:
+      enforceLimits: false
+      limits:
+        cpu: 1
+        memory: 512Mi
+      requests:
+        cpu: 0.5
+        memory: 256Mi
+    secretstoresetup:
+      enforceLimits: false
+      limits:
+        cpu: 1
+        memory: 512Mi
+      requests:
+        cpu: 0.5
+        memory: 256Mi
+
+  storage:
+    className: ""
+

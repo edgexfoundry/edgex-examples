@@ -1,0 +1,91 @@
+# Copyright (C) 2022 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    org.edgexfoundry.service: {{.Values.edgex.app.support.scheduler}}
+  name: {{.Values.edgex.app.support.scheduler}}
+spec:
+  replicas: {{.Values.edgex.replicas.support.scheduler}}
+  selector:
+    matchLabels:
+      org.edgexfoundry.service: {{.Values.edgex.app.support.scheduler}}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        org.edgexfoundry.service: {{.Values.edgex.app.support.scheduler}}
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - name: {{.Values.edgex.app.support.scheduler}}
+        image: {{.Values.edgex.image.support.scheduler.repository}}:{{.Values.edgex.image.support.scheduler.tag}}
+        imagePullPolicy: {{.Values.edgex.image.support.scheduler.pullPolicy}}
+      {{- if .Values.edgex.security.enabled }}
+        command: ["/edgex-init/ready_to_run_wait_install.sh"]
+        args: ["/support-scheduler", "-cp=consul.http://edgex-core-consul:8500", "--registry", "--confdir=/res"]
+      {{- end}}
+        ports:
+        - containerPort: {{.Values.edgex.port.support.scheduler}}
+      {{- if not .Values.edgex.security.enabled }}
+          hostPort: {{.Values.edgex.port.support.scheduler}}
+          hostIP: {{.Values.edgex.hostPortInternalBind}}
+      {{- end}}
+        envFrom:
+        - configMapRef:
+            name: edgex-common-variables
+        env:
+        - name: SERVICE_HOST
+          value: {{.Values.edgex.app.support.scheduler}}
+        - name: INTERVALACTIONS_SCRUBPUSHED_HOST
+          value: {{.Values.edgex.app.core.data}}
+        - name: INTERVALACTIONS_SCRUBAGED_HOST
+          value: {{.Values.edgex.app.core.data}}
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+        startupProbe:
+          httpGet:
+            path: /api/v2/ping
+            port: {{.Values.edgex.port.support.scheduler}}
+          periodSeconds: 1
+          failureThreshold: 120
+        livenessProbe:
+          httpGet:
+            path: /api/v2/ping
+            port: {{.Values.edgex.port.support.scheduler}}
+      {{- if .Values.edgex.security.enabled }}
+        volumeMounts:
+        - mountPath: /edgex-init
+          name: edgex-init
+        - mountPath: /tmp/edgex/secrets
+          name: edgex-secrets
+      {{- end }}
+      {{- if .Values.edgex.resources.support.scheduler.enforceLimits }}
+        resources:
+          limits:
+            memory: {{ .Values.edgex.resources.support.scheduler.limits.memory }}
+            cpu: {{ .Values.edgex.resources.support.scheduler.limits.cpu }}
+          requests:
+            memory: {{ .Values.edgex.resources.support.scheduler.requests.memory }}
+            cpu: {{ .Values.edgex.resources.support.scheduler.requests.cpu }}
+      {{- end}}
+      hostname: {{.Values.edgex.app.support.scheduler}}
+      restartPolicy: Always
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: {{ .Values.edgex.security.runAsUser }}
+        runAsGroup: {{ .Values.edgex.security.runAsGroup }}
+    {{- if .Values.edgex.security.enabled }}
+      volumes:
+      - name: edgex-init
+        persistentVolumeClaim:
+          claimName: edgex-init
+      - name: edgex-secrets
+        persistentVolumeClaim:
+          claimName: edgex-secrets
+    {{- end}}

@@ -1,0 +1,46 @@
+# Copyright (C) 2022 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: edgex-common-variables
+data:
+  CLIENTS_CORE_DATA_HOST: {{.Values.edgex.app.core.data}}
+  CLIENTS_CORE_METADATA_HOST: {{.Values.edgex.app.core.metadata}}
+  CLIENTS_CORE_COMMAND_HOST: {{.Values.edgex.app.core.command}}
+  CLIENTS_SUPPORT_NOTIFICATIONS_HOST: {{.Values.edgex.app.support.notifications}}
+  CLIENTS_SUPPORT_SCHEDULER_HOST: {{.Values.edgex.app.support.scheduler}}
+  MESSAGEQUEUE_HOST: {{.Values.edgex.app.redis}}
+  REGISTRY_HOST: {{.Values.edgex.app.consul}}
+  DATABASES_PRIMARY_HOST: {{.Values.edgex.app.redis}}
+{{- if .Values.edgex.security.enabled }}
+  EDGEX_SECURITY_SECRET_STORE: "true"
+  SECRETSTORE_HOST: edgex-vault
+  SECRETSTORE_PORT: "8200"
+  DEFAULT_EDGEX_RUN_CMD_PARMS: "-cp=consul.http://edgex-core-consul:8500 --registry --confdir=/res"
+  # stagegate
+  STAGEGATE_WAITFOR_TIMEOUT: 60s
+  STAGEGATE_BOOTSTRAPPER_HOST: {{.Values.edgex.app.bootstrapper}}
+  STAGEGATE_BOOTSTRAPPER_STARTPORT: "54321"
+  STAGEGATE_SECRETSTORESETUP_HOST: edgex-security-secretstore-setup
+  STAGEGATE_SECRETSTORESETUP_TOKENS_READYPORT: "54322"
+  # this is intended to be the same as Database.Primary.Host/.Port for other services
+  STAGEGATE_DATABASE_HOST: {{.Values.edgex.app.redis}}
+  STAGEGATE_DATABASE_PORT: "6379"
+  STAGEGATE_DATABASE_READYPORT: "6379"
+  # this is intended to be the same as Registry.Host/.Port for other services
+  STAGEGATE_REGISTRY_HOST: {{.Values.edgex.app.consul}}
+  STAGEGATE_REGISTRY_PORT: "8500"
+  STAGEGATE_REGISTRY_READYPORT: "54324"
+  STAGEGATE_KONGDB_HOST: edgex-kong-db
+  STAGEGATE_KONGDB_PORT: "5432"
+  STAGEGATE_KONGDB_READYPORT: "54325"
+  STAGEGATE_READY_TORUNPORT: "54329"
+  PROXY_SETUP_HOST: edgex-security-proxy-setup
+  API_GATEWAY_HOST: edgex-kong
+  API_GATEWAY_STATUS_PORT: "8100"
+{{- else }}
+  EDGEX_SECURITY_SECRET_STORE: "false"
+{{- end }}

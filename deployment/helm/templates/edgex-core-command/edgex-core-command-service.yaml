@@ -1,0 +1,17 @@
+# Copyright (C) 2022 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    org.edgexfoundry.service: {{.Values.edgex.app.core.command}}
+  name: {{.Values.edgex.app.core.command}}
+spec:
+  ports:
+  - name: "http"
+    port: {{.Values.edgex.port.core.command}}
+  selector:
+    org.edgexfoundry.service: {{.Values.edgex.app.core.command}}
+  type: {{.Values.expose.type}}
