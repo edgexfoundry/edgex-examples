@@ -28,7 +28,7 @@ helm uninstall edgex-jakarta -n edgex
 
 ## Test EdgeX
 
-EdgeX on kubernetes using NodePort type to expose services by default,You can use ping command to test whether the EdgeX services start successfully.
+EdgeX on kubernetes using NodePort type to expose services by default. You can use ping command to test whether the EdgeX services start successfully.
 
 The ping command format:
 ```bash
@@ -53,7 +53,7 @@ Use details see [EdgeX UI doc](https://github.com/edgexfoundry/edgex-ui-go)
 - This project is based on [docker-compose-no-secty.yml](https://github.com/edgexfoundry/edgex-compose/blob/jakarta/docker-compose-no-secty.yml),
 you can implement your customized version based on this.
 - Since the EdgeX pods communicates with each other through the kubernetes service name, make sure the kubernetes DNS is enabled.
-- Since other edgex services need to rely on consul to obtain configuration or register themselves to consul, other services cannot run normally until consul starts successfully.
+- Since other EdgeX services need to rely on consul to obtain configuration or register themselves to consul, other services cannot run normally until consul starts successfully.
 - Unlike the docker-compose files for this release (which use a separate Docker volume container), the manifest files mount host based volumes as follows:
 
 1、edgex-core-consul's /consul/config directory is mapped to the host's /mnt/edgex-consul-config directory.
