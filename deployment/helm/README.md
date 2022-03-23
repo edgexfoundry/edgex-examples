@@ -13,9 +13,9 @@ Based on EdgeX [Jakarta](https://github.com/edgexfoundry/edgex-compose/tree/jaka
 Install the EdgeX helm chart with a release name edgex-jakarta
 
 ```bash
-$ git clone https://github.com/lenny-intel/edgex-helm
-$ cd edgex-helm
-$ git checkout jakarta
+$ git clone https://github.com/edgexfoundry/edgex-examples.git
+$ cd edgex-examples
+$ cd deployment/helm
 $ kubectl create namespace edgex
 $ helm install edgex-jakarta -n edgex .
 ```
