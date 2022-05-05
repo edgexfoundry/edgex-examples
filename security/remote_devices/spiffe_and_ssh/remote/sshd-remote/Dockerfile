@@ -2,7 +2,7 @@
 # 
 # SPDX-License-Identifier: Apache-2.0
 
-FROM ubuntu:latest
+FROM debian:latest
 
 ENV DEBIAN_FRONTEND=noninteractive
 
