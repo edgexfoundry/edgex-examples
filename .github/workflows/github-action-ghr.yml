@@ -1,0 +1,32 @@
+on:
+  push:
+    tags:
+      - '*'
+name: Build and release on push
+jobs:
+  release:
+    name: create release artifacts 
+    runs-on: ubuntu-latest
+    steps:
+      - name: clone edgex examples repo
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Print github workspace
+        run: echo $GITHUB_WORKSPACE && pwd && echo ${{ github.workspace }} 
+
+      - name: tar zip edgex jakarta helm directory
+        shell: bash
+        run: |
+          (cd $GITHUB_WORKSPACE/deployment && tar -czvf edgex-examples-helm.tar.gz helm)
+
+      - name: upload helm tarball release artifact 
+        uses: svenstaro/upload-release-action@v2 
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ${{ github.workspace}}/deployment/edgex-examples-helm.tar.gz
+          asset_name: edgex-examples-helm.tar.gz
+          tag: ${{ github.ref }}
+          overwrite: true
+          body: "EdgeX examples with helm deployment tarball asset"
