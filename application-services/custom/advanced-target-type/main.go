@@ -43,9 +43,9 @@ func main() {
 	// 2) This is our functions pipeline configuration, the collection of functions to
 	// execute every time an event is triggered.
 	err := appService.SetFunctionsPipeline(
-		functions.FormatPhoneDisplay,             // Expects a Person as set by TargetType
-		functions.ConvertToXML,                   // Expects a Person
-		functions.PrintXmlToConsole,              // Expects XML string
+		functions.FormatPhoneDisplay,                 // Expects a Person as set by TargetType
+		functions.ConvertToXML,                       // Expects a Person
+		functions.PrintXmlToConsole,                  // Expects XML string
 		transforms.NewResponseData().SetResponseData, // Expects string or []byte. Returns XML formatted Person with PhoneDisplay set sent as the trigger response
 	)
 
