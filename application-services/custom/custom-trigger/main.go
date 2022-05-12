@@ -88,7 +88,7 @@ func (t *stdinTrigger) Initialize(_ *sync.WaitGroup, ctx context.Context, _ <-ch
 
 					t.tc.Logger.Tracef("sending message to runtime %+v", env)
 
-					err := t.tc.MessageReceived(nil, env, nil)
+					err := t.tc.MessageReceived(nil, env, t.responseHandler)
 
 					if err != nil {
 						t.tc.Logger.Error(err.Error())
@@ -101,6 +101,12 @@ func (t *stdinTrigger) Initialize(_ *sync.WaitGroup, ctx context.Context, _ <-ch
 	return func() {
 		cancel()
 	}, nil
+}
+
+func (t *stdinTrigger) responseHandler(ctx interfaces.AppFunctionContext, pipeline *interfaces.FunctionPipeline) error {
+	t.tc.Logger.Infof("Responding to pipeline %s with '%s'", pipeline.Id, string(ctx.ResponseData()))
+	os.Stdout.WriteString(">")
+	return nil
 }
 
 func main() {
@@ -173,8 +179,11 @@ func printLowerToConsole(appContext interfaces.AppFunctionContext, data interfac
 
 	appContext.LoggingClient().Info("PrintToConsole")
 
-	os.Stdout.WriteString(fmt.Sprintf("'%s' received %s ago\n>", strings.ToLower(string(input)), wait.String()))
+	processed := strings.ToLower(string(input))
 
+	appContext.LoggingClient().Infof("'%s' received %s ago\n>", processed, wait.String())
+
+	appContext.SetResponseData([]byte(processed))
 	return false, nil
 }
 
@@ -192,7 +201,10 @@ func printUpperToConsole(appContext interfaces.AppFunctionContext, data interfac
 
 	appContext.LoggingClient().Info("PrintToConsole")
 
-	os.Stdout.WriteString(fmt.Sprintf("'%s' received %s ago\n>", strings.ToUpper(string(input)), wait.String()))
+	processed := strings.ToUpper(string(input))
+	appContext.LoggingClient().Infof("'%s' received %s ago\n", processed, wait.String())
+
+	appContext.SetResponseData([]byte(processed))
 
 	return false, nil
 }
