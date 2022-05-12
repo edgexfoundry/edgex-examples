@@ -42,70 +42,70 @@ edgex:
     core:
       command:
         repository: edgexfoundry/core-command
-        tag: "2.1.0"
+        tag: "2.2.0"
         pullPolicy: IfNotPresent
       data:
         repository: edgexfoundry/core-data
-        tag: "2.1.0"
+        tag: "2.2.0"
         pullPolicy: IfNotPresent
       metadata:
         repository: edgexfoundry/core-metadata
-        tag: "2.1.0"
+        tag: "2.2.0"
         pullPolicy: IfNotPresent
     support:
       notifications:
         repository: edgexfoundry/support-notifications
-        tag: "2.1.0"
+        tag: "2.2.0"
         pullPolicy: IfNotPresent
       scheduler:
         repository: edgexfoundry/support-scheduler
-        tag: "2.1.0"
+        tag: "2.2.0"
         pullPolicy: IfNotPresent
     appservice:
       rules:
         repository: edgexfoundry/app-service-configurable
-        tag: "2.1.0"
+        tag: "2.2.0"
         pullPolicy: IfNotPresent
     device:
       virtual:
         repository: edgexfoundry/device-virtual
-        tag: "2.1.0"
+        tag: "2.2.0"
         pullPolicy: IfNotPresent
       rest:
         repository: edgexfoundry/device-rest
-        tag: "2.1.0"
+        tag: "2.2.0"
         pullPolicy: IfNotPresent
     ui:
       repository: edgexfoundry/edgex-ui
-      tag: "2.1.0"
+      tag: "2.2.0"
       pullPolicy: IfNotPresent
     system:
       repository: edgexfoundry/sys-mgmt-agent
-      tag: "2.1.0"
+      tag: "2.2.0"
       pullPolicy: IfNotPresent
     consul:
       repository: consul
-      tag: "1.10"
+      tag: "1.10.10"
       pullPolicy: IfNotPresent
     redis:
       repository: redis
-      tag: "6.2-alpine"
+      tag: "6.2.6-alpine"
       pullPolicy: IfNotPresent
     ekuiper:
       repository: lfedge/ekuiper
-      tag: "1.3.1-alpine"
+      tag: "1.4.4-alpine"
       pullPolicy: IfNotPresent
     vault:
       repository: vault
-      tag: "1.8.5"
+      tag: "1.8.9"
       pullPolicy: IfNotPresent
     bootstrapper:
       repository: edgexfoundry/security-bootstrapper
-      tag: "2.1.0"
+      tag: "2.2.0"
       pullPolicy: IfNotPresent
     secretstoresetup:
       repository: edgexfoundry/security-secretstore-setup
-      tag: "2.1.0"
+      tag: "2.2.0"
       pullPolicy: IfNotPresent
 
   # port defines configuration properties for container, target and host ports
