@@ -1,7 +1,7 @@
 # EdgeX Foundry on Kubernetes
 
 A [Helm](https://helm.sh/) chart to easily deploy the EdgeX IoT project on Kubernetes.
-Based on EdgeX [Jakarta](https://github.com/edgexfoundry/edgex-compose/tree/jakarta) version.
+Based on EdgeX [Jakarta](https://github.com/edgexfoundry/edgex-compose/tree/kamakura) version.
 
 ## Prerequisites
 
@@ -10,20 +10,20 @@ Based on EdgeX [Jakarta](https://github.com/edgexfoundry/edgex-compose/tree/jaka
 
 ## Installation
 
-Install the EdgeX helm chart with a release name edgex-jakarta
+Install the EdgeX helm chart with a release name edgex-kamakura
 
 ```bash
 $ git clone https://github.com/edgexfoundry/edgex-examples.git
 $ cd edgex-examples
 $ cd deployment/helm
 $ kubectl create namespace edgex
-$ helm install edgex-jakarta -n edgex .
+$ helm install edgex-kamakura -n edgex .
 ```
 
 ## Uninstallation
 
 ```bash
-helm uninstall edgex-jakarta -n edgex
+helm uninstall edgex-kamakura -n edgex
 ```
 
 ## Test EdgeX
@@ -50,7 +50,7 @@ Use details see [EdgeX UI doc](https://github.com/edgexfoundry/edgex-ui-go)
 
 ## Tips
 
-- This project is based on [docker-compose-no-secty.yml](https://github.com/edgexfoundry/edgex-compose/blob/jakarta/docker-compose-no-secty.yml),
+- This project is based on [docker-compose-no-secty.yml](https://github.com/edgexfoundry/edgex-compose/blob/kamakura/docker-compose-no-secty.yml),
 you can implement your customized version based on this.
 - Since the EdgeX pods communicates with each other through the kubernetes service name, make sure the kubernetes DNS is enabled.
 - Since other EdgeX services need to rely on consul to obtain configuration or register themselves to consul, other services cannot run normally until consul starts successfully.
@@ -133,7 +133,7 @@ If necessary, uninstall the non-security one first.
 The helm chart is not coded to allow for dynamic switching in and out of secure mode.
 
 ```sh
-helm install edgex-jakarta --set edgex.security.enabled=true -n edgex .
+helm install edgex-kamakura --set edgex.security.enabled=true -n edgex .
 ```
 
 Finally, test with `curl`.
