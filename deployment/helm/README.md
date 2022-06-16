@@ -12,6 +12,11 @@ Based on EdgeX [Jakarta](https://github.com/edgexfoundry/edgex-compose/tree/kama
 
 Install the EdgeX helm chart with a release name edgex-kamakura
 
+You can install the helm chart 1 of 2 ways. 
+1. Install the chart from by cloning the edgex-examples repository
+2. Install the chart from the tar zipped asset from a tag
+
+**If you want to clone the entire edgex-examples repository:**
 ```bash
 $ git clone https://github.com/edgexfoundry/edgex-examples.git
 $ cd edgex-examples
@@ -20,6 +25,38 @@ $ kubectl create namespace edgex
 $ helm install edgex-kamakura -n edgex .
 ```
 
+**If you are only interested in installing the helm chart as a standalone:**
+1. Navigate to the tagged asset by selecting the tag you desire to use
+ 
+![image](https://user-images.githubusercontent.com/8902109/174185451-51273981-af57-42d7-ab8d-ae913a03e1b6.png)
+
+2. Click on **Downloads** for the tag
+ 
+![image](https://user-images.githubusercontent.com/8902109/174185618-eff4eb77-3185-46aa-b678-169f4c8730c0.png)
+
+3. Either right click and copy the url or click to download the `edgex-examples-helm.tar.gz` file to save locally
+
+![image](https://user-images.githubusercontent.com/8902109/174185727-7506e740-d51e-43c7-bf80-7effeb2402cb.png)
+
+If you're using a Linux variant, you can use the copied URL to download the file from your terminal
+```console
+curl -o edgex-examples-heml.tar.gz <url for file from tag>
+```
+
+You will then need to unpack the tar zipped file:
+```console
+tar -xvf edgex-examples-heml.tar.gz
+```
+You will see output similar to:
+![image](https://user-images.githubusercontent.com/8902109/174187588-910e9ee7-c8e2-4083-a7c3-d2614385c42c.png)
+
+You can now change to the unzipped directory and install the helm chart.
+
+```console
+cd helm
+kubectl create namespace edgex
+helm install edgex-kamakura -n edgex .
+```
 ## Uninstallation
 
 ```bash
