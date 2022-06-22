@@ -1,0 +1,11 @@
+# Copyright (C) 2022 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+*
+!src
+!.browserslistrc
+!*.json
+!*.js
+
+**/node_modules
+.angular

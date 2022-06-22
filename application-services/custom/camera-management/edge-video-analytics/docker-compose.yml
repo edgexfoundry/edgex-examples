@@ -1,0 +1,65 @@
+#
+# Copyright (c) 2022 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+version: "3"
+
+networks:
+  evam_network:
+    driver: "bridge"
+
+services:
+  broker:
+    image: eclipse-mosquitto
+    hostname: mqtt
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    networks:
+      - evam_network
+
+  edge_video_analytics_microservice:
+    image: intel/edge_video_analytics_microservice:0.7.0
+    hostname: edge_video_analytics_microservice
+    privileged: true
+    entrypoint: ["./run.sh"]
+    ports:
+      - '8080:8080'
+      - '8554:8554'
+    networks:
+      - evam_network
+    environment:
+      ENABLE_RTSP: "true"
+      RTSP_PORT: 8554
+      RUN_MODE: EVA
+      GST_DEBUG: "*:2,python*:4"
+    volumes:
+      - "./pipelines/:/app/pipelines/"
+      - "./models:/app/models/"
+    device_cgroup_rules:
+      # Default run - device-cgroup-rule='c 189:* rmw'
+      # NCS2 run - device-cgroup-rule='c 209:* rmw'
+      # Selective rules can be applied for deployment
+      - 'c 189:* rmw'
+      - 'c 209:* rmw'
+    devices:
+      # Following devices under /dev filesystem will be needed based on usecase
+      # dri - GPU
+      # ion - VPU
+      # USB camera devices
+      # Selective mount can be done for deployment as mounting whole /dev is not recommended
+      - "/dev:/dev"

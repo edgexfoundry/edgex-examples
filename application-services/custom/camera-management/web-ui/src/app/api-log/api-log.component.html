@@ -1,0 +1,20 @@
+<!-- Copyright (C) 2022 Intel Corporation
+SPDX-License-Identifier: Apache-2.0 -->
+
+<mat-accordion>
+  <mat-expansion-panel *ngFor="let item of data.apiLog">
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        <mat-chip-list selectable="false">
+          <mat-chip class="request-method" [ngClass]="item.request.method === 'GET' ? 'request-get' : item.request.method === 'POST' ? 'request-post' : ''">{{item.request.method}}</mat-chip>
+        </mat-chip-list>
+      </mat-panel-title>
+      <mat-panel-description><span>{{item.request.url}}</span></mat-panel-description>
+      <mat-chip-list class="response-chips" *ngIf="item.response !== undefined" selectable="false">
+        <mat-chip [ngClass]="item.response.ok ? 'ok-chip' : 'bad-chip'">{{item.response.status}}: {{item.response.statusText}}</mat-chip>
+      </mat-chip-list>
+    </mat-expansion-panel-header>
+    <pre *ngIf="item.response !== undefined && item.response.body !== undefined">{{item.response.body | json}}</pre>
+    <pre *ngIf="item.response !== undefined && item.response.error !== undefined">{{item.response.error | json}}</pre>
+  </mat-expansion-panel>
+</mat-accordion>

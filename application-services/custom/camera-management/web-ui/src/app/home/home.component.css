@@ -1,0 +1,18 @@
+/* Copyright (C) 2022 Intel Corporation
+SPDX-License-Identifier: Apache-2.0 */
+
+.material-icons {
+  font-size: 32px;
+  zoom: 2;
+}
+
+.pause-events {
+  margin-left: 10px;
+  background-color: #ffbd3a;
+}
+
+.stream-events {
+  margin-left: 10px;
+  background-color: #188729;
+  color: white;
+}

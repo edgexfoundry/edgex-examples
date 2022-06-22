@@ -1,0 +1,32 @@
+/* Copyright (C) 2022 Intel Corporation
+SPDX-License-Identifier: Apache-2.0 */
+
+.mat-icon-button {
+  width: auto;
+  height: auto;
+  margin: 5px;
+}
+
+.material-icons {
+  zoom: 2;
+}
+
+.center-button {
+  color: transparent;
+  background-color: transparent;
+}
+
+.goto-presets {
+  /*display: inline;*/
+  /*float: right;*/
+}
+
+.preset-button {
+  /*display: block;*/
+  margin: 10px;
+}
+
+.center-button {
+  color: transparent;
+  background-color: transparent;
+}

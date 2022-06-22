@@ -1,0 +1,35 @@
+<!-- Copyright (C) 2022 Intel Corporation
+SPDX-License-Identifier: Apache-2.0 -->
+
+<mat-form-field appearance="fill">
+  <mat-label>Select a camera</mat-label>
+  <mat-select [(value)]="data.selectedCamera" (valueChange)="cameraSelectionChanged($event)">
+    <mat-option *ngFor="let camera of data.cameras" value="{{camera.name}}">{{camera.name}}</mat-option>
+  </mat-select>
+</mat-form-field>
+
+<br/>
+
+<mat-form-field appearance="fill">
+  <mat-label>Select a video stream</mat-label>
+  <mat-select [(value)]="data.selectedProfile" (valueChange)="profileSelectionChanged($event)">
+    <mat-option *ngFor="let profile of data.profiles" value="{{profile.Token}}">{{profile.Token}} ({{profile.VideoEncoderConfiguration.Resolution.Width}}x{{profile.VideoEncoderConfiguration.Resolution.Height}} {{profile.VideoEncoderConfiguration.Encoding}} @ {{profile.VideoEncoderConfiguration.RateControl.FrameRateLimit}} fps)</mat-option>
+  </mat-select>
+</mat-form-field>
+
+<br />
+
+<mat-form-field class="pipeline-picker" appearance="fill">
+  <mat-label>Select a pipeline</mat-label>
+  <mat-select [(value)]="data.selectedPipeline">
+    <mat-option *ngFor="let pipeline of data.pipelines" value="{{pipeline.name}}/{{pipeline.version}}">
+      {{pipeline.name}} - {{pipeline.version}}
+    </mat-option>
+  </mat-select>
+</mat-form-field>
+<button mat-raised-button
+        [disabled]="shouldDisablePipeline()"
+        class="start-button"
+        (click)="startPipeline()">
+  Start Pipeline
+</button>

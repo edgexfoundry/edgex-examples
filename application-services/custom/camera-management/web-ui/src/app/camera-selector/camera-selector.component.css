@@ -1,0 +1,30 @@
+/* Copyright (C) 2022 Intel Corporation
+SPDX-License-Identifier: Apache-2.0 */
+
+button {
+  width: auto;
+  height: auto;
+}
+
+.material-icons {
+  zoom: 2;
+}
+
+mat-form-field {
+  width: 600px;
+}
+
+.pipeline-picker {
+  width: 471px;
+}
+
+.start-button {
+  margin-left: 10px;
+  vertical-align: top;
+  margin-top: 10px;
+}
+
+.start-button:enabled {
+  background-color: #09af00;
+  color: white;
+}

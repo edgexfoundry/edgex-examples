@@ -1,0 +1,49 @@
+<!-- Copyright (C) 2022 Intel Corporation
+SPDX-License-Identifier: Apache-2.0 -->
+
+<div>
+  <button mat-icon-button [disabled]="isPtzDisabled()" (click)="ptz.upLeft(data.selectedCamera, data.selectedProfile)">
+    <mat-icon>north_west</mat-icon>
+  </button>
+  <button mat-icon-button [disabled]="isPtzDisabled()" (click)="ptz.up(data.selectedCamera, data.selectedProfile)">
+    <mat-icon>north</mat-icon>
+  </button>
+  <button mat-icon-button [disabled]="isPtzDisabled()" (click)="ptz.upRight(data.selectedCamera, data.selectedProfile)">
+    <mat-icon>north_east</mat-icon>
+  </button>
+  <button mat-icon-button [disabled]="isZoomDisabled()" (click)="ptz.zoomIn(data.selectedCamera, data.selectedProfile)">
+    <mat-icon>zoom_in</mat-icon>
+  </button>
+</div>
+<div>
+  <button mat-icon-button [disabled]="isPtzDisabled()" (click)="ptz.left(data.selectedCamera, data.selectedProfile)">
+    <mat-icon>west</mat-icon>
+  </button>
+  <button mat-icon-button [disabled]="true">
+    <mat-icon class="center-button">circle</mat-icon>
+  </button>
+  <button mat-icon-button [disabled]="isPtzDisabled()" (click)="ptz.right(data.selectedCamera, data.selectedProfile)">
+    <mat-icon>east</mat-icon>
+  </button>
+  <button mat-icon-button [disabled]="isZoomDisabled()" (click)="ptz.zoomOut(data.selectedCamera, data.selectedProfile)">
+    <mat-icon>zoom_out</mat-icon>
+  </button>
+</div>
+<div>
+  <button mat-icon-button [disabled]="isPtzDisabled()" (click)="ptz.downLeft(data.selectedCamera, data.selectedProfile)">
+    <mat-icon>south_west</mat-icon>
+  </button>
+  <button mat-icon-button [disabled]="isPtzDisabled()" (click)="ptz.down(data.selectedCamera, data.selectedProfile)">
+    <mat-icon>south</mat-icon>
+  </button>
+  <button mat-icon-button [disabled]="isPtzDisabled()" (click)="ptz.downRight(data.selectedCamera, data.selectedProfile)">
+    <mat-icon>south_east</mat-icon>
+  </button>
+</div>
+
+<div class="goto-presets" *ngIf="data.presets != undefined && data.presets.length > 0">
+  <button mat-raised-button class="preset-button" color="primary" *ngFor="let preset of data.presets"
+          (click)="api.gotoPreset(data.selectedCamera, data.selectedProfile, preset.Token)">
+    {{preset.Name === undefined || preset.Name === "" ? preset.Token : preset.Name}}
+  </button>
+</div>

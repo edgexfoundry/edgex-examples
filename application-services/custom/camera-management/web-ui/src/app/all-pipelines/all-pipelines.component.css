@@ -1,0 +1,27 @@
+/* Copyright (C) 2022 Intel Corporation
+SPDX-License-Identifier: Apache-2.0 */
+
+.state-RUNNING {
+  background-color: #09af00;
+  color: white;
+}
+
+.state-QUEUED {
+  background-color: #00838F;
+  color: white;
+}
+
+.state-ERROR {
+  background-color: #C62828;
+  color: white;
+}
+
+button {
+  width: auto;
+  height: auto;
+}
+
+.stop-button {
+  margin-right: 10px;
+}
+
