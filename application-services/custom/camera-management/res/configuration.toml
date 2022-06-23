@@ -44,13 +44,6 @@ RequestTimeout = "5s"
   CORSExposeHeaders = "Cache-Control, Content-Language, Content-Length, Content-Type, Expires, Last-Modified, Pragma, X-Correlation-ID"
   CORSMaxAge = 3600
 
-# TODO: Remove section if not using HTTPS Webserver. Default protocol is HTTP if section is empty
-[HttpServer]
-Protocol = "http"
-SecretName = "https"
-HTTPSCertName = "cert"
-HTTPSKeyName = "key"
-
 [Registry]
 Host = "localhost"
 Port = 8500
