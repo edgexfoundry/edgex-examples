@@ -133,7 +133,7 @@ func (app *CameraManagementApp) getPresetsRoute(w http.ResponseWriter, req *http
 
 	js, err := json.Marshal(presets)
 	if err != nil {
-		msg := fmt.Sprintf("Failed to marshal stream uris: %v", err)
+		msg := fmt.Sprintf("Failed to marshal presets: %v", err)
 		app.lc.Error(msg)
 		http.Error(w, msg, http.StatusInternalServerError)
 		return

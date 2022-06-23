@@ -24,7 +24,7 @@ import (
 )
 
 const (
-	serviceKey = "appcamera"
+	serviceKey = "app-camera-management"
 )
 
 func main() {

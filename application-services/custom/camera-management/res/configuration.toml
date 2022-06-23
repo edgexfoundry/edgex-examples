@@ -15,26 +15,22 @@ LogLevel = "INFO"
       username = ""
       password = ""
 
-    # TODO: Enter your camera credentials here. Note currently only 1 supported
+    # TODO: Enter your camera's credentials here.
+    # NOTE: currently this solution is limited to supporting only 1 username/password combination
+    #       for ALL cameras. In the future when then device-onvif-camera service is able to provide
+    #       us with pre-authenticated uris, this can be removed.
     [Writable.InsecureSecrets.CameraCredentials]
     path = "CameraCredentials"
       [Writable.InsecureSecrets.CameraCredentials.Secrets]
       username = ""
       password = ""
 
-    # TODO: Remove if not using HTTPS Webserver
-    [Writable.InsecureSecrets.HTTPS]
-    path = "https"
-      [Writable.InsecureSecrets.HTTPS.Secrets]
-      cert = ""
-      key = ""
-
 
 [Service]
 HealthCheckInterval = "10s"
 Host = "localhost"
 Port = 59750
-ServerBindAddr = "0.0.0.0" # Leave blank so default to Host value unless different value is needed.
+ServerBindAddr = "" # Leave blank so default to Host value unless different value is needed.
 StartupMsg = "Camera Management Application Service has started"
 MaxResultCount = 0 # Not curently used by App Services.
 MaxRequestSize = 0 # Not curently used by App Services.
@@ -68,7 +64,7 @@ Timeout = "30s"
 
 # TODO: Determine if your service will use secrets in secure mode, i.e. Vault.
 #       if not this secion can be removed, but you must make sure EDGEX_SECURITY_SECRET_STORE is set to false
-#       Note is database is running in secure more and you have Store and Forward enable you will need to run this
+#       Note: If database is running in secure more and you have Store and Forward enabled, you will need to run this
 #       service in secure mode.
 #       For more deatils about SecretStore: https://docs.edgexfoundry.org/1.3/microservices/security/Ch-SecretStore/
 [SecretStore]

@@ -41,13 +41,13 @@ func (info PipelineInfo) getPipelineUrl(evamBaseUrl string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	uri.Path = path.Join(uri.Path, "pipelines", info.Name, info.Version)
+	uri.Path = path.Join(uri.Path, "pipelines", info.Name, info.Version, info.Id)
 	return uri.String(), nil
 }
 
 func (app *CameraManagementApp) addPipelineInfo(camera string, info PipelineInfo) error {
-	app.pipelinesMutex.RLock()
-	defer app.pipelinesMutex.RUnlock()
+	app.pipelinesMutex.Lock()
+	defer app.pipelinesMutex.Unlock()
 	if _, exists := app.pipelinesMap[camera]; !exists {
 		app.pipelinesMap[camera] = info
 		return nil
@@ -56,8 +56,8 @@ func (app *CameraManagementApp) addPipelineInfo(camera string, info PipelineInfo
 }
 
 func (app *CameraManagementApp) deletePipelineInfo(camera string) {
-	app.pipelinesMutex.RLock()
-	defer app.pipelinesMutex.RUnlock()
+	app.pipelinesMutex.Lock()
+	defer app.pipelinesMutex.Unlock()
 	if _, exists := app.pipelinesMap[camera]; exists {
 		delete(app.pipelinesMap, camera)
 	}
@@ -125,7 +125,7 @@ func (app *CameraManagementApp) stopPipeline(deviceName string) error {
 		if err != nil {
 			return err
 		}
-		if err := issueDeleteRequest(context.Background(), &res, pipelineUrl, info.Id); err != nil {
+		if err := issueDeleteRequest(context.Background(), &res, pipelineUrl, ""); err != nil {
 			return errors.Wrap(err, "DELETE request to stop EVAM pipeline failed")
 		}
 		app.deletePipelineInfo(deviceName)
@@ -180,7 +180,7 @@ func (app *CameraManagementApp) getPipelineStatus(deviceName string) (interface{
 		if err != nil {
 			return nil, err
 		}
-		if err := issueGetRequest(context.Background(), &res, pipelineUrl, info.Id+"/status"); err != nil {
+		if err := issueGetRequest(context.Background(), &res, pipelineUrl, "status"); err != nil {
 			return nil, errors.Wrap(err, "GET request to query EVAM pipeline failed")
 		}
 		return res, nil
@@ -190,25 +190,31 @@ func (app *CameraManagementApp) getPipelineStatus(deviceName string) (interface{
 }
 
 func (app *CameraManagementApp) getAllPipelineStatuses() (map[string]PipelineInfoStatus, error) {
-	res := make(map[string]PipelineInfoStatus)
-
+	response := make(map[string]PipelineInfoStatus)
+	// pre-create the response object using a read lock to minimize the time we hold the lock
+	app.pipelinesMutex.RLock()
 	for camera, info := range app.pipelinesMap {
-		var status interface{}
-		pipelineUrl, err := info.getPipelineUrl(app.config.AppCustom.EvamBaseUrl)
+		response[camera] = PipelineInfoStatus{
+			Camera: camera,
+			Info:   info,
+		}
+	}
+	app.pipelinesMutex.RUnlock()
+
+	// loop through the partially filled response map to fill in the missing data. we do not need to hold the lock here.
+	for camera, data := range response {
+		pipelineUrl, err := data.Info.getPipelineUrl(app.config.AppCustom.EvamBaseUrl)
 		if err != nil {
 			return nil, err
 		}
-		if err := issueGetRequest(context.Background(), &status, pipelineUrl, info.Id+"/status"); err != nil {
+		if err = issueGetRequest(context.Background(), &data.Status, pipelineUrl, "status"); err != nil {
 			return nil, errors.Wrap(err, "GET request to query EVAM pipeline failed")
 		}
-		res[camera] = PipelineInfoStatus{
-			Camera: camera,
-			Info:   info,
-			Status: status,
-		}
+		// overwrite the changed result in the map
+		response[camera] = data
 	}
 
-	return res, nil
+	return response, nil
 }
 
 func (app *CameraManagementApp) getPipelines() (interface{}, error) {

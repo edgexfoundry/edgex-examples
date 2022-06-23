@@ -19,6 +19,8 @@ const (
 	relativeMoveCommand = "RelativeMove"
 	gotoPresetCommand   = "GotoPreset"
 	streamUriCommand    = "StreamUri"
+	profilesCommand     = "Profiles"
+	getPresetsCommand   = "GetPresets"
 
 	moveScaleX = 10
 	moveScaleY = 5
@@ -26,7 +28,7 @@ const (
 )
 
 func (app *CameraManagementApp) getProfiles(deviceName string) (ProfilesResponse, error) {
-	profiles, err := app.issueGetCommand(context.Background(), deviceName, "Profiles", struct{}{})
+	profiles, err := app.issueGetCommand(context.Background(), deviceName, profilesCommand, struct{}{})
 	if err != nil {
 		return ProfilesResponse{}, errors.Wrapf(err, "failed to issue get Profiles command")
 	}
@@ -81,7 +83,7 @@ func (app *CameraManagementApp) getPresets(deviceName string, profileToken strin
 		ProfileToken: onvif.ReferenceToken(profileToken),
 	}
 
-	presets, err := app.issueGetCommand(context.Background(), deviceName, "GetPresets", cmd)
+	presets, err := app.issueGetCommand(context.Background(), deviceName, getPresetsCommand, cmd)
 	if err != nil {
 		return GetPresetsResponse{}, errors.Wrapf(err, "failed to issue get presets command")
 	}
@@ -106,11 +108,12 @@ func (app *CameraManagementApp) gotoPreset(deviceName string, profile string, pr
 	return app.sendPutCommand(deviceName, gotoPresetCommand, cmd)
 }
 
-func (app *CameraManagementApp) sendPutCommand(deviceName string, commandName string, command interface{}) (dtosCommon.BaseResponse, error) {
-	app.lc.Infof("Sending PUT command: %s, %+v", commandName, command)
+func (app *CameraManagementApp) sendPutCommand(deviceName string, commandName string, commandValue interface{}) (dtosCommon.BaseResponse, error) {
+	app.lc.Infof("Sending PUT command: %s, %+v", commandName, commandValue)
 	return app.service.CommandClient().IssueSetCommandByNameWithObject(context.Background(), deviceName, commandName,
 		map[string]interface{}{
-			commandName: command,
+			// note: we are using the actual name of the command as the key
+			commandName: commandValue,
 		})
 }
 

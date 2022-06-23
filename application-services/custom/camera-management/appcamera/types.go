@@ -5,6 +5,9 @@
 
 package appcamera
 
+// Note: The code in this file was created from actual JSON payloads, using 1 or more of the
+//       many JSON -> Go struct converters available.
+
 type StreamUriRequest struct {
 	StreamSetup  StreamSetup `json:"StreamSetup"`
 	ProfileToken string      `json:"ProfileToken"`
