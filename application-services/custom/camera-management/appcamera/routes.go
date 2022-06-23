@@ -6,7 +6,6 @@
 package appcamera
 
 import (
-	"encoding/json"
 	"fmt"
 	dtosCommon "github.com/edgexfoundry/go-mod-core-contracts/v2/dtos/common"
 	"github.com/gorilla/mux"
@@ -125,23 +124,12 @@ func (app *CameraManagementApp) getPresetsRoute(w http.ResponseWriter, req *http
 
 	presets, err := app.getPresets(deviceName, profileToken)
 	if err != nil {
-		msg := fmt.Sprintf("Failed to get presets: %v", err)
-		app.lc.Error(msg)
-		http.Error(w, msg, http.StatusInternalServerError)
+		respondError(app.lc, w, http.StatusInternalServerError,
+			fmt.Sprintf("Failed to get presets: %v", err))
 		return
 	}
 
-	js, err := json.Marshal(presets)
-	if err != nil {
-		msg := fmt.Sprintf("Failed to marshal presets: %v", err)
-		app.lc.Error(msg)
-		http.Error(w, msg, http.StatusInternalServerError)
-		return
-	}
-
-	if _, err = w.Write(js); err != nil {
-		app.lc.Error(err.Error())
-	}
+	respondJson(app.lc, w, presets)
 }
 
 func (app *CameraManagementApp) getProfilesRoute(w http.ResponseWriter, req *http.Request) {
@@ -151,61 +139,35 @@ func (app *CameraManagementApp) getProfilesRoute(w http.ResponseWriter, req *htt
 
 	pr, err := app.getProfiles(deviceName)
 	if err != nil {
-		msg := fmt.Sprintf("Failed to get profiles: %v", err)
-		app.lc.Error(msg)
-		http.Error(w, msg, http.StatusInternalServerError)
+		respondError(app.lc, w, http.StatusInternalServerError,
+			fmt.Sprintf("Failed to get profiles: %v", err))
 		return
 	}
 
-	js, err := json.Marshal(pr)
-	if err != nil {
-		msg := fmt.Sprintf("Failed to marshal profiles: %v", err)
-		app.lc.Error(msg)
-		http.Error(w, msg, http.StatusInternalServerError)
-		return
-	}
-
-	if _, err = w.Write(js); err != nil {
-		app.lc.Error(err.Error())
-	}
+	respondJson(app.lc, w, pr)
 }
 
 func (app *CameraManagementApp) getCamerasRoute(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	js, err := app.getCamerasJson()
+	devices, err := app.getDevices()
 	if err != nil {
-		msg := fmt.Sprintf("Failed to get cameras list: %v", err)
-		app.lc.Error(msg)
-		http.Error(w, msg, http.StatusInternalServerError)
+		respondError(app.lc, w, http.StatusInternalServerError,
+			fmt.Sprintf("Failed to get cameras list: %v", err))
 		return
 	}
-
-	if _, err = w.Write(js); err != nil {
-		app.lc.Error(err.Error())
-	}
+	respondJson(app.lc, w, devices)
 }
 
 func (app *CameraManagementApp) getPipelinesRoute(w http.ResponseWriter, _ *http.Request) {
 	pl, err := app.getPipelines()
 	if err != nil {
-		msg := fmt.Sprintf("Failed to get pipelines: %v", err)
-		app.lc.Error(msg)
-		http.Error(w, msg, http.StatusInternalServerError)
+		respondError(app.lc, w, http.StatusInternalServerError,
+			fmt.Sprintf("Failed to get pipelines: %v", err))
 		return
 	}
 
-	js, err := json.Marshal(pl)
-	if err != nil {
-		msg := fmt.Sprintf("Failed to marshal pipelines: %v", err)
-		app.lc.Error(msg)
-		http.Error(w, msg, http.StatusInternalServerError)
-		return
-	}
-
-	if _, err = w.Write(js); err != nil {
-		app.lc.Error(err.Error())
-	}
+	respondJson(app.lc, w, pl)
 }
 
 func (app *CameraManagementApp) startPipelineRoute(w http.ResponseWriter, req *http.Request) {
@@ -223,9 +185,8 @@ func (app *CameraManagementApp) startPipelineRoute(w http.ResponseWriter, req *h
 	}
 
 	if err := app.startPipeline(deviceName, sr.ProfileToken, sr.PipelineName, sr.PipelineVersion); err != nil {
-		msg := fmt.Sprintf("Failed to start pipeline: %v", err)
-		app.lc.Error(msg)
-		http.Error(w, msg, http.StatusInternalServerError)
+		respondError(app.lc, w, http.StatusInternalServerError, fmt.Sprintf("Failed to start pipeline: %v", err))
+		return
 	}
 }
 
@@ -326,9 +287,8 @@ func (app *CameraManagementApp) ptzRoute(w http.ResponseWriter, req *http.Reques
 	}
 
 	if err != nil {
-		msg := fmt.Sprintf("Failed to do ptz: %v", err)
-		app.lc.Error(msg)
-		http.Error(w, msg, http.StatusInternalServerError)
+		respondError(app.lc, w, http.StatusInternalServerError,
+			fmt.Sprintf("Failed to do ptz: %v", err))
 		return
 	}
 	_, err = w.Write([]byte(res.Message))

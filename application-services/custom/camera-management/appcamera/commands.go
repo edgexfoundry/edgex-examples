@@ -78,7 +78,6 @@ func (app *CameraManagementApp) doPTZ(deviceName, profileToken string, x, y, zoo
 }
 
 func (app *CameraManagementApp) getPresets(deviceName string, profileToken string) (GetPresetsResponse, error) {
-
 	cmd := &ptz.GetPresets{
 		ProfileToken: onvif.ReferenceToken(profileToken),
 	}
@@ -99,7 +98,6 @@ func (app *CameraManagementApp) getPresets(deviceName string, profileToken strin
 }
 
 func (app *CameraManagementApp) gotoPreset(deviceName string, profile string, preset string) (dtosCommon.BaseResponse, error) {
-
 	cmd := &ptz.GotoPreset{
 		ProfileToken: (*onvif.ReferenceToken)(&profile),
 		PresetToken:  (*onvif.ReferenceToken)(&preset),
@@ -115,15 +113,6 @@ func (app *CameraManagementApp) sendPutCommand(deviceName string, commandName st
 			// note: we are using the actual name of the command as the key
 			commandName: commandValue,
 		})
-}
-
-func (app *CameraManagementApp) getCamerasJson() ([]byte, error) {
-	devices, err := app.getDevices()
-	if err != nil {
-		return nil, err
-	}
-
-	return json.Marshal(devices)
 }
 
 func (app *CameraManagementApp) getDevices() ([]dtos.Device, error) {
