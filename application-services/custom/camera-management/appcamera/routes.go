@@ -10,6 +10,7 @@ import (
 	dtosCommon "github.com/edgexfoundry/go-mod-core-contracts/v2/dtos/common"
 	"github.com/gorilla/mux"
 	"net/http"
+	"path"
 
 	"github.com/edgexfoundry/go-mod-core-contracts/v2/common"
 	"github.com/pkg/errors"
@@ -22,6 +23,8 @@ const (
 	down    = -1
 	zoomIn  = 1
 	zoomOut = -1
+
+	webUIDistDir = "./web-ui/dist"
 
 	getCamerasPath = common.ApiBase + "/cameras"
 	cameraApiBase  = getCamerasPath + "/{name}"
@@ -88,11 +91,12 @@ func (app *CameraManagementApp) addRoutes() error {
 		return err
 	}
 
-	app.fileServer = http.FileServer(http.Dir("./web-ui/dist"))
+	app.fileServer = http.FileServer(http.Dir(webUIDistDir))
 	// this is a bit of a hack to get refreshing working, as the path is /home
 	if err := app.addRoute("/home", http.MethodGet, app.index); err != nil {
 		return err
 	}
+	// all other routes will be forwarded to serving the web-ui
 	if err := app.addRoute("/{path:.*}", http.MethodGet, app.serveWebUI); err != nil {
 		return err
 	}
@@ -109,7 +113,7 @@ func (app *CameraManagementApp) addRoute(path, method string, f http.HandlerFunc
 
 // Routes
 func (app *CameraManagementApp) index(w http.ResponseWriter, req *http.Request) {
-	http.ServeFile(w, req, "./web-ui/dist/index.html")
+	http.ServeFile(w, req, path.Join(webUIDistDir, "index.html"))
 }
 
 func (app *CameraManagementApp) serveWebUI(w http.ResponseWriter, req *http.Request) {
@@ -117,7 +121,6 @@ func (app *CameraManagementApp) serveWebUI(w http.ResponseWriter, req *http.Requ
 }
 
 func (app *CameraManagementApp) getPresetsRoute(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	rv := mux.Vars(req)
 	deviceName := rv["name"]
 	profileToken := rv["profile"]
@@ -133,7 +136,6 @@ func (app *CameraManagementApp) getPresetsRoute(w http.ResponseWriter, req *http
 }
 
 func (app *CameraManagementApp) getProfilesRoute(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	rv := mux.Vars(req)
 	deviceName := rv["name"]
 
@@ -148,8 +150,6 @@ func (app *CameraManagementApp) getProfilesRoute(w http.ResponseWriter, req *htt
 }
 
 func (app *CameraManagementApp) getCamerasRoute(w http.ResponseWriter, _ *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
 	devices, err := app.getDevices()
 	if err != nil {
 		respondError(app.lc, w, http.StatusInternalServerError,

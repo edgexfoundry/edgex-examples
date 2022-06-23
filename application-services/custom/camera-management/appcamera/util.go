@@ -70,10 +70,10 @@ func issueDeleteRequest(ctx context.Context, res interface{}, baseUrl string, re
 }
 
 func respondError(lc logger.LoggingClient, w http.ResponseWriter, statusCode int, errStr string) {
+	lc.Error(errStr)
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.WriteHeader(statusCode)
-	lc.Error(errStr)
 	if _, writeErr := w.Write([]byte(errStr)); writeErr != nil {
 		lc.Error(writeErr.Error())
 	}
@@ -86,11 +86,14 @@ func respondJson(lc logger.LoggingClient, w http.ResponseWriter, val interface{}
 		respondError(lc, w, http.StatusInternalServerError, fmt.Sprintf("failed to marshal response body: %v", err))
 		return
 	}
+
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.WriteHeader(http.StatusOK)
+
 	_, err = w.Write(b)
 	if err != nil {
+		// this will most likely fail since the w.Write failed, but it will at least print the error
 		respondError(lc, w, http.StatusInternalServerError, fmt.Sprintf("failed to write response body: %v", err))
 		return
 	}
