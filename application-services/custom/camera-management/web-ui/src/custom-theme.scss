@@ -4,19 +4,19 @@ SPDX-License-Identifier: Apache-2.0 */
 @use '@angular/material' as mat;
 
 @font-face {
-    font-family: Intel;
-    src: url(/assets/IntelClear-Regular-webfont.woff);
+    font-family: Google;
+    src: url(/assets/Roboto-Regular.ttf);
 }
 
-$intel-typography: mat.define-typography-config(
-  $font-family: 'Intel',
+$google-typography: mat.define-typography-config(
+  $font-family: 'Google',
   $body-1: mat.define-typography-level(
       $font-size: 14px,
       $line-height: 21px,
       $font-weight: 500,
     ),
 );
-@include mat.core($intel-typography);
+@include mat.core($google-typography);
 
 // Available color palettes: https://material.io/design/color/
 $web-ui-primary: mat.define-palette(mat.$blue-palette, 200, 100, 800);

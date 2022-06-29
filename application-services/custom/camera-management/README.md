@@ -20,7 +20,8 @@ make install-edge-video-analytics
 # Run the EVAM services (in another terminal)
 make run-edge-video-analytics
 # ...
-# Leave this running. If needed, press Ctrl-C to stop it
+# Leave this running. If needed to stop
+make stop-edge-video-analytics
 ```
 3. Configure Camera Credentials
 
@@ -43,10 +44,10 @@ make run-edge-video-analytics
    and start inference pipelines for camera video streams and also view inference results streams.
 ```shell
 # Build the app. 
-make build
+make build-app
 
 # Run the app.
-make run
+make run-app
 # ...
 # Open your browser to http://localhost:59750
 # ...

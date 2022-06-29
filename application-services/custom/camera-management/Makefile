@@ -1,7 +1,7 @@
 # Copyright (C) 2022 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-.PHONY: build test clean docker tidy run run-tests
+.PHONY: build-app test clean docker tidy run-app run-tests
 
 GO=CGO_ENABLED=1 go
 
@@ -18,13 +18,13 @@ GOFLAGS=-ldflags "-X github.com/edgexfoundry/app-functions-sdk-go/v2/internal.SD
 
 GIT_SHA=$(shell git rev-parse HEAD)
 
-build: tidy
+build-app: tidy
 	$(GO) build $(GOFLAGS) -o $(MICROSERVICE)
 
 tidy:
 	go mod tidy
 
-run:
+run-app:
 	EDGEX_SECURITY_SECRET_STORE=false ./$(MICROSERVICE)
 
 # TODO: Change the registries (edgexfoundry, nexus3.edgexfoundry.org:10004) below as needed.
