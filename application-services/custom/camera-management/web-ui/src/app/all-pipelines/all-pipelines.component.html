@@ -1,0 +1,31 @@
+<!-- Copyright (C) 2022 Intel Corporation
+SPDX-License-Identifier: Apache-2.0 -->
+
+<mat-accordion>
+  <mat-expansion-panel *ngFor="let item of data.pipelineMap | keyvalue">
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        <mat-chip-list selectable="false">
+          <mat-chip>
+            Pipeline {{item.value.info.id}}
+          </mat-chip>
+        </mat-chip-list>
+      </mat-panel-title>
+      <mat-panel-description><span>{{item.key}} - {{item.value.info.name}}/{{item.value.info.version}}</span></mat-panel-description>
+      <mat-chip-list selectable="false">
+        <mat-chip class="state-{{item.value.status.state}}">
+          {{item.value.status.state}}
+        </mat-chip>
+        <mat-chip *ngIf="item.value.status.state === 'RUNNING'">
+          {{item.value.status.avg_fps | number: '2.0-0'}} FPS
+        </mat-chip>
+        <button mat-icon-button color="warn"
+                class="stop-button"
+                (click)="api.stopPipeline(item.key)">
+          <mat-icon>stop</mat-icon>
+        </button>
+      </mat-chip-list>
+    </mat-expansion-panel-header>
+    <pre>{{item.value | json}}</pre>
+  </mat-expansion-panel>
+</mat-accordion>

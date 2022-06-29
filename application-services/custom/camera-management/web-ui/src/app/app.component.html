@@ -1,0 +1,27 @@
+<!-- Copyright (C) 2022 Intel Corporation
+SPDX-License-Identifier: Apache-2.0 -->
+
+<nav mat-tab-nav-bar backgroundColor="primary" class="mat-elevation-z8">
+  <a class="mat-tab-link" (click)="data.currentPage = 'home'" routerLink="home">
+  </a>
+
+  <button mat-icon-button type="button"
+          (click)="useDarkTheme = !useDarkTheme"
+          title="Switch to {{useDarkTheme ? 'light' : 'dark'}} theme">
+    <mat-icon role="img" aria-hidden="true">
+      {{useDarkTheme ? 'light_mode' : 'dark_mode'}}
+    </mat-icon>
+  </button>
+
+  <a mat-tab-link *ngFor="let page of data.pages"
+     (click)="data.currentPage = page.page"
+     [active]="data.currentPage == page.page"
+     [routerLink]="page.page">
+    {{ page.caption | uppercase }}
+  </a>
+</nav>
+
+<main role="main">
+  <router-outlet></router-outlet>
+</main>
+

@@ -1,0 +1,14 @@
+# Copyright (C) 2022 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+test.txt
+debug
+*.exe
+app-camera-management
+.vscode
+coverage.out
+logs/
+.idea
+VERSION
+*.imagebuilt
+edge-video-analytics/edge-video-analytics-microservice

@@ -1,0 +1,82 @@
+/* Copyright (C) 2022 Intel Corporation
+SPDX-License-Identifier: Apache-2.0 */
+
+@use '@angular/material' as mat;
+
+@font-face {
+    font-family: Google;
+    src: url(/assets/Roboto-Regular.ttf);
+}
+
+$google-typography: mat.define-typography-config(
+  $font-family: 'Google',
+  $body-1: mat.define-typography-level(
+      $font-size: 14px,
+      $line-height: 21px,
+      $font-weight: 500,
+    ),
+);
+@include mat.core($google-typography);
+
+// Available color palettes: https://material.io/design/color/
+$web-ui-primary: mat.define-palette(mat.$blue-palette, 200, 100, 800);
+$web-ui-accent: mat.define-palette(mat.$blue-grey-palette, 600, 500, 900);
+$web-ui-warn: mat.define-palette(mat.$red-palette);
+$web-ui-dark-primary: mat.define-palette(mat.$indigo-palette, 900, 800, A200);
+$web-ui-dark-accent: mat.define-palette(mat.$teal-palette, 700, 600, A200);
+$web-ui-dark-warn: mat.define-palette(mat.$red-palette, 900, 800, 50);
+
+$web-ui-light-theme: mat.define-light-theme((
+  color: (
+    primary: $web-ui-primary,
+    accent: $web-ui-accent,
+    warn: $web-ui-warn,
+  )
+));
+
+$web-ui-dark-theme: mat.define-dark-theme((
+  color: (
+    primary: $web-ui-dark-primary,
+    accent: $web-ui-dark-accent,
+    warn: $web-ui-dark-warn,
+  )
+));
+
+footer {
+  width: 100%;
+  background-color: mat.get-color-from-palette($web-ui-primary, 'default');
+  margin-top: auto;
+  padding: 1rem 0rem 0rem 0rem;
+  display: flex;
+  justify-content: end;
+}
+
+// This emits styles for _all_ components in Angular Material,
+// which is very likely to produce unnecessary CSS,
+// but is lazier than specifying all the @include mat.<foo>-theme($web-ui-light-theme).
+@include mat.all-component-themes($web-ui-light-theme);
+
+// Apply .dark-theme to some ancestor to convert it and its children to the dark side.
+.dark-theme {
+  @include mat.all-component-colors($web-ui-dark-theme);
+
+  footer {
+    background-color: mat.get-color-from-palette($web-ui-dark-primary, 'default');
+  }
+}
+
+// A class that animations elevation changes for mat-cards.
+// See: https://material.angular.io/guide/elevation#animating-elevation
+.box-card {
+  @include mat.elevation-transition();
+  @include mat.elevation(8);
+
+  &:hover {
+    @include mat.elevation(16);
+
+    -webkit-transition: all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+    transition: all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+    -webkit-transform: scale(1.05, 1.05);
+    transform: scale(1.05, 1.05);
+  }
+}

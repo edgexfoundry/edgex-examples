@@ -1,0 +1,28 @@
+# Copyright (C) 2022 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+npm-debug.log
+Dockerfile*
+docker-compose*
+.dockerignore
+.git
+.gitignore
+.env
+**/bin
+**/obj
+README.md
+.vscode
+
+# exclude all node modules
+**/node_modules
+
+# exlude edge-video-analytics model data
+**/models
+**/pipelines
+edge-video-analytics
+
+web-ui/.angular
+
+*.imagebuilt
+*.iml
+**/.idea

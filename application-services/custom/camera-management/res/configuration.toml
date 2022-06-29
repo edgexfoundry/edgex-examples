@@ -1,0 +1,93 @@
+# Go here for detailed information on Application Service configuation:
+# https://docs.edgexfoundry.org/2.2/microservices/application/GeneralAppServiceConfig/
+[Writable]
+LogLevel = "INFO"
+
+  [Writable.StoreAndForward]
+  Enabled = false
+  RetryInterval = "5m"
+  MaxRetryCount = 10
+
+  [Writable.InsecureSecrets]
+    [Writable.InsecureSecrets.DB]
+    path = "redisdb"
+      [Writable.InsecureSecrets.DB.Secrets]
+      username = ""
+      password = ""
+
+    # TODO: Enter your camera's credentials here.
+    # NOTE: currently this solution is limited to supporting only 1 username/password combination
+    #       for ALL cameras. In the future when then device-onvif-camera service is able to provide
+    #       us with pre-authenticated uris, this can be removed.
+    [Writable.InsecureSecrets.CameraCredentials]
+    path = "CameraCredentials"
+      [Writable.InsecureSecrets.CameraCredentials.Secrets]
+      username = ""
+      password = ""
+
+
+[Service]
+HealthCheckInterval = "10s"
+Host = "localhost"
+Port = 59750
+ServerBindAddr = "" # Leave blank so default to Host value unless different value is needed.
+StartupMsg = "Camera Management Application Service has started"
+MaxResultCount = 0 # Not curently used by App Services.
+MaxRequestSize = 0 # Not curently used by App Services.
+RequestTimeout = "5s"
+  [Service.CORSConfiguration]
+  EnableCORS = true
+  CORSAllowCredentials = false
+  CORSAllowedOrigin = "*"
+  CORSAllowedMethods = "GET, POST, PUT, PATCH, DELETE"
+  CORSAllowedHeaders = "Authorization, Accept, Accept-Language, Content-Language, Content-Type, X-Correlation-ID, X-CameraApp-Ignore"
+  CORSExposeHeaders = "Cache-Control, Content-Language, Content-Length, Content-Type, Expires, Last-Modified, Pragma, X-Correlation-ID"
+  CORSMaxAge = 3600
+
+[Registry]
+Host = "localhost"
+Port = 8500
+Type = "consul"
+
+[Database]
+Type = "redisdb"
+Host = "localhost"
+Port = 6379
+Timeout = "30s"
+
+# TODO: Determine if your service will use secrets in secure mode, i.e. Vault.
+#       if not this secion can be removed, but you must make sure EDGEX_SECURITY_SECRET_STORE is set to false
+#       Note: If database is running in secure more and you have Store and Forward enabled, you will need to run this
+#       service in secure mode.
+#       For more deatils about SecretStore: https://docs.edgexfoundry.org/1.3/microservices/security/Ch-SecretStore/
+[SecretStore]
+Type = "vault"
+Host = "localhost"
+Port = 8200
+Path = "appservice/"
+Protocol = "http"
+RootCaCertPath = ""
+ServerName = ""
+TokenFile = "/tmp/edgex/secrets/app-camera-management/secrets-token.json"
+  [SecretStore.Authentication]
+  AuthType = "X-Vault-Token"
+
+[Clients]
+  [Clients.core-metadata]
+  Protocol = "http"
+  Host = "localhost"
+  Port = 59881
+
+  [Clients.core-command]
+  Protocol = "http"
+  Host = "localhost"
+  Port = 59882
+
+[Trigger]
+Type="http"
+
+[AppCustom]
+DeviceServiceName = "device-onvif-camera"
+EvamBaseUrl = "http://localhost:8080"
+MqttAddress = "broker:1883"
+MqttTopic = "incoming/data/edge-video-analytics/inference-event"

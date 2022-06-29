@@ -1,0 +1,55 @@
+<!-- Copyright (C) 2022 Intel Corporation
+SPDX-License-Identifier: Apache-2.0 -->
+
+<mat-grid-tile-header>
+  <div class="jumbotron bg-image-home">
+    <h1>Camera Management</h1>
+    <p class="text-justify">
+      This is the landing page for the
+      Camera Management Reference Implementation.
+    </p>
+  </div>
+
+  <mat-card>
+    <mat-card-title>Camera Position</mat-card-title>
+    <mat-card-content>
+      <app-ptz></app-ptz>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card>
+    <mat-card-title>Camera</mat-card-title>
+    <mat-card-content>
+      <app-camera-selector></app-camera-selector>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card *ngIf="data.pipelineMap != undefined && data.pipelineMap.size > 0">
+    <mat-card-title>Running Pipelines</mat-card-title>
+    <mat-card-content>
+      <app-all-pipelines></app-all-pipelines>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card>
+    <mat-card-title>API Log</mat-card-title>
+    <mat-card-content>
+      <app-api-log></app-api-log>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card>
+    <mat-card-title>
+      Inference Events
+      <button *ngIf="!eventService.isPaused()" mat-button class="pause-events"
+              (click)="eventService.pause()">Pause Events
+      </button>
+      <button *ngIf="eventService.isPaused()" mat-button class="stream-events"
+              (click)="eventService.resume()">Stream Events
+      </button>
+    </mat-card-title>
+    <mat-card-content>
+      <app-inference-events></app-inference-events>
+    </mat-card-content>
+  </mat-card>
+</mat-grid-tile-header>

@@ -1,0 +1,61 @@
+/* Copyright (C) 2022 Intel Corporation
+SPDX-License-Identifier: Apache-2.0 */
+
+/* You can add global styles to this file, and also import other style files */
+
+
+body {
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  padding: 2em;
+}
+
+footer > * {
+  padding-right: 1rem;
+}
+
+.jumbotron {
+  background-image: none;
+  background-size: 100% auto;
+  border-radius: 0;
+  color: white;
+
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.bg-image-home {
+  background-image: linear-gradient(to bottom, rgba(0,0,0,0.4) 0%,rgba(0,0,0,0.4) 100%), url('/assets/bg/nick-loggie-fRVPzBYcd5A-unsplash.jpg');
+  background-position: center;
+}
+
+.navbar-logo {
+    background-color: #0071c5;
+    line-height: 1;
+    width: 70px;
+    padding: 0;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 70px;
+    margin-right: 16px;
+}
+
+.action-row a, .action-row button {
+  margin: 16px 8px;
+}
+
+mat-card {
+  margin-bottom: 30px;
+}
+
+.error-snackbar {
+  white-space: pre-wrap
+}
+

@@ -1,0 +1,17 @@
+<!-- Copyright (C) 2022 Intel Corporation
+SPDX-License-Identifier: Apache-2.0 -->
+
+<div *ngIf="eventService.lastEvent !== undefined">
+  <h3>{{eventService.eventCount}} Total Events</h3>
+  <div>
+    <mat-chip-list selectable="false">
+      <mat-chip *ngFor="let obj of eventService.lastEvent.objects">
+        <mat-icon>
+          {{ labelToIcon(obj.detection.label) }}
+        </mat-icon>
+        <span>{{obj.detection.confidence * 100 | number: '2.0-0'}}%</span>
+      </mat-chip>
+    </mat-chip-list>
+  </div>
+  <pre>{{ eventService.lastEvent | json }}</pre>
+</div>
