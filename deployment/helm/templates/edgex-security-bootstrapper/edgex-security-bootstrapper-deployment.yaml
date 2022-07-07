@@ -22,19 +22,6 @@ spec:
         org.edgexfoundry.service: {{.Values.edgex.app.bootstrapper}}
     spec:
       automountServiceAccountToken: false
-      initContainers:
-      - name: prep-edgex-init
-        image: {{.Values.edgex.image.bootstrapper.repository}}:{{.Values.edgex.image.bootstrapper.tag}}
-        imagePullPolicy: {{.Values.edgex.image.bootstrapper.pullPolicy}}
-        command: [ "sh", "-c", "cp -rpd /edgex-init/* /edgex-init-volume/; exit 0" ]
-        securityContext:
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: true
-          runAsUser: 0
-          runAsGroup: 0
-        volumeMounts:
-          - mountPath: /edgex-init-volume
-            name: edgex-init
       containers:
       - name: {{.Values.edgex.app.bootstrapper}}
         image: {{.Values.edgex.image.bootstrapper.repository}}:{{.Values.edgex.image.bootstrapper.tag}}
