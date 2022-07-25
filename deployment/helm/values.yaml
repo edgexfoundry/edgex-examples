@@ -101,11 +101,11 @@ edgex:
       pullPolicy: IfNotPresent
     bootstrapper:
       repository: edgexfoundry/security-bootstrapper
-      tag: "2.2.0"
+      tag: "latest"
       pullPolicy: IfNotPresent
     secretstoresetup:
       repository: edgexfoundry/security-secretstore-setup
-      tag: "2.2.0"
+      tag: "latest"
       pullPolicy: IfNotPresent
 
   # port defines configuration properties for container, target and host ports
