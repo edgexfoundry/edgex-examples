@@ -8,4 +8,4 @@ in order to make authenticated connections to Consul and the EdgeX secret store.
 
 ## Build and Run
 
-Please see the detailed steps in "how-to guide" for remote device services in documentation repository here: <https://github.com/edgexfoundry/edgex-docs/blob/master/docs_src/microservices/security/Ch-RemoteDeviceServices.md>.
+Please see the detailed steps in "how-to guide" for remote device services in documentation repository here: <https://github.com/edgexfoundry/edgex-docs/blob/main/docs_src/security/Ch-RemoteDeviceServices.md>.
