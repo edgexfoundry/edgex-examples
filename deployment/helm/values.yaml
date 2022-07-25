@@ -100,11 +100,11 @@ edgex:
       tag: "1.8.9"
       pullPolicy: IfNotPresent
     bootstrapper:
-      repository: edgexfoundry/security-bootstrapper
+      repository: nexus3.edgexfoundry.org:10004/security-bootstrapper
       tag: "latest"
       pullPolicy: IfNotPresent
     secretstoresetup:
-      repository: edgexfoundry/security-secretstore-setup
+      repository: nexus3.edgexfoundry.org:10004/security-secretstore-setup
       tag: "latest"
       pullPolicy: IfNotPresent
 
