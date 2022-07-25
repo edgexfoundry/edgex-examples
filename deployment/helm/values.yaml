@@ -100,12 +100,12 @@ edgex:
       tag: "1.8.9"
       pullPolicy: IfNotPresent
     bootstrapper:
-      repository: edgexfoundry/security-bootstrapper
-      tag: "2.2.0"
+      repository: nexus3.edgexfoundry.org:10004/security-bootstrapper
+      tag: "latest"
       pullPolicy: IfNotPresent
     secretstoresetup:
-      repository: edgexfoundry/security-secretstore-setup
-      tag: "2.2.0"
+      repository: nexus3.edgexfoundry.org:10004/security-secretstore-setup
+      tag: "latest"
       pullPolicy: IfNotPresent
 
   # port defines configuration properties for container, target and host ports
