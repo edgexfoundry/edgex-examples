@@ -8,7 +8,7 @@ The tools to run EdgeX services are ready. The EdgeX stack consists of many dock
 
 ## 3.1 Launch EdgeX core services
 
-The compose files can be found from a repository - [edgexfoundry/developer-scripts](https://github.com/edgexfoundry/developer-scripts). In this chapter, the Geneva version will be used as it is the latest stable version. To launch containers:
+The compose files can be found from a repository - [edgexfoundry/edgex-compose](https://github.com/edgexfoundry/edgex-compose). In this chapter, the Jakarta version will be used as it is the latest stable version. To launch containers:
 ```sh
 $ cd ~
 
@@ -16,64 +16,75 @@ $ cd ~
 $ mkdir repo
 $ cd repo
 
-# Clone the developer-scripts repository
-$ git clone https://github.com/edgexfoundry/developer-scripts
-$ cd developer-scripts/releases/geneva/compose-files
+# Clone the edgex-compose repository
+$ git clone https://github.com/edgexfoundry/edgex-compose
+$ git fetch --all
+$ git checkout jakarta
 $ ls
+GOVERNANCE.md
+LICENSE
+Makefile
+OWNERS.md
 README.md
-docker-compose-geneva-redis-no-secty-arm64.yml
-docker-compose-geneva-redis-no-secty.yml
-docker-compose-geneva-redis-arm64.yml
-docker-compose-geneva-redis.yml
-docker-compose-geneva-mongo-no-secty-arm64.yml
-docker-compose-geneva-mongo-no-secty.yml
-docker-compose-geneva-mongo-arm64.yml
-docker-compose-geneva-mongo.yml
-docker-compose-geneva-ui-arm64.yml
-docker-compose-geneva-ui.yml
+compose-builder
+docker-compose-arm64.yml
+docker-compose-no-secty-arm64.yml
+docker-compose-no-secty-with-app-sample-arm64.yml
+docker-compose-no-secty-with-app-sample.yml
+docker-compose-no-secty.yml
 docker-compose-portainer.yml
+docker-compose-with-app-sample-arm64.yml
+docker-compose-with-app-sample.yml
+docker-compose.yml
+taf
+
 
 # There are several compose files but we only need one to launch for our purpose. 
 # - ARM64 version should be used for RPI. 
-# - Redis is the choice of DB because of MongoDB's license. 
 # - Security is out of scope in this tutorial. 
-# With these criteria, we will use "docker-compose-geneva-redis-no-secty-arm64.yml". 
+# With these criteria, we will use "docker-compose-no-secty-arm64.yml". 
 
 # This command launches the stack but might take couple minutes depends on the network.
-$ docker-compose -f docker-compose-geneva-redis-no-secty-arm64.yml up -d
+$ docker-compose -f docker-compose-no-secty-arm64.yml up -d
 ...
+Creating edgex-ui-go       ... done
 Creating edgex-redis       ... done
 Creating edgex-core-consul ... done
-Creating edgex-support-scheduler     ... done
 Creating edgex-support-notifications ... done
+Creating edgex-support-scheduler     ... done
+Creating edgex-kuiper                ... done
 Creating edgex-core-metadata         ... done
-Creating edgex-core-command                   ... done
+Creating edgex-core-command          ... done
 Creating edgex-core-data             ... done
-Creating edgex-app-service-configurable-rules ... done
-Creating edgex-sys-mgmt-agent                 ... done
-Creating edgex-kuiper                         ... done
+Creating edgex-device-rest           ... done
+Creating edgex-device-virtual        ... done
+Creating edgex-app-rules-engine      ... done
+Creating edgex-sys-mgmt-agent        ... done
+
 
 # Once launching is done, let's check what are up and running. Some columns are removed.
-$ docker ps | less -ESX
-IMAGE                                                      STATUS       
-emqx/kuiper:0.4.2-alpine                                   Up 11 seconds
-edgexfoundry/docker-sys-mgmt-agent-go-arm64:1.2.1          Up 15 seconds
-edgexfoundry/docker-app-service-configurable-arm64:1.2.0   Up 14 seconds
-edgexfoundry/docker-core-command-go-arm64:1.2.1            Up 18 seconds
-edgexfoundry/docker-core-data-go-arm64:1.2.1               Up 19 seconds
-edgexfoundry/docker-core-metadata-go-arm64:1.2.1           Up 21 seconds
-edgexfoundry/docker-support-scheduler-go-arm64:1.2.1       Up 23 seconds
-edgexfoundry/docker-support-notifications-go-arm64:1.2.1   Up 22 seconds
-arm64v8/redis:5.0.8-alpine                                 Up 26 seconds
-edgexfoundry/docker-edgex-consul-arm64:1.2.0               Up 26 seconds
-portainer/portainer
+$ docker ps --format "table {{.ID}}\t{{.Image}}\t{{.Status}}"
+CONTAINER ID   IMAGE                                               STATUS
+7d041dd2cde5   edgexfoundry/sys-mgmt-agent-arm64:2.1.0             Up 4 minutes
+d405bf5834f5   edgexfoundry/device-virtual-arm64:2.1.0             Up 4 minutes
+4eacedaff009   edgexfoundry/app-service-configurable-arm64:2.1.0   Up 4 minutes
+95a08253847e   edgexfoundry/device-rest-arm64:2.1.0                Up 4 minutes
+23110c85c80c   edgexfoundry/core-data-arm64:2.1.0                  Up 4 minutes
+8b432e47ea9f   edgexfoundry/core-command-arm64:2.1.0               Up 4 minutes
+183dec617f70   edgexfoundry/core-metadata-arm64:2.1.0              Up 4 minutes
+8d3945944f74   lfedge/ekuiper:1.3.1-alpine                         Up 4 minutes
+47e71a310782   edgexfoundry/support-notifications-arm64:2.1.0      Up 4 minutes
+404a9ee4f501   edgexfoundry/support-scheduler-arm64:2.1.0          Up 4 minutes
+2859afc4b612   consul:1.10.3                                       Up 4 minutes
+70d3a90e88a4   redis:6.2.6-alpine                                  Up 4 minutes
+284ff5b3fa92   edgexfoundry/edgex-ui-arm64:2.1.0                   Up 4 minutes
 ```
 
 <br/>
 
 The EdgeX structure diagram clearly shows the purpose of each service:
 
-![EdgeX Architecture Diagram (Jun/12 2020)](./assets/EdgeX-Arch-Jun12-20.png.jpg)
+![EdgeX 2.1 Architecture Diagram](./assets/EdgeX_architecture.png)
 
 There are the core services in the middle. Devices services will talk to the hardwares. Supporting services will inject rules and run actions scheduled. Application services will interact with frontend or external cloud services. All the well designed services are just launched with the one line of command!
 
@@ -85,19 +96,19 @@ Although the services are launched well, it is worth to test the servcies before
 
 Curl is a command line tool of *nix systems to transfer data to a given URL and the basic tool to ping EdgeX services:
 ```
-$ curl http://localhost:48080/api/v1/ping
-pong
+$ curl http://localhost:59880/api/v2/ping
+{"apiVersion":"v2","timestamp":"Mon Jan 10 22:45:05 UTC 2022"}
 
-$ curl http://localhost:48081/api/v1/ping
-pong
+$ curl http://localhost:59881/api/v2/ping
+{"apiVersion":"v2","timestamp":"Mon Jan 10 22:45:32 UTC 2022"}
 
-$ curl http://localhost:48082/api/v1/ping 
-pong
+$ curl http://localhost:59882/api/v2/ping
+{"apiVersion":"v2","timestamp":"Mon Jan 10 22:45:56 UTC 2022"}
 ```
 
 Also docker-compose can be used to monitor logs:
 ```sh
-$ docker-compose -f docker-compose-geneva-redis-no-secty-arm64.yml logs -f {data|command|metadata}
+$ docker-compose -f docker-compose-no-secty-arm64.yml logs -f
 ```
 
 <br/>
@@ -128,4 +139,4 @@ EdgeX stack is up and running so that we can start making our own custom device 
 
 ---
 
-Next: [How to develop custom device and app services](40_custom_services.md)
+Next: [How to develop custom device services](40_custom_device_services.md)

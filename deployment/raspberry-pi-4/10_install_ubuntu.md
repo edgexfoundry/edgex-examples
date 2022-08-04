@@ -5,7 +5,7 @@
 
 # 1. How to install Ubuntu on RPI
 
-RPI uses micro SD card as its main disk storage. Ubuntu server 20.10 image file can be downloaded from Canonical and the file can be flashed to a micro SD card by using various ways.
+RPI uses micro SD card as its main disk storage. Ubuntu server 21.10 image file can be downloaded from Canonical and the file can be flashed to a micro SD card by using various ways.
 
 <br/>
 
@@ -17,10 +17,10 @@ The OS image file can be found from [https://ubuntu.com/download/raspberry-pi](h
 
 <br/>
 
-As mentioned earlier the 64 bit version of Ubuntu server 20.10 will be used so that click the button on the web page or run below command:
+As mentioned earlier the 64 bit version of Ubuntu server 21.10 will be used so that click the button on the web page or run below command:
 ```sh
 $ cd ~/Downloads
-$ wget https://ubuntu.com/download/raspberry-pi/thank-you?version=20.10&architecture=server-arm64+raspi
+$ wget https://cdimage.ubuntu.com/releases/21.10/release/ubuntu-21.10-preinstalled-server-arm64+raspi.img.xz
 ```
 
 Since many of EdgeX components are built as ARM64 binary, the 64 bit version should be used for the rest of this tutorial.
@@ -46,18 +46,19 @@ $ dmesg | grep Attached
 [17709.594036] sd 3:0:0:1: [sdb] Attached SCSI removable disk
 ```
 
-Balena etcher, Raspberry Pi OS Imager, or Ubuntu Imager can be used but let's try this commands below:
+From here we can unzip and write to the disk identified (sdb)
 ```sh
 $ cd ~/Downloads
 $ sudo -s
 
-# xzcat extracts the image as raw disk image format and passes to the dd commandlittle by little. Then the dd writes the coming data to the disk.  
-$ xzcat ubuntu-20.10-preinstalled-server-arm64+raspi.img.xz | dd of=/dev/sdb bs=8M status=progress; sync
+# xzcat extracts the image as raw disk image format and passes to the dd command little by little. Then the dd writes the coming data to the disk.  
+$ xzcat ubuntu-21.10-preinstalled-server-arm64+raspi.img.xz | dd of=/dev/sdb bs=8M status=progress
 ```
 
-Once it is done, the host automatically mounts the disks just flashed. The disks get mounted under **/media/\$USER/system-boot** and **/media/\$USER/writable**. However, please do NOT unmount and move on to the next step. 
+Once it is done (it will probably take awhile), the host automatically mounts the disks just flashed. The disks get mounted under **/media/\$USER/system-boot** and **/media/\$USER/writable**. However, please do NOT unmount and move on to the next step. 
 
-<br/>
+> **NOTE**:
+> The raspberry pi imager or similar utilities can be used as well to simplify this process.  To make similar changes on a booted raspberry pi (eg by connecting a monitor) and it should take you through the network setup.  File alterations can then be made at the appropriate locations on the mounted file system (eg /media/$USER/writable/etc => /etc).
 
 ## 1.3 Network configuration before first boot
 

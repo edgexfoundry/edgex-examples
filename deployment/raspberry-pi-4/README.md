@@ -23,7 +23,7 @@ Ubuntu on ARM:
 EdgeX: 
 - https://www.edgexfoundry.org/
 - https://github.com/edgexfoundry
-- https://docs.edgexfoundry.org/1.2/examples/LinuxTutorial/LinuxTutorial/
+- https://docs.edgexfoundry.org/2.1/walk-through/Ch-Walkthrough/
 
 <br/>
 
@@ -42,5 +42,5 @@ EdgeX:
 - [How to install Ubuntu on RPI](10_install_ubuntu.md)
 - [How to install packages required for EdgeX development](20_install_packages.md)
 - [How to install and launch EdgeX](30_install_edgex.md)
-- [How to develop custom device and app services](40_custom_services.md)
+- [How to develop custom device and app services](40_custom_device_services.md)
 
