@@ -48,6 +48,7 @@ RUN apk add --update --no-cache ca-certificates zeromq dumb-init
 COPY --from=builder /app/LICENSE /LICENSE
 COPY --from=builder /app/res/ /res/
 COPY --from=builder /app/app-camera-management /app-camera-management
+COPY --from=builder /app/web-ui/dist /web-ui/dist
 
 EXPOSE 59750
 
