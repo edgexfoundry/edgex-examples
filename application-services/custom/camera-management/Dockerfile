@@ -33,7 +33,7 @@ RUN [ ! -d "vendor" ] && go mod download all || echo "skipping..."
 
 COPY . .
 
-ARG MAKE="make build"
+ARG MAKE="make build-app"
 RUN $MAKE
 
 #final stage
