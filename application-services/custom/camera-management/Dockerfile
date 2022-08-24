@@ -33,7 +33,7 @@ RUN [ ! -d "vendor" ] && go mod download all || echo "skipping..."
 
 COPY . .
 
-ARG MAKE="make build"
+ARG MAKE="make build-app"
 RUN $MAKE
 
 #final stage
@@ -48,6 +48,7 @@ RUN apk add --update --no-cache ca-certificates zeromq dumb-init
 COPY --from=builder /app/LICENSE /LICENSE
 COPY --from=builder /app/res/ /res/
 COPY --from=builder /app/app-camera-management /app-camera-management
+COPY --from=builder /app/web-ui/dist /web-ui/dist
 
 EXPOSE 59750
 
