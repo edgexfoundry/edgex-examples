@@ -28,8 +28,8 @@ LABEL license='SPDX-License-Identifier: Apache-2.0' \
 RUN apk add --update --no-cache ${ALPINE_PKG_BASE} ${ALPINE_PKG_EXTRA}
 WORKDIR /app
 
-COPY go.mod vendor* ./
-RUN [ ! -d "vendor" ] && go mod download all || echo "skipping..."
+COPY go.mod ./
+RUN go mod download all
 
 COPY . .
 
