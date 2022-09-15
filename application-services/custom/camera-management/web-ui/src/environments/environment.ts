@@ -12,9 +12,9 @@ export const environment = {
 
   mqtt: {
     host: 'localhost',
-    port: 9001,
+    port: 59001,
     path: '/mqtt',
-    topic: 'vaserving/#',
+    topic: 'incoming/data/edge-video-analytics/inference-event',
   }
 };
 

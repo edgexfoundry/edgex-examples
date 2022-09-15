@@ -28,7 +28,7 @@ services:
       - ./mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
     ports:
       - "1883:1883"
-      - "9001:9001"
+      - "59001:9001"
     networks:
       - evam_network
 
