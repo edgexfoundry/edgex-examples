@@ -7,8 +7,8 @@ export const environment = {
   defaultPipelineId: 'object_detection/person_vehicle_bike',
 
   mqtt: {
-    host: 'localhost',
-    port: 9001,
+    host: null,
+    port: 59001,
     path: '/mqtt',
     topic: 'incoming/data/edge-video-analytics/inference-event',
   }

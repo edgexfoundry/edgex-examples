@@ -28,7 +28,7 @@ LogLevel = "INFO"
 
 [Service]
 HealthCheckInterval = "10s"
-Host = "localhost"
+Host = "0.0.0.0"
 Port = 59750
 ServerBindAddr = "" # Leave blank so default to Host value unless different value is needed.
 StartupMsg = "Camera Management Application Service has started"

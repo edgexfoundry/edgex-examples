@@ -49,7 +49,7 @@ import { environment } from "../environments/environment";
 import { AllPipelinesComponent } from './all-pipelines/all-pipelines.component';
 
 const MQTT_SERVICE_OPTIONS: IMqttServiceOptions = {
-  hostname: environment.mqtt.host,
+  hostname: window.location.hostname,
   port: environment.mqtt.port,
   path: environment.mqtt.path
 };
