@@ -20,6 +20,15 @@ spec:
       labels:
         org.edgexfoundry.service: {{.Values.edgex.app.support.scheduler}}
     spec:
+    {{- if and (eq .Values.edgex.security.enabled true) (eq .Values.edgex.storage.isLocal true)}}
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  org.edgexfoundry.service: {{ .Values.edgex.app.secretstoresetup}}
+              topologyKey: "kubernetes.io/hostname"
+    {{- end}}
       automountServiceAccountToken: false
       containers:
       - name: {{.Values.edgex.app.support.scheduler}}
