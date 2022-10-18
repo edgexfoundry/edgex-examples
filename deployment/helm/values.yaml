@@ -306,4 +306,8 @@ edgex:
 
   storage:
     className: ""
+    # Set "isLocal" to true when volumes storage is local, where volume mount is not accessible to remote host.
+    # This value is used to configure pod affinity.
+    isLocal: true
+    useHostPath: true
 

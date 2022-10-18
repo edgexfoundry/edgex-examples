@@ -9,7 +9,7 @@ metadata:
 spec:
   storageClassName: "{{.Values.edgex.storage.className}}"
   accessModes:
-  - ReadWriteMany
+  - ReadWriteOnce
   resources:
     requests:
       storage: 128Mi
@@ -21,7 +21,7 @@ metadata:
 spec:
   storageClassName: "{{.Values.edgex.storage.className}}"
   accessModes:
-  - ReadWriteMany
+  - ReadWriteOnce
   resources:
     requests:
       storage: 128Mi
@@ -33,7 +33,7 @@ metadata:
 spec:
   storageClassName: "{{.Values.edgex.storage.className}}"
   accessModes:
-  - ReadWriteMany
+  - ReadWriteOnce
   resources:
     requests:
       storage: 512Mi
@@ -45,7 +45,7 @@ metadata:
 spec:
   storageClassName: "{{.Values.edgex.storage.className}}"
   accessModes:
-  - ReadWriteMany
+  - ReadWriteOnce
   resources:
     requests:
       storage: 128Mi
@@ -58,7 +58,7 @@ metadata:
 spec:
   storageClassName: "{{.Values.edgex.storage.className}}"
   accessModes:
-  - ReadWriteMany
+  - ReadWriteOnce
   resources:
     requests:
       storage: 8Mi
@@ -70,7 +70,7 @@ metadata:
 spec:
   storageClassName: "{{.Values.edgex.storage.className}}"
   accessModes:
-  - ReadWriteMany
+  - ReadWriteOnce
   resources:
     requests:
       storage: 128Mi
@@ -82,7 +82,7 @@ metadata:
 spec:
   storageClassName: "{{.Values.edgex.storage.className}}"
   accessModes:
-  - ReadWriteMany
+  - ReadWriteOnce
   resources:
     requests:
       storage: 128Mi
@@ -94,7 +94,7 @@ metadata:
 spec:
   storageClassName: "{{.Values.edgex.storage.className}}"
   accessModes:
-  - ReadWriteMany
+  - ReadWriteOnce
   resources:
     requests:
       storage: 128Mi
@@ -106,7 +106,7 @@ metadata:
 spec:
   storageClassName: "{{.Values.edgex.storage.className}}"
   accessModes:
-  - ReadWriteMany
+  - ReadWriteOnce
   resources:
     requests:
       storage: 8Mi
@@ -118,7 +118,7 @@ metadata:
 spec:
   storageClassName: "{{.Values.edgex.storage.className}}"
   accessModes:
-  - ReadWriteMany
+  - ReadWriteOnce
   resources:
     requests:
       storage: 8Mi
@@ -130,7 +130,7 @@ metadata:
 spec:
   storageClassName: "{{.Values.edgex.storage.className}}"
   accessModes:
-  - ReadWriteMany
+  - ReadWriteOnce
   resources:
     requests:
       storage: 8Mi
