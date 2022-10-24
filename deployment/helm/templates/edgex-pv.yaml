@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
+  {{- if .Values.edgex.storage.useHostPath }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -14,10 +15,12 @@ spec:
   capacity:
     storage: 500Mi
   accessModes:
-  - ReadWriteMany
+    - ReadWriteOnce
   hostPath:
     path: "/mnt/edgex-consul-config"
+{{- end}}
 ---
+{{- if .Values.edgex.storage.useHostPath }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -30,10 +33,12 @@ spec:
   capacity:
     storage: 500Mi
   accessModes:
-  - ReadWriteMany
+    - ReadWriteOnce
   hostPath:
     path: "/mnt/edgex-consul-data"
+{{- end }}
 ---
+{{- if .Values.edgex.storage.useHostPath }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -46,10 +51,12 @@ spec:
   capacity:
     storage: 1Gi
   accessModes:
-  - ReadWriteMany
+    - ReadWriteOnce
   hostPath:
     path: "/mnt/edgex-db"
+{{- end }}
 ---
+{{- if .Values.edgex.storage.useHostPath }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -62,11 +69,13 @@ spec:
   capacity:
     storage: 128Mi
   accessModes:
-  - ReadWriteMany
+    - ReadWriteOnce
   hostPath:
     path: "/mnt/edgex-kuiper-data"
+{{- end }}
 {{- if .Values.edgex.security.enabled }}
 ---
+{{- if .Values.edgex.storage.useHostPath }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -79,10 +88,12 @@ spec:
   capacity:
     storage: 8Mi
   accessModes:
-  - ReadWriteMany
+    - ReadWriteOnce
   hostPath:
     path: "/tmp/edgex/secrets"
+{{- end }}
 ---
+{{- if .Values.edgex.storage.useHostPath }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -95,10 +106,12 @@ spec:
   capacity:
     storage: 128Mi
   accessModes:
-  - ReadWriteMany
+    - ReadWriteOnce
   hostPath:
     path: "/mnt/edgex-init-volume"
+{{- end }}
 ---
+{{- if .Values.edgex.storage.useHostPath }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -111,10 +124,12 @@ spec:
   capacity:
     storage: 1Gi
   accessModes:
-  - ReadWriteMany
+    - ReadWriteOnce
   hostPath:
     path: "/mnt/edgex-vault-data"
+{{- end }}
 ---
+{{- if .Values.edgex.storage.useHostPath }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -127,10 +142,12 @@ spec:
   capacity:
     storage: 1Gi
   accessModes:
-  - ReadWriteMany
+    - ReadWriteOnce
   hostPath:
     path: "/mnt/edgex-vault-logs"
+{{- end }}
 ---
+{{- if .Values.edgex.storage.useHostPath }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -143,10 +160,12 @@ spec:
   capacity:
     storage: 8Mi
   accessModes:
-  - ReadWriteMany
+    - ReadWriteOnce
   hostPath:
     path: "/mnt/edgex-vault-config"
+{{- end }}
 ---
+{{- if .Values.edgex.storage.useHostPath }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -159,10 +178,12 @@ spec:
   capacity:
     storage: 8Mi
   accessModes:
-  - ReadWriteMany
+    - ReadWriteOnce
   hostPath:
     path: "/mnt/edgex-redis-config"
+{{- end }}
 ---
+{{- if .Values.edgex.storage.useHostPath }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -175,7 +196,8 @@ spec:
   capacity:
     storage: 8Mi
   accessModes:
-  - ReadWriteMany
+    - ReadWriteOnce
   hostPath:
     path: "/mnt/edgex-consul-acl-token"
+{{- end }}
 {{- end }}
