@@ -19,7 +19,7 @@ spec:
       labels:
         org.edgexfoundry.service: {{.Values.edgex.app.ekuiper}}
     spec:
-      {{- if and (eq .Values.edgex.security.enabled true) (eq .Values.edgex.storage.isLocal true)}}
+    {{- if and (eq .Values.edgex.security.enabled true) (or (eq .Values.edgex.storage.sharedVolumesAccessMode "ReadWriteOnce") (eq .Values.edgex.storage.useHostPath true))}}
       affinity:
         podAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -27,7 +27,7 @@ spec:
                 matchLabels:
                   org.edgexfoundry.service: {{ .Values.edgex.app.bootstrapper}}
               topologyKey: "kubernetes.io/hostname"
-      {{- end}}
+    {{- end}}
       automountServiceAccountToken: false
       initContainers:
       - name: prep-volumes
