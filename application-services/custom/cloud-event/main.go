@@ -21,9 +21,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
+
 	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/interfaces"
 	"github.com/edgexfoundry/go-mod-core-contracts/v2/models"
-	"os"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 
@@ -59,8 +60,8 @@ func main() {
 	// This would probably be a different process running on a different host but
 	// this is just to illustrate sending and receiving of cloudevents events
 	go func() {
-		appService.LoggingClient().Info("will listen on :8080")
-		appService.LoggingClient().Error(fmt.Sprintf("failed to start receiver: %s", c.StartReceiver(ctx, gotEvent)))
+		appService.LoggingClient().Info("cloudEvent receiver server will listen on :8080")
+		appService.LoggingClient().Errorf("failed to start receiver: %s", c.StartReceiver(ctx, gotEvent))
 	}()
 
 	// Setup pipeline.  The event our first function will get is a edgex event, this

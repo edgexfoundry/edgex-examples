@@ -10,6 +10,8 @@ LogLevel = "DEBUG"
       [Writable.InsecureSecrets.DB.Secrets]
       username = ""
       password = ""
+  [Writable.Telemetry]
+  Interval = "0s" # Disabled since require MessageBus Trigger to be in use.
 
 [Service]
 HealthCheckInterval = "10s"
@@ -20,6 +22,14 @@ StartupMsg = "Cloud Event Transforms"
 RequestTimeout = "30s"
 MaxRequestSize = 0
 MaxResultCount = 0
+  [Service.CORSConfiguration]
+  EnableCORS = false
+  CORSAllowCredentials = false
+  CORSAllowedOrigin = "https://localhost"
+  CORSAllowedMethods = "GET, POST, PUT, PATCH, DELETE"
+  CORSAllowedHeaders = "Authorization, Accept, Accept-Language, Content-Language, Content-Type, X-Correlation-ID"
+  CORSExposeHeaders = "Cache-Control, Content-Language, Content-Length, Content-Type, Expires, Last-Modified, Pragma, X-Correlation-ID"
+  CORSMaxAge = 3600
 
 [Registry]
 Host = "localhost"

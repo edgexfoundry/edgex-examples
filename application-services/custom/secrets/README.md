@@ -4,7 +4,7 @@ This example demonstrates storing a secret to the secret store (Vault) and retri
 
 When running in secure mode, the secrets are stored and retrieved from Vault based on the `SecretStore` section of the configuration file.
 
-Please refer to the [Application Functions SDK documentation](https://docs.edgexfoundry.org/2.0/microservices/application/AdvancedTopics/#secrets)  for more details on storing and getting secrets using the SDK.
+Please refer to the [Application Functions SDK documentation](https://docs.edgexfoundry.org/latest/microservices/application/AdvancedTopics/#secrets)  for more details on storing and getting secrets using the SDK.
 
 ## Build and Run the app with Secure Edgex services
 
@@ -34,7 +34,7 @@ Please refer to the [Application Functions SDK documentation](https://docs.edgex
          ADD_SECRETSTORE_TOKENS: 'app-secrets'
    ```
 
-   This creates a Vault back SecretStore for our example and populates it with then known `redisdb` secret. In addition creating the SecretStore, service's can request known secrets and to be added to the API Gateway. See the [Configuring Add-on Service](https://docs.edgexfoundry.org/2.0/security/Ch-Configuring-Add-On-Services/) security documentation for complete details.
+   This creates a Vault back SecretStore for our example and populates it with then known `redisdb` secret. In addition creating the SecretStore, service's can request known secrets and to be added to the API Gateway. See the [Configuring Add-on Service](https://docs.edgexfoundry.org/latest/security/Ch-Configuring-Add-On-Services/) security documentation for complete details.
 
 4. Run the Edgex services in Docker using the modified compose file from above.
 

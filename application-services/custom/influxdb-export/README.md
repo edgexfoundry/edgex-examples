@@ -1,6 +1,6 @@
 # EdgeX Foundry application service InfluxDB
 
-EdgeX Foundry application service to export readings to InfluxDB via MQTT.  This service example was created with EdgeX Foundry version 2.0.0 (Ireland).
+EdgeX Foundry application service to export readings to InfluxDB via MQTT.  This service example was created with EdgeX Foundry version 2.3.0 (Levski).
 
 The pipeline simply consists of two functions:
 - conversion of EdgeX Event/Reading objects to Influx [line protocol](https://docs.influxdata.com/influxdb/v2.0/reference/syntax/line-protocol/)

@@ -10,6 +10,25 @@ LogLevel = "INFO"
       [Writable.InsecureSecrets.DB.Secrets]
       username = ""
       password = ""
+  [Writable.Telemetry]
+  Interval = "30s"
+  PublishTopicPrefix  = "edgex/telemetry" # /<service-name>/<metric-name> will be added to this Publish Topic prefix
+    [Writable.Telemetry.Metrics] # All service's metric names must be present in this list.
+    # Common App Service Metrics
+    MessagesReceived = false
+    InvalidMessagesReceived = false
+    PipelineMessagesProcessed = false # Pipeline IDs are added as the tag for the metric for each pipeline defined
+    PipelineMessageProcessingTime = false # Pipeline IDs are added as the tag for the metric for each pipeline defined
+    PipelineProcessingErrors = false # Pipeline IDs are added as the tag for the metric for each pipeline defined
+    HttpExportSize = false # Single metric used for all HTTP Exports
+    MqttExportSize = false # BrokerAddress and Topic are added as the tag for this metric for each MqttExport defined
+    # Common Security Service Metrics
+    SecuritySecretsRequested = false
+    SecuritySecretsStored = false
+    SecurityConsulTokensRequested = false
+    SecurityConsulTokenDuration = false
+    [Writable.Telemetry.Tags] # Contains the service level tags to be attached to all the service's metrics
+#    Gateway="my-iot-gateway" # Tag must be added here since Env Override can only change existing value, not added new ones.
 
 [Service]
 HealthCheckInterval = "10s"
@@ -20,6 +39,14 @@ StartupMsg = "This is a sample Filter/XML Transform Application Service"
 RequestTimeout = "30s"
 MaxRequestSize = 0
 MaxResultCount = 0
+  [Service.CORSConfiguration]
+  EnableCORS = false
+  CORSAllowCredentials = false
+  CORSAllowedOrigin = "https://localhost"
+  CORSAllowedMethods = "GET, POST, PUT, PATCH, DELETE"
+  CORSAllowedHeaders = "Authorization, Accept, Accept-Language, Content-Language, Content-Type, X-Correlation-ID"
+  CORSExposeHeaders = "Cache-Control, Content-Language, Content-Length, Content-Type, Expires, Last-Modified, Pragma, X-Correlation-ID"
+  CORSMaxAge = 3600
 
 [Registry]
 Host = "localhost"
@@ -77,6 +104,6 @@ Type="edgex-messagebus"
 
 # App Service specifc simple settings
 # Great for single string settings. For more complex structured custom configuration
-# See https://docs.edgexfoundry.org/2.0/microservices/application/AdvancedTopics/#custom-configuration
+# See https://docs.edgexfoundry.org/latest/microservices/application/AdvancedTopics/#custom-configuration
 [ApplicationSettings]
 DeviceNames = "Random-Float-Device, Random-Integer-Device"
