@@ -16,8 +16,10 @@ GOFLAGS=-ldflags "-X github.com/edgexfoundry/device-random.Version=$(VERSION)"
 
 build: $(MICROSERVICES)
 
-cmd/device-random:
+tidy:
 	go mod tidy
+
+cmd/device-random:
 	$(GOCGO) build $(GOFLAGS) -o $@ ./cmd
 
 test:
