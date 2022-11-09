@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2022 Intel Corporation
+// Copyright (C) 2022-2023 Intel Corporation
 //
 // SPDX-License-Identifier: Apache-2.0
 
@@ -7,10 +7,13 @@ package appcamera
 
 // CustomConfig holds the values for the app configuration
 type CustomConfig struct {
-	DeviceServiceName string
-	EvamBaseUrl       string
-	MqttAddress       string
-	MqttTopic         string
+	OnvifDeviceServiceName string
+	USBDeviceServiceName   string
+	EvamBaseUrl            string
+	MqttAddress            string
+	MqttTopic              string
+	DefaultPipelineName    string
+	DefaultPipelineVersion string
 }
 
 // ServiceConfig a struct that wraps CustomConfig which holds the values for driver configuration

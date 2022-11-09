@@ -1,13 +1,19 @@
-// Copyright (C) 2022 Intel Corporation
+// Copyright (C) 2022-2023 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 import { environment } from '../../environments/environment';
-import { Device, GetPresetsResponse, GetProfilesResponse } from "./camera-api.types";
+import {
+  CameraFeatures,
+  Device,
+  GetImageFormatsResponse,
+  GetPresetsResponse,
+  GetProfilesResponse
+} from "./camera-api.types";
 import { DataService } from "./data.service";
-import { Pipeline, PipelineInfoStatus, PipelineStatus, StartPipelineRequest } from "./pipeline-api.types";
+import { Pipeline, PipelineInfoStatus, PipelineStatus, StartPipelineRequest, USBConfig } from "./pipeline-api.types";
 import { ApiLogIgnoreHeader, JsonHeaders } from "../constants";
 
 @Injectable({
@@ -37,28 +43,65 @@ export class CameraApiService {
 
   updateCameraList() {
     this.data.cameras = undefined;
+    this.data.cameraMap = undefined;
     this.httpClient
       .get<Device[]>(this.camerasUrl)
       .subscribe({
         next: data => {
           this.data.cameras = data;
+          this.data.cameraMap = new Map<string, Device>();
+          for (let camera of data) {
+            this.data.cameraMap.set(camera.name, camera);
+          }
           if (data.length > 0) {
             this.data.selectedCamera = data[0].name;
-            this.updateProfiles(this.data.selectedCamera);
+            this.updateCameraChanged(this.data.selectedCamera);
             this.refreshPipelineStatus(this.data.selectedCamera, true);
           } else {
             this.data.selectedCamera = undefined;
           }
         }, error: _ => {
           this.data.cameras = undefined;
+          this.data.cameraMap = undefined;
+        }
+      });
+  }
+
+  clearCameraInfo() {
+    this.data.selectedProfile = undefined;
+    this.data.profiles = undefined;
+    this.data.selectedPreset = undefined;
+    this.data.presets = undefined;
+    this.data.imageFormats = undefined;
+    this.data.inputPixelFormat = undefined;
+    this.data.inputImageSize = undefined;
+    this.data.cameraFeatures = undefined;
+  }
+
+  updateCameraChanged(cameraName: string) {
+    this.clearCameraInfo();
+    this.updateCameraFeatures(cameraName);
+  }
+
+  updateCameraFeatures(cameraName: string) {
+    this.httpClient.get<CameraFeatures>(
+      this.makeCameraUrl(cameraName, '/features'))
+      .subscribe({
+        next: data => {
+          this.data.cameraFeatures = data;
+          if (this.data.cameraIsOnvif()) {
+            this.updateProfiles(cameraName);
+          } else if (this.data.cameraIsUSB()) {
+            this.updateImageFormats(cameraName);
+          } else {
+            console.log('error, invalid camera type: ' + data.CameraType)
+          }
+        }, error: _ => {
         }
       });
   }
 
   updateProfiles(cameraName: string) {
-    this.data.selectedProfile = undefined;
-    this.data.profiles = undefined;
-
     this.httpClient.get<GetProfilesResponse>(
       this.makeCameraUrl(cameraName, '/profiles'))
       .subscribe({
@@ -74,14 +117,27 @@ export class CameraApiService {
   }
 
   updatePresets(cameraName: string, profileToken: string) {
-    this.data.presets = undefined;
     this.httpClient.get<GetPresetsResponse>(
       this.makeProfileUrl(cameraName, profileToken, '/presets'))
       .subscribe({
         next: data => {
           this.data.presets = data.Preset;
+          this.data.selectedPreset = data.Preset.length > 0 ? data.Preset[0].Token: undefined;
         }, error: _ => {
           this.data.presets = undefined;
+        }
+      });
+  }
+
+  updateImageFormats(cameraName: string) {
+    this.data.imageFormats = undefined;
+    this.httpClient.get<GetImageFormatsResponse>(
+      this.makeCameraUrl(cameraName, '/imageformats'))
+      .subscribe({
+        next: data => {
+          this.data.imageFormats = data.ImageFormats;
+        }, error: _ => {
+          this.data.imageFormats = undefined;
         }
       });
   }
@@ -92,17 +148,26 @@ export class CameraApiService {
       .subscribe();
   }
 
-  startPipeline(cameraName: string, profileToken: string, name: string, version: string) {
+  startOnvifPipeline(cameraName: string, name: string, version: string, profileToken: string) {
     let url = this.makePipelineUrl(cameraName, '/start');
-    let req = new StartPipelineRequest(profileToken, name, version);
+    let req = StartPipelineRequest.forOnvif(name, version, {profile_token: profileToken});
     this.httpClient.post<any>(url, JSON.stringify(req), JsonHeaders).subscribe(_ => {
       // todo: do at an interval?
       this.refreshPipelineStatus(this.data.selectedCamera, true);
     });
   }
 
-  stopPipeline(cameraName: string) {
-    let url = this.makePipelineUrl(cameraName, '/stop');
+  startUSBPipeline(cameraName: string, name: string, version: string, usb: USBConfig) {
+    let url = this.makePipelineUrl(cameraName, '/start');
+    let req = StartPipelineRequest.forUSB(name, version, usb);
+    this.httpClient.post<any>(url, JSON.stringify(req), JsonHeaders).subscribe(_ => {
+      // todo: do at an interval?
+      this.refreshPipelineStatus(this.data.selectedCamera, true);
+    });
+  }
+
+  stopPipeline(cameraName: string, id: string) {
+    let url = this.makePipelineUrl(cameraName, `/stop/${id}`);
     this.httpClient.post<any>(url, '').subscribe(_ => {
       this.refreshPipelineStatus(this.data.selectedCamera, true);
     });

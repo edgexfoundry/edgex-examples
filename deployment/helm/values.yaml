@@ -7,8 +7,44 @@
 # Declare variables to be passed into your templates.
 
 expose:
-  # Option value: ClusterIP/NodePort/LoadBalancer
-  type: ClusterIP
+  type:
+    # Option value: ClusterIP/NodePort/LoadBalancer
+    core:
+      command: ClusterIP
+      data:  ClusterIP
+      metadata: ClusterIP
+    support:
+      notifications: ClusterIP
+      scheduler: ClusterIP
+    appservice:
+      rules: ClusterIP
+      mqttexport: ClusterIP
+      httpexport: ClusterIP
+      appsample: ClusterIP
+      metricsinfluxdb: ClusterIP
+      rfidllrpinventory: ClusterIP
+      externalmqtttrigger: ClusterIP
+    device:
+      virtual: ClusterIP
+      rest: ClusterIP
+      usbcamera: ClusterIP
+      onvifcamera: ClusterIP
+      mqtt: ClusterIP
+      modbus: ClusterIP
+      bacnet: ClusterIP
+      snmp: ClusterIP
+      rfidllrp: ClusterIP
+      gpio: ClusterIP
+    ui: NodePort
+    system: ClusterIP
+    consul: NodePort
+    redis: ClusterIP
+    ekuiper: ClusterIP
+    modbussimulator: ClusterIP
+    mqttbroker: ClusterIP
+    natsserver: ClusterIP
+    bootstrapper: ClusterIP
+    vault: ClusterIP
 
 # edgex defines a set of configuration properties for application-level concerns
 edgex:
@@ -25,89 +61,168 @@ edgex:
       scheduler: edgex-support-scheduler
     appservice:
       rules: edgex-app-rules-engine
+      mqttexport: edgex-app-mqtt-export
+      httpexport: edgex-app-http-export
+      appsample: edgex-app-sample
+      metricsinfluxdb: edgex-app-metrics-influxdb
+      rfidllrpinventory: edgex-app-rfid-llrp-inventory
+      externalmqtttrigger: edgex-app-external-mqtt-trigger
     device:
       virtual: edgex-device-virtual
       rest: edgex-device-rest
+      onvifcamera: edgex-device-onvif-camera
+      usbcamera: edgex-device-usb-camera
+      mqtt: edgex-device-mqtt
+      modbus: edgex-device-modbus
+      bacnet: edgex-device-bacnet
+      snmp: edgex-device-snmp
+      rfidllrp: edgex-device-rfid-llrp
+      gpio: edgex-device-gpio
     ui: edgex-ui
-    system: edgex-sys-mgmt-agent
     consul: edgex-core-consul
     redis: edgex-redis
     ekuiper: edgex-kuiper
     vault: edgex-vault
     bootstrapper: edgex-security-bootstrapper
     secretstoresetup: edgex-security-secretstore-setup
+    modbussimulator: edgex-modbus-simulator
+    mqttbroker: edgex-mqtt-broker
+    natsserver: edgex-nats-server
 
   # image defines configuration properties for docker-image-level concerns
   image:
     core:
       command:
         repository: edgexfoundry/core-command
-        tag: "2.2.0"
+        tag: "2.3.0"
         pullPolicy: IfNotPresent
       data:
         repository: edgexfoundry/core-data
-        tag: "2.2.0"
+        tag: "2.3.0"
         pullPolicy: IfNotPresent
       metadata:
         repository: edgexfoundry/core-metadata
-        tag: "2.2.0"
+        tag: "2.3.0"
         pullPolicy: IfNotPresent
     support:
       notifications:
         repository: edgexfoundry/support-notifications
-        tag: "2.2.0"
+        tag: "2.3.0"
         pullPolicy: IfNotPresent
       scheduler:
         repository: edgexfoundry/support-scheduler
-        tag: "2.2.0"
+        tag: "2.3.0"
         pullPolicy: IfNotPresent
     appservice:
       rules:
         repository: edgexfoundry/app-service-configurable
-        tag: "2.2.0"
+        tag: "2.3.0"
+        pullPolicy: IfNotPresent
+      appsample:
+        repository: edgexfoundry/app-service-configurable
+        tag: "2.3.0"
+        pullPolicy: IfNotPresent
+      metricsinfluxdb:
+        repository: edgexfoundry/app-service-configurable
+        tag: "2.3.0"
+        pullPolicy: IfNotPresent
+      rfidllrpinventory:
+        repository: edgexfoundry/app-rfid-llrp-inventory
+        tag: "2.3.0"
+        pullPolicy: IfNotPresent
+      mqttexport:
+        repository: edgexfoundry/app-service-configurable
+        tag: "2.3.0"
+        pullPolicy: IfNotPresent
+      httpexport:
+        repository: edgexfoundry/app-service-configurable
+        tag: "2.3.0"
+        pullPolicy: IfNotPresent
+      externalmqtttrigger:
+        repository: edgexfoundry/app-service-configurable
+        tag: "2.3.0"
         pullPolicy: IfNotPresent
     device:
       virtual:
         repository: edgexfoundry/device-virtual
-        tag: "2.2.0"
+        tag: "2.3.0"
         pullPolicy: IfNotPresent
       rest:
         repository: edgexfoundry/device-rest
-        tag: "2.2.0"
+        tag: "2.3.0"
+        pullPolicy: IfNotPresent
+      onvifcamera:
+        repository: edgexfoundry/device-onvif-camera
+        tag: "2.3.0"
+        pullPolicy: IfNotPresent
+      usbcamera:
+        repository: nexus3.edgexfoundry.org:10004/device-usb-camera
+        tag: "latest"
+        pullPolicy: IfNotPresent
+      mqtt:
+        repository: edgexfoundry/device-mqtt
+        tag: "2.3.0"
+        pullPolicy: IfNotPresent
+      modbus:
+        repository: edgexfoundry/device-modbus
+        tag: "2.3.0"
+        pullPolicy: IfNotPresent
+      bacnet:
+        repository: edgexfoundry/device-bacnet
+        tag: "2.3.0"
+        pullPolicy: IfNotPresent
+      snmp:
+        repository: edgexfoundry/device-snmp
+        tag: "2.3.0"
+        pullPolicy: IfNotPresent
+      rfidllrp:
+        repository: edgexfoundry/device-rfid-llrp
+        tag: "2.3.0"
+        pullPolicy: IfNotPresent
+      gpio:
+        repository: edgexfoundry/device-gpio
+        tag: "2.3.0"
         pullPolicy: IfNotPresent
     ui:
       repository: edgexfoundry/edgex-ui
-      tag: "2.2.0"
-      pullPolicy: IfNotPresent
-    system:
-      repository: edgexfoundry/sys-mgmt-agent
-      tag: "2.2.0"
+      tag: "2.3.0"
       pullPolicy: IfNotPresent
     consul:
       repository: consul
-      tag: "1.10.10"
+      tag: "1.13.2"
       pullPolicy: IfNotPresent
     redis:
       repository: redis
-      tag: "6.2.6-alpine"
+      tag: "7.0.5-alpine"
       pullPolicy: IfNotPresent
     ekuiper:
       repository: lfedge/ekuiper
-      tag: "1.4.4-alpine"
+      tag: "1.7.1-alpine"
       pullPolicy: IfNotPresent
     vault:
       repository: vault
-      tag: "1.8.9"
+      tag: "1.11.4"
       pullPolicy: IfNotPresent
     bootstrapper:
-      repository: nexus3.edgexfoundry.org:10004/security-bootstrapper
-      tag: "latest"
+      repository: edgexfoundry/security-bootstrapper
+      tag: "2.3.0"
       pullPolicy: IfNotPresent
     secretstoresetup:
-      repository: nexus3.edgexfoundry.org:10004/security-secretstore-setup
+      repository: edgexfoundry/security-secretstore-setup
+      tag: "2.3.0"
+      pullPolicy: IfNotPresent
+    modbussimulator:
+      repository: nexus3.edgexfoundry.org:10003/edgex-devops/edgex-modbus-simulator
       tag: "latest"
       pullPolicy: IfNotPresent
-
+    mqttbroker:
+      repository: eclipse-mosquitto
+      tag: "2.0"
+      pullPolicy: IfNotPresent
+    natsserver:
+      repository: nats
+      tag: "2.9.3-alpine"
+      pullPolicy: IfNotPresent
   # port defines configuration properties for container, target and host ports
   port:
     core:
@@ -119,14 +234,32 @@ edgex:
       scheduler: 59861
     appservice:
       rules: 59701
+      mqttexport: 59703
+      httpexport: 59704
+      appsample: 59700
+      metricsinfluxdb: 59707
+      rfidllrpinventory: 59711
+      externalmqtttrigger: 59706
     device:
       virtual: 59900
       rest: 59986
+      usbcamera: 59983
+      onvifcamera: 59984
+      bacnet: 59980
+      mqtt: 59982
+      modbus: 59901
+      snmp: 59993
+      rfidllrp: 59989
+      gpio: 59994
     system: 58890
     ui: 4000
     consul: 8500
     redis: 6379
     ekuiper: 59720
+    modbussimulator: 1502
+    mqttbroker: 1883
+    natsserver: 4222
+    vault: 8200
 
   # ports used by security bootstrapping for stage gating edgex init
   bootstrap:
@@ -153,14 +286,31 @@ edgex:
       scheduler: 1
     appservice:
       rules: 1
+      mqttexport: 0
+      httpexport: 0
+      appsample: 0
+      metricsinfluxdb: 0
+      rfidllrpinventory: 0
+      externalmqtttrigger: 0
     device:
       virtual: 1
       rest: 1
+      usbcamera: 0
+      onvifcamera: 0
+      mqtt: 0
+      modbus: 0
+      bacnet: 0
+      snmp: 0
+      rfidllrp: 0
+      gpio: 0
     ui: 1
     system: 1
     consul: 1
     redis: 1
     ekuiper: 1
+    modbussimulator: 0
+    mqttbroker: 0
+    natsserver: 0
 
   # UID/GID for container user
   security:
@@ -168,6 +318,9 @@ edgex:
     runAsUser: 2002
     runAsGroup: 2001
     tlsHost: edgex
+    addConsulRoles: "app-external-mqtt-trigger,app-http-export,app-metrics-influxdb,app-mqtt-export,app-rfid-llrp-inventory,app-sample,device-bacnet,device-gpio,device-modbus,device-mqtt,device-onvif-camera,device-rfid-llrp,device-snmp,device-usb-camera"
+    addServiceTokens: "app-external-mqtt-trigger, app-http-export, app-metrics-influxdb, app-mqtt-export, app-rfid-llrp-inventory, app-sample, device-bacnet, device-gpio, device-modbus, device-mqtt, device-onvif-camera, device-rest, device-rfid-llrp, device-snmp, device-usb-camera, device-virtual"
+    addKnownSecrets: "message-bus[app-mqtt-export],message-bus[app-http-export],redisdb[app-external-mqtt-trigger],redisdb[app-http-export],redisdb[app-metrics-influxdb], redisdb[app-metrics-influxdb],redisdb[app-mqtt-export],redisdb[app-rfid-llrp-inventory],redisdb[app-sample],redisdb[device-bacnet],redisdb[device-gpio],redisdb[device-modbus],redisdb[device-mqtt],redisdb[device-onvif-camera],redisdb[device-rest],redisdb[device-rfid-llrp],redisdb[device-snmp], redisdb[device-usb-camera],redisdb[device-virtual]"
 
   # resources defines the cpu and memory limits and requests for the respective application
   resources:
@@ -222,6 +375,54 @@ edgex:
         requests:
           cpu: 0.5
           memory: 256Mi
+      mqttexport:
+        enforceLimits: false
+        limits:
+          cpu: 1
+          memory: 512Mi
+        requests:
+          cpu: 0.5
+          memory: 256Mi
+      httpexport:
+        enforceLimits: false
+        limits:
+          cpu: 1
+          memory: 512Mi
+        requests:
+          cpu: 0.5
+          memory: 256Mi
+      appsample:
+        enforceLimits: false
+        limits:
+          cpu: 1
+          memory: 512Mi
+        requests:
+          cpu: 0.5
+          memory: 256Mi
+      metricsinfluxdb:
+        enforceLimits: false
+        limits:
+          cpu: 1
+          memory: 512Mi
+        requests:
+          cpu: 0.5
+          memory: 256Mi
+      rfidllrpinventory:
+        enforceLimits: false
+        limits:
+          cpu: 1
+          memory: 512Mi
+        requests:
+          cpu: 0.5
+          memory: 256Mi
+      externalmqtttrigger:
+        enforceLimits: false
+        limits:
+          cpu: 1
+          memory: 512Mi
+        requests:
+          cpu: 0.5
+          memory: 256Mi
     device:
       virtual:
         enforceLimits: false
@@ -232,6 +433,70 @@ edgex:
           cpu: 0.5
           memory: 256Mi
       rest:
+        enforceLimits: false
+        limits:
+          cpu: 1
+          memory: 512Mi
+        requests:
+          cpu: 0.5
+          memory: 256Mi
+      usbcamera:
+        enforceLimits: false
+        limits:
+          cpu: 1
+          memory: 512Mi
+        requests:
+          cpu: 0.5
+          memory: 256Mi
+      onvifcamera:
+        enforceLimits: false
+        limits:
+          cpu: 1
+          memory: 512Mi
+        requests:
+          cpu: 0.5
+          memory: 256Mi
+      mqtt:
+        enforceLimits: false
+        limits:
+          cpu: 1
+          memory: 512Mi
+        requests:
+          cpu: 0.5
+          memory: 256Mi
+      modbus:
+        enforceLimits: false
+        limits:
+          cpu: 1
+          memory: 512Mi
+        requests:
+          cpu: 0.5
+          memory: 256Mi
+      bacnet:
+        enforceLimits: false
+        limits:
+          cpu: 1
+          memory: 512Mi
+        requests:
+          cpu: 0.5
+          memory: 256Mi
+      snmp:
+        enforceLimits: false
+        limits:
+          cpu: 1
+          memory: 512Mi
+        requests:
+          cpu: 0.5
+          memory: 256Mi
+      rfidllrp:
+        enforceLimits: false
+        limits:
+          cpu: 1
+          memory: 512Mi
+        requests:
+          cpu: 0.5
+          memory: 256Mi
+      gpio:
         enforceLimits: false
         limits:
           cpu: 1
@@ -303,11 +568,47 @@ edgex:
       requests:
         cpu: 0.5
         memory: 256Mi
-
+    modbussimulator:
+      enforceLimits: false
+      limits:
+        cpu: 1
+        memory: 512Mi
+      requests:
+        cpu: 0.5
+        memory: 256Mi
+    mqttbroker:
+      enforceLimits: false
+      limits:
+        cpu: 1
+        memory: 512Mi
+      requests:
+        cpu: 0.5
+        memory: 256Mi
+    natsserver:
+      enforceLimits: false
+      limits:
+        cpu: 1
+        memory: 512Mi
+      requests:
+        cpu: 0.5
+        memory: 256Mi
   storage:
-    className: ""
-    # Set "isLocal" to true when volumes storage is local, where volume mount is not accessible to remote host.
-    # This value is used to configure pod affinity.
-    isLocal: true
     useHostPath: true
 
+    # nonSharedVolumesClassName used for services that does not share a storage volume with other services.
+    nonSharedVolumesClassName: "rook-ceph-block"
+    nonSharedVolumesAccessMode: "ReadWriteOnce"
+
+    # sharedVolumesClassName used for services that share a storage volume
+    sharedVolumesClassName: "rook-cephfs"
+    # If this value is set to "ReadWriteOnce" it will trigger pod affinity rules.
+    sharedVolumesAccessMode: "ReadWriteMany"
+
+  features:
+    # Available messagebus options: redis|mqtt|nats
+    messagebusbackend: redis
+    # MQTT broker address
+    mqttBrokerAddress: ""
+    # Writable pipeline functions HTTP export parameter URL
+    httpExportURL: ""
+    enableHostPort: false

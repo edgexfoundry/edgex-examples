@@ -11,9 +11,9 @@ metadata:
   name: {{.Values.edgex.app.vault}}
 spec:
   ports:
-  - name: "http"
+  - name: "vault-http"
     port: 8200
   selector:
     org.edgexfoundry.service: {{.Values.edgex.app.vault}}
-  type: ClusterIP
+  type: {{.Values.expose.type.vault}}
 {{- end}}

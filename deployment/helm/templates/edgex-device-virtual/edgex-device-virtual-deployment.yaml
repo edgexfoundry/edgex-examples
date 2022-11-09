@@ -20,7 +20,7 @@ spec:
       labels:
         org.edgexfoundry.service: {{.Values.edgex.app.device.virtual}}
     spec:
-    {{- if and (eq .Values.edgex.security.enabled true) (eq .Values.edgex.storage.isLocal true)}}
+    {{- if and (eq .Values.edgex.security.enabled true) (or (eq .Values.edgex.storage.sharedVolumesAccessMode "ReadWriteOnce") (eq .Values.edgex.storage.useHostPath true))}}
       affinity:
         podAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -40,9 +40,12 @@ spec:
       {{- end}}
         ports:
         - containerPort: {{.Values.edgex.port.device.virtual}}
+          name: "http"
       {{- if not .Values.edgex.security.enabled }}
+        {{- if .Values.edgex.features.enableHostPort}}
           hostPort: {{.Values.edgex.port.device.virtual}}
           hostIP: {{.Values.edgex.hostPortInternalBind}}
+        {{- end}}
       {{- end}}
         env:
         - name: SERVICE_HOST
@@ -50,16 +53,20 @@ spec:
         envFrom:
         - configMapRef:
             name: edgex-common-variables
+        - configMapRef:
+            name: device-common-variables
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
         startupProbe:
-          tcpSocket:
+          httpGet:
+            path: /api/v2/ping
             port: {{.Values.edgex.port.device.virtual}}
           periodSeconds: 1
           failureThreshold: 120
         livenessProbe:
-          tcpSocket:
+          httpGet:
+            path: /api/v2/ping
             port: {{.Values.edgex.port.device.virtual}}
       {{- if .Values.edgex.security.enabled }}
         volumeMounts:

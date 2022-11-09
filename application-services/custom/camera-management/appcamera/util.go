@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2022 Intel Corporation
+// Copyright (C) 2022-2023 Intel Corporation
 //
 // SPDX-License-Identifier: Apache-2.0
 
@@ -13,31 +13,18 @@ import (
 	"github.com/edgexfoundry/go-mod-core-contracts/v2/clients/http/utils"
 	"github.com/edgexfoundry/go-mod-core-contracts/v2/clients/logger"
 	"github.com/edgexfoundry/go-mod-core-contracts/v2/common"
+	"github.com/edgexfoundry/go-mod-core-contracts/v2/dtos"
 	"github.com/edgexfoundry/go-mod-core-contracts/v2/dtos/responses"
+	"github.com/pkg/errors"
 	"io"
 	"net/http"
-	"net/url"
-	"path"
 )
 
 const (
 	maxBodySz = 1024 * 1024 * 10
 )
 
-func parseStreamUri(res *responses.EventResponse) (string, error) {
-	val := res.Event.Readings[0].ObjectValue
-	js, err := json.Marshal(val)
-	if err != nil {
-		return "", err
-	}
-	sr := StreamUriResponse{}
-	if err := json.Unmarshal(js, &sr); err != nil {
-		return "", err
-	}
-	return sr.MediaURI.URI, nil
-}
-
-func (app *CameraManagementApp) issueGetCommand(ctx context.Context, deviceName string, commandName string, jsonValue interface{}) (*responses.EventResponse, error) {
+func (app *CameraManagementApp) issueGetCommandWithJson(ctx context.Context, deviceName string, commandName string, jsonValue interface{}) (*responses.EventResponse, error) {
 	jsonStr, err := json.Marshal(jsonValue)
 	if err != nil {
 		return nil, err
@@ -47,25 +34,54 @@ func (app *CameraManagementApp) issueGetCommand(ctx context.Context, deviceName 
 		map[string]string{"jsonObject": base64.URLEncoding.EncodeToString(jsonStr)})
 }
 
+func (app *CameraManagementApp) parseResponse(commandName string, event *responses.EventResponse, response interface{}) error {
+	val := event.Event.Readings[0].ObjectValue
+	js, err := json.Marshal(val)
+	if err != nil {
+		return errors.Wrapf(err, "failed to marshal %s object value as json object", commandName)
+	}
+
+	err = json.Unmarshal(js, response)
+	if err != nil {
+		return errors.Wrapf(err, "failed to unmarhal %s json object to response type %T", commandName, response)
+	}
+
+	return nil
+}
+
+func (app *CameraManagementApp) issueGetCommandWithJsonForResponse(ctx context.Context, deviceName string, commandName string,
+	jsonValue interface{}, response interface{}) error {
+
+	event, err := app.issueGetCommandWithJson(ctx, deviceName, commandName, jsonValue)
+	if err != nil {
+		return errors.Wrapf(err, "failed to issue get command %s for device %s", commandName, deviceName)
+	}
+	return app.parseResponse(commandName, event, response)
+}
+
+func (app *CameraManagementApp) issueGetCommand(ctx context.Context, deviceName string, commandName string) (*responses.EventResponse, error) {
+	return app.service.CommandClient().IssueGetCommandByName(ctx, deviceName, commandName, "no", "yes")
+}
+
+func (app *CameraManagementApp) issueGetCommandForResponse(ctx context.Context, deviceName string, commandName string,
+	response interface{}) error {
+
+	event, err := app.issueGetCommand(ctx, deviceName, commandName)
+	if err != nil {
+		return errors.Wrapf(err, "failed to issue get command %s for device %s", commandName, deviceName)
+	}
+	return app.parseResponse(commandName, event, response)
+}
+
 func issuePostRequest(ctx context.Context, res interface{}, baseUrl string, reqPath string, jsonValue []byte) (err error) {
 	return utils.PostRequest(ctx, &res, baseUrl, reqPath, jsonValue, common.ContentTypeJSON)
 }
 
 func issueGetRequest(ctx context.Context, res interface{}, baseUrl string, requestPath string) (err error) {
-	u, err := url.Parse(baseUrl)
-	if err != nil {
-		return err
-	}
-	requestPath = path.Join(u.Path, requestPath)
 	return utils.GetRequest(ctx, &res, baseUrl, requestPath, nil)
 }
 
 func issueDeleteRequest(ctx context.Context, res interface{}, baseUrl string, requestPath string) (err error) {
-	u, err := url.Parse(baseUrl)
-	if err != nil {
-		return err
-	}
-	requestPath = path.Join(u.Path, requestPath)
 	return utils.DeleteRequest(ctx, &res, baseUrl, requestPath)
 }
 
@@ -121,4 +137,12 @@ func extractJSONBody(lc logger.LoggingClient, w http.ResponseWriter, r *http.Req
 	}
 
 	return true
+}
+
+func (app *CameraManagementApp) getDeviceByName(deviceName string) (dtos.Device, error) {
+	resp, err := app.service.DeviceClient().DeviceByName(context.Background(), deviceName)
+	if err != nil {
+		return dtos.Device{}, nil
+	}
+	return resp.Device, nil
 }

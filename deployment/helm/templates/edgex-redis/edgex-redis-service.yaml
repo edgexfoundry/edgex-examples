@@ -10,10 +10,8 @@ metadata:
   name: {{.Values.edgex.app.redis}}
 spec:
   ports:
-    - name: "http"
+    - name: "redis-redis"
       port: {{.Values.edgex.port.redis}}
   selector:
     org.edgexfoundry.service: {{.Values.edgex.app.redis}}
-  type: {{.Values.expose.type}}
-status:
-  loadBalancer: {}
+  type: {{.Values.expose.type.redis}}

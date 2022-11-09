@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: device-common-variables
+data:
+  {{- if (eq .Values.edgex.features.messagebusbackend "redis") }}
+  MESSAGEQUEUE_HOST: edgex-redis
+  {{- end}}

@@ -20,7 +20,7 @@ spec:
       labels:
         org.edgexfoundry.service: {{.Values.edgex.app.support.notifications}}
     spec:
-    {{- if and (eq .Values.edgex.security.enabled true) (eq .Values.edgex.storage.isLocal true)}}
+    {{- if and (eq .Values.edgex.security.enabled true) (or (eq .Values.edgex.storage.sharedVolumesAccessMode "ReadWriteOnce") (eq .Values.edgex.storage.useHostPath true))}}
       affinity:
         podAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -40,13 +40,30 @@ spec:
       {{- end}}
         ports:
         - containerPort: {{.Values.edgex.port.support.notifications}}
+          name: "http"
       {{- if not .Values.edgex.security.enabled }}
+        {{- if .Values.edgex.features.enableHostPort}}
           hostPort: {{.Values.edgex.port.support.notifications}}
           hostIP: {{.Values.edgex.hostPortInternalBind}}
+        {{- end}}
       {{- end}}
         env:
         - name: SERVICE_HOST
           value: {{.Values.edgex.app.support.notifications}}
+        {{- if (eq .Values.edgex.features.messagebusbackend "nats") }}
+        - name: MESSAGEQUEUE_AUTHMODE
+          value: none
+        - name: MESSAGEQUEUE_HOST
+          value: edgex-nats-server
+        - name: MESSAGEQUEUE_OPTIONAL_CLIENTID
+          value: support-notifications
+        - name: MESSAGEQUEUE_PORT
+          value: '4222'
+        - name: MESSAGEQUEUE_PROTOCOL
+          value: tcp
+        - name: MESSAGEQUEUE_TYPE
+          value: nats-jetstream
+        {{end}}
         envFrom:
         - configMapRef:
             name: edgex-common-variables

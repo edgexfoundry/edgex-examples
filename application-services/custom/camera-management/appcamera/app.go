@@ -1,16 +1,17 @@
 //
-// Copyright (C) 2022 Intel Corporation
+// Copyright (C) 2022-2023 Intel Corporation
 //
 // SPDX-License-Identifier: Apache-2.0
 
 package appcamera
 
 import (
+	"net/http"
+	"sync"
+
 	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/interfaces"
 	"github.com/edgexfoundry/go-mod-core-contracts/v2/clients/logger"
 	"github.com/pkg/errors"
-	"net/http"
-	"sync"
 )
 
 type CameraManagementApp struct {
@@ -19,6 +20,8 @@ type CameraManagementApp struct {
 	config         *ServiceConfig
 	pipelinesMap   map[string]PipelineInfo
 	pipelinesMutex sync.RWMutex
+	ptzRangeMap    map[string]PTZRange
+	ptzRangeMutex  sync.RWMutex
 	fileServer     http.Handler
 }
 
@@ -28,6 +31,7 @@ func NewCameraManagementApp(service interfaces.ApplicationService) *CameraManage
 		lc:           service.LoggingClient(),
 		config:       &ServiceConfig{},
 		pipelinesMap: make(map[string]PipelineInfo),
+		ptzRangeMap:  make(map[string]PTZRange),
 	}
 }
 
@@ -40,7 +44,30 @@ func (app *CameraManagementApp) Run() error {
 		return err
 	}
 
-	if err := app.service.MakeItRun(); err != nil {
+	// Subscribe to events.
+	err := app.service.SetDefaultFunctionsPipeline(
+		app.processEdgeXDeviceSystemEvent)
+	if err != nil {
+		return errors.Wrap(err, "failed to set default pipeline to processEdgeXEvent")
+	}
+
+	if err = app.queryAllPipelineStatuses(); err != nil {
+		// do not exit, just log
+		app.lc.Errorf("Unable to query EVAM pipeline statuses. Is EVAM running? %s", err.Error())
+	}
+
+	devices, err := app.getAllDevices()
+	if err != nil {
+		app.lc.Errorf("no devices found: %s", err.Error())
+	} else {
+		for _, device := range devices {
+			if err = app.startDefaultPipeline(device); err != nil {
+				app.lc.Errorf("Error starting default pipeline for %s, %v", device.Name, err)
+			}
+		}
+	}
+
+	if err = app.service.MakeItRun(); err != nil {
 		return errors.Wrap(err, "failed to run pipeline")
 	}
 

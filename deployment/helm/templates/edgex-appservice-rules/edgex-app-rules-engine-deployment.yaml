@@ -19,7 +19,7 @@ spec:
       labels:
         org.edgexfoundry.service: {{.Values.edgex.app.appservice.rules}}
     spec:
-    {{- if and (eq .Values.edgex.security.enabled true) (eq .Values.edgex.storage.isLocal true)}}
+    {{- if and (eq .Values.edgex.security.enabled true) (or (eq .Values.edgex.storage.sharedVolumesAccessMode "ReadWriteOnce") (eq .Values.edgex.storage.useHostPath true))}}
       affinity:
         podAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -39,9 +39,12 @@ spec:
       {{- end}}
         ports:
         - containerPort: {{.Values.edgex.port.appservice.rules}}
+          name: "http"
       {{- if not .Values.edgex.security.enabled }}
+        {{- if .Values.edgex.features.enableHostPort}}
           hostPort: {{.Values.edgex.port.appservice.rules}}
           hostIP: {{.Values.edgex.hostPortInternalBind}}
+        {{- end}}
       {{- end}}
         envFrom:
         - configMapRef:
@@ -51,10 +54,33 @@ spec:
           value: "rules-engine"
         - name: SERVICE_HOST
           value: {{.Values.edgex.app.appservice.rules}}
+        {{- if (eq .Values.edgex.features.messagebusbackend "redis") }}
         - name: TRIGGER_EDGEXMESSAGEBUS_PUBLISHHOST_HOST
           value: {{.Values.edgex.app.redis}}
         - name: TRIGGER_EDGEXMESSAGEBUS_SUBSCRIBEHOST_HOST
           value: {{.Values.edgex.app.redis}}
+        {{- end}}
+        {{- if (eq .Values.edgex.features.messagebusbackend "nats") }}
+        - name: TRIGGER_EDGEXMESSAGEBUS_OPTIONAL_AUTHMODE
+          value: none
+        - name: TRIGGER_EDGEXMESSAGEBUS_PUBLISHHOST_HOST
+          value: edgex-nats-server
+        - name: TRIGGER_EDGEXMESSAGEBUS_PUBLISHHOST_PORT
+          value: "4222"
+        - name: TRIGGER_EDGEXMESSAGEBUS_PUBLISHHOST_PROTOCOL
+          value: tcp
+        - name: TRIGGER_EDGEXMESSAGEBUS_PUBLISHHOST_PUBLISHTOPIC
+          value: edgex/rules-events
+        - name: TRIGGER_EDGEXMESSAGEBUS_SUBSCRIBEHOST_HOST
+          value: edgex-nats-server
+        - name: TRIGGER_EDGEXMESSAGEBUS_SUBSCRIBEHOST_PORT
+          value: "4222"
+        - name: TRIGGER_EDGEXMESSAGEBUS_SUBSCRIBEHOST_PROTOCOL
+          value: tcp
+        - name: TRIGGER_EDGEXMESSAGEBUS_TYPE
+          value: nats-jetstream
+        {{- end}}
+
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
@@ -74,6 +100,10 @@ spec:
           name: edgex-init
         - mountPath: /tmp/edgex/secrets
           name: edgex-secrets
+        - mountPath: /kuiper/etc/sources
+          name: kuiper-sources
+        - mountPath: /kuiper/etc/connections
+          name: kuiper-connections
       {{- end }}
       {{- if .Values.edgex.resources.appservice.rules.enforceLimits }}
         resources:
@@ -98,4 +128,10 @@ spec:
       - name: edgex-secrets
         persistentVolumeClaim:
           claimName: edgex-secrets
+      - name: kuiper-sources
+        persistentVolumeClaim:
+          claimName: kuiper-sources
+      - name: kuiper-connections
+        persistentVolumeClaim:
+          claimName: kuiper-connections
     {{- end}}
