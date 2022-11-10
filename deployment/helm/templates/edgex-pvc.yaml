@@ -7,9 +7,13 @@ kind: PersistentVolumeClaim
 metadata:
   name: consul-config
 spec:
-  storageClassName: "{{.Values.edgex.storage.className}}"
+  {{- if (eq .Values.edgex.storage.useHostPath true)}}
+  storageClassName: ""
+  {{- else }}
+  storageClassName: "{{.Values.edgex.storage.nonSharedVolumesClassName}}"
+  {{- end }}
   accessModes:
-  - ReadWriteOnce
+    - {{.Values.edgex.storage.nonSharedVolumesAccessMode}}
   resources:
     requests:
       storage: 128Mi
@@ -19,9 +23,13 @@ kind: PersistentVolumeClaim
 metadata:
   name: consul-data
 spec:
-  storageClassName: "{{.Values.edgex.storage.className}}"
+  {{- if (eq .Values.edgex.storage.useHostPath true)}}
+  storageClassName: ""
+  {{- else }}
+  storageClassName: "{{.Values.edgex.storage.nonSharedVolumesClassName}}"
+  {{- end }}
   accessModes:
-  - ReadWriteOnce
+    - {{.Values.edgex.storage.nonSharedVolumesAccessMode}}
   resources:
     requests:
       storage: 128Mi
@@ -31,9 +39,13 @@ kind: PersistentVolumeClaim
 metadata:
   name: db-data
 spec:
-  storageClassName: "{{.Values.edgex.storage.className}}"
+  {{- if (eq .Values.edgex.storage.useHostPath true)}}
+  storageClassName: ""
+  {{- else }}
+  storageClassName: "{{.Values.edgex.storage.nonSharedVolumesClassName}}"
+  {{- end }}
   accessModes:
-  - ReadWriteOnce
+    - {{.Values.edgex.storage.nonSharedVolumesAccessMode}}
   resources:
     requests:
       storage: 512Mi
@@ -43,9 +55,13 @@ kind: PersistentVolumeClaim
 metadata:
   name: kuiper-data
 spec:
-  storageClassName: "{{.Values.edgex.storage.className}}"
+  {{- if (eq .Values.edgex.storage.useHostPath true)}}
+  storageClassName: ""
+  {{- else }}
+  storageClassName: "{{.Values.edgex.storage.nonSharedVolumesClassName}}"
+  {{- end }}
   accessModes:
-  - ReadWriteOnce
+    - {{.Values.edgex.storage.nonSharedVolumesAccessMode}}
   resources:
     requests:
       storage: 128Mi
@@ -56,9 +72,13 @@ kind: PersistentVolumeClaim
 metadata:
   name: edgex-secrets
 spec:
-  storageClassName: "{{.Values.edgex.storage.className}}"
+  {{- if (eq .Values.edgex.storage.useHostPath true)}}
+  storageClassName: ""
+  {{- else }}
+  storageClassName: "{{.Values.edgex.storage.sharedVolumesClassName}}"
+  {{- end }}
   accessModes:
-  - ReadWriteOnce
+    - {{.Values.edgex.storage.sharedVolumesAccessMode}}
   resources:
     requests:
       storage: 8Mi
@@ -68,9 +88,13 @@ kind: PersistentVolumeClaim
 metadata:
   name: edgex-init
 spec:
-  storageClassName: "{{.Values.edgex.storage.className}}"
+  {{- if (eq .Values.edgex.storage.useHostPath true)}}
+  storageClassName: ""
+  {{- else }}
+  storageClassName: "{{.Values.edgex.storage.sharedVolumesClassName}}"
+  {{- end }}
   accessModes:
-  - ReadWriteOnce
+    - {{.Values.edgex.storage.sharedVolumesAccessMode}}
   resources:
     requests:
       storage: 128Mi
@@ -80,9 +104,13 @@ kind: PersistentVolumeClaim
 metadata:
   name: vault-file
 spec:
-  storageClassName: "{{.Values.edgex.storage.className}}"
+  {{- if (eq .Values.edgex.storage.useHostPath true)}}
+  storageClassName: ""
+  {{- else }}
+  storageClassName: "{{.Values.edgex.storage.nonSharedVolumesClassName}}"
+  {{- end }}
   accessModes:
-  - ReadWriteOnce
+    - {{.Values.edgex.storage.nonSharedVolumesAccessMode}}
   resources:
     requests:
       storage: 128Mi
@@ -92,9 +120,13 @@ kind: PersistentVolumeClaim
 metadata:
   name: vault-logs
 spec:
-  storageClassName: "{{.Values.edgex.storage.className}}"
+  {{- if (eq .Values.edgex.storage.useHostPath true)}}
+  storageClassName: ""
+  {{- else }}
+  storageClassName: "{{.Values.edgex.storage.nonSharedVolumesClassName}}"
+  {{- end }}
   accessModes:
-  - ReadWriteOnce
+    - {{.Values.edgex.storage.nonSharedVolumesAccessMode}}
   resources:
     requests:
       storage: 128Mi
@@ -104,9 +136,13 @@ kind: PersistentVolumeClaim
 metadata:
   name: vault-config
 spec:
-  storageClassName: "{{.Values.edgex.storage.className}}"
+  {{- if (eq .Values.edgex.storage.useHostPath true)}}
+  storageClassName: ""
+  {{- else }}
+  storageClassName: "{{.Values.edgex.storage.nonSharedVolumesClassName}}"
+  {{- end }}
   accessModes:
-  - ReadWriteOnce
+    - {{.Values.edgex.storage.nonSharedVolumesAccessMode}}
   resources:
     requests:
       storage: 8Mi
@@ -116,9 +152,13 @@ kind: PersistentVolumeClaim
 metadata:
   name: redis-config
 spec:
-  storageClassName: "{{.Values.edgex.storage.className}}"
+  {{- if (eq .Values.edgex.storage.useHostPath true)}}
+  storageClassName: ""
+  {{- else }}
+  storageClassName: "{{.Values.edgex.storage.nonSharedVolumesClassName}}"
+  {{- end }}
   accessModes:
-  - ReadWriteOnce
+    - {{.Values.edgex.storage.nonSharedVolumesAccessMode}}
   resources:
     requests:
       storage: 8Mi
@@ -128,9 +168,13 @@ kind: PersistentVolumeClaim
 metadata:
   name: consul-acl-token
 spec:
-  storageClassName: "{{.Values.edgex.storage.className}}"
+  {{- if (eq .Values.edgex.storage.useHostPath true)}}
+  storageClassName: ""
+  {{- else }}
+  storageClassName: "{{.Values.edgex.storage.nonSharedVolumesClassName}}"
+  {{- end }}
   accessModes:
-  - ReadWriteOnce
+    - {{.Values.edgex.storage.nonSharedVolumesAccessMode}}
   resources:
     requests:
       storage: 8Mi

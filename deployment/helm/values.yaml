@@ -305,9 +305,13 @@ edgex:
         memory: 256Mi
 
   storage:
-    className: ""
-    # Set "isLocal" to true when volumes storage is local, where volume mount is not accessible to remote host.
-    # This value is used to configure pod affinity.
-    isLocal: true
     useHostPath: true
 
+    # nonSharedVolumesClassName used for services that does not share a storage volume with other services.
+    nonSharedVolumesClassName: "rook-ceph-block"
+    nonSharedVolumesAccessMode: "ReadWriteOnce"
+
+    # sharedVolumesClassName used for services that share a storage volume
+    sharedVolumesClassName: "rook-cephfs"
+    # If this value is set to "ReadWriteOnce" it will trigger pod affinity rules.
+    sharedVolumesAccessMode: "ReadWriteMany"
