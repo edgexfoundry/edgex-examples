@@ -36,6 +36,8 @@ spec:
       {{- else }}
           value: "false"
       {{- end }}
+        - name: SERVICE_SERVERBINDADDR
+          value: "0.0.0.0"
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
