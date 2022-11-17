@@ -55,6 +55,8 @@ spec:
           value: /consul/config/consul_acl_done
         - name: STAGEGATE_REGISTRY_ACL_BOOTSTRAPTOKENPATH
           value: /tmp/edgex/secrets/consul-acl-token/bootstrap_token.json
+        - name: ADD_REGISTRY_ACL_ROLES
+          value: {{.Values.edgex.security.addConsulRoles}}
       {{- end }}
         envFrom:
         - configMapRef:

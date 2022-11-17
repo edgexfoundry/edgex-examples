@@ -178,4 +178,36 @@ spec:
   resources:
     requests:
       storage: 8Mi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: device-onvif-camera
+spec:
+  {{- if (eq .Values.edgex.storage.useHostPath true)}}
+  storageClassName: ""
+  {{- else }}
+  storageClassName: "{{.Values.edgex.storage.nonSharedVolumesClassName}}"
+  {{- end }}
+  accessModes:
+    - {{.Values.edgex.storage.nonSharedVolumesAccessMode}}
+  resources:
+    requests:
+      storage: 128Mi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: device-usb-camera
+spec:
+  {{- if (eq .Values.edgex.storage.useHostPath true)}}
+  storageClassName: ""
+  {{- else }}
+  storageClassName: "{{.Values.edgex.storage.nonSharedVolumesClassName}}"
+  {{- end }}
+  accessModes:
+    - {{.Values.edgex.storage.nonSharedVolumesAccessMode}}
+  resources:
+    requests:
+      storage: 128Mi
 {{- end }}

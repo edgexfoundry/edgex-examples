@@ -1,0 +1,18 @@
+# Copyright (C) 2022 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    org.edgexfoundry.service: {{.Values.edgex.app.device.onvifcamera}}
+  name: {{.Values.edgex.app.device.onvifcamera}}
+spec:
+  ports:
+  - name: "{{.Values.edgex.port.device.onvifcamera}}"
+    port: {{.Values.edgex.port.device.onvifcamera}}
+  selector:
+    org.edgexfoundry.service: {{.Values.edgex.app.device.onvifcamera}}
+  type: {{.Values.expose.type}}
+
