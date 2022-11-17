@@ -199,3 +199,39 @@ spec:
   hostPath:
     path: "/mnt/edgex-consul-acl-token"
 {{- end }}
+---
+{{- if .Values.edgex.storage.useHostPath }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: edgex-device-onvif-camera
+spec:
+  storageClassName: ""
+  claimRef:
+    name: device-onvif-camera
+    namespace: {{ .Release.Namespace }}
+  capacity:
+    storage: 128Mi
+  accessModes:
+    - {{.Values.edgex.storage.nonSharedVolumesAccessMode}}
+  hostPath:
+    path: "/mnt/edgex-device-onvif-camera"
+{{- end}}
+---
+{{- if .Values.edgex.storage.useHostPath }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: edgex-device-usb-camera
+spec:
+  storageClassName: ""
+  claimRef:
+    name: device-usb-camera
+    namespace: {{ .Release.Namespace }}
+  capacity:
+    storage: 128Mi
+  accessModes:
+    - {{.Values.edgex.storage.nonSharedVolumesAccessMode}}
+  hostPath:
+    path: "/mnt/edgex-device-usb-camera"
+{{- end}}
