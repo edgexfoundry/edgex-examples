@@ -38,6 +38,7 @@ edgex:
     vault: edgex-vault
     bootstrapper: edgex-security-bootstrapper
     secretstoresetup: edgex-security-secretstore-setup
+    modbussimulator: edgex-modbus-simulator
 
   # image defines configuration properties for docker-image-level concerns
   image:
@@ -117,6 +118,10 @@ edgex:
       repository: edgexfoundry/security-secretstore-setup
       tag: "2.3.0"
       pullPolicy: IfNotPresent
+    modbussimulator:
+      repository: nexus3.edgexfoundry.org:10003/edgex-devops/edgex-modbus-simulator
+      tag: "latest"
+      pullPolicy: IfNotPresent
 
   # port defines configuration properties for container, target and host ports
   port:
@@ -139,6 +144,7 @@ edgex:
     consul: 8500
     redis: 6379
     ekuiper: 59720
+    modbussimulator: 1502
 
   # ports used by security bootstrapping for stage gating edgex init
   bootstrap:
@@ -175,6 +181,7 @@ edgex:
     consul: 1
     redis: 1
     ekuiper: 1
+    modbussimulator: 0
 
   # UID/GID for container user
   security:
@@ -329,6 +336,14 @@ edgex:
         cpu: 0.5
         memory: 256Mi
     secretstoresetup:
+      enforceLimits: false
+      limits:
+        cpu: 1
+        memory: 512Mi
+      requests:
+        cpu: 0.5
+        memory: 256Mi
+    modbussimulator:
       enforceLimits: false
       limits:
         cpu: 1
