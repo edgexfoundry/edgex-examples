@@ -1,0 +1,59 @@
+# Copyright (C) 2022 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    org.edgexfoundry.service: {{.Values.edgex.app.modbussimulator}}
+  name: {{.Values.edgex.app.modbussimulator}}
+spec:
+  replicas: {{.Values.edgex.replicas.modbussimulator}}
+  selector:
+    matchLabels:
+      org.edgexfoundry.service: {{.Values.edgex.app.modbussimulator}}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        org.edgexfoundry.service: {{.Values.edgex.app.modbussimulator}}
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - name: {{.Values.edgex.app.modbussimulator}}
+        image: {{.Values.edgex.image.modbussimulator.repository}}:{{.Values.edgex.image.modbussimulator.tag}}
+        imagePullPolicy: {{.Values.edgex.image.modbussimulator.pullPolicy}}
+        ports:
+        - containerPort: {{.Values.edgex.port.modbussimulator}}
+      {{- if not .Values.edgex.security.enabled }}
+          hostPort: {{.Values.edgex.port.modbussimulator}}
+          hostIP: {{.Values.edgex.hostPortInternalBind}}
+      {{- end}}
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+        startupProbe:
+          tcpSocket:
+            port: {{.Values.edgex.port.modbussimulator}}
+          periodSeconds: 1
+          failureThreshold: 120
+        livenessProbe:
+          tcpSocket:
+            port: {{.Values.edgex.port.modbussimulator}}
+      {{- if .Values.edgex.resources.modbussimulator.enforceLimits }}
+        resources:
+          limits:
+            memory: {{ .Values.edgex.resources.modbussimulator.limits.memory }}
+            cpu: {{ .Values.edgex.resources.modbussimulator.limits.cpu }}
+          requests:
+            memory: {{ .Values.edgex.resources.modbussimulator.requests.memory }}
+            cpu: {{ .Values.edgex.resources.modbussimulator.requests.cpu }}
+      {{- end}}
+      hostname: {{.Values.edgex.app.modbussimulator}}
+      restartPolicy: Always
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: {{ .Values.edgex.security.runAsUser }}
+        runAsGroup: {{ .Values.edgex.security.runAsGroup }}
