@@ -1,0 +1,63 @@
+# Copyright (C) 2022 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    org.edgexfoundry.service: {{.Values.edgex.app.mqttbroker}}
+  name: {{.Values.edgex.app.mqttbroker}}
+spec:
+  replicas: {{.Values.edgex.replicas.mqttbroker}}
+  selector:
+    matchLabels:
+      org.edgexfoundry.service: {{.Values.edgex.app.mqttbroker}}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        org.edgexfoundry.service: {{.Values.edgex.app.mqttbroker}}
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - name: {{.Values.edgex.app.mqttbroker}}
+        image: {{.Values.edgex.image.mqttbroker.repository}}:{{.Values.edgex.image.mqttbroker.tag}}
+        imagePullPolicy: {{.Values.edgex.image.mqttbroker.pullPolicy}}
+      {{- if .Values.edgex.security.enabled }}
+        command: ["/usr/sbin/mosquitto", "-c", "/mosquitto-no-auth.conf"]
+        args: []
+      {{- end}}
+        ports:
+        - containerPort: {{.Values.edgex.port.mqttbroker}}
+      {{- if not .Values.edgex.security.enabled }}
+          hostPort: {{.Values.edgex.port.mqttbroker}}
+          hostIP: {{.Values.edgex.hostPortInternalBind}}
+      {{- end}}
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+        startupProbe:
+          tcpSocket:
+            port: {{.Values.edgex.port.mqttbroker}}
+          periodSeconds: 1
+          failureThreshold: 120
+        livenessProbe:
+          tcpSocket:
+            port: {{.Values.edgex.port.mqttbroker}}
+      {{- if .Values.edgex.resources.device.usbcamera.enforceLimits }}
+        resources:
+          limits:
+            memory: {{ .Values.edgex.resources.mqttbroker.limits.memory }}
+            cpu: {{ .Values.edgex.resources.mqttbroker.limits.cpu }}
+          requests:
+            memory: {{ .Values.edgex.resources.mqttbroker.requests.memory }}
+            cpu: {{ .Values.edgex.resources.mqttbroker.requests.cpu }}
+      {{- end}}
+      hostname: {{.Values.edgex.app.mqttbroker}}
+      restartPolicy: Always
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: {{ .Values.edgex.security.runAsUser }}
+        runAsGroup: {{ .Values.edgex.security.runAsGroup }}

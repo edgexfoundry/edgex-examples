@@ -1,0 +1,18 @@
+# Copyright (C) 2022 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    org.edgexfoundry.service: {{.Values.edgex.app.mqttbroker}}
+  name: {{.Values.edgex.app.mqttbroker}}
+spec:
+  ports:
+  - name: "{{.Values.edgex.port.mqttbroker}}"
+    port: {{.Values.edgex.port.mqttbroker}}
+  selector:
+    org.edgexfoundry.service: {{.Values.edgex.app.mqttbroker}}
+  type: {{.Values.expose.type}}
+

@@ -30,6 +30,7 @@ edgex:
       rest: edgex-device-rest
       onvifcamera: edgex-device-onvif-camera
       usbcamera: edgex-device-usb-camera
+      mqtt: edgex-device-mqtt
     ui: edgex-ui
     system: edgex-sys-mgmt-agent
     consul: edgex-core-consul
@@ -39,6 +40,7 @@ edgex:
     bootstrapper: edgex-security-bootstrapper
     secretstoresetup: edgex-security-secretstore-setup
     modbussimulator: edgex-modbus-simulator
+    mqttbroker: edgex-mqtt-broker
 
   # image defines configuration properties for docker-image-level concerns
   image:
@@ -86,6 +88,10 @@ edgex:
         repository: nexus3.edgexfoundry.org:10004/device-usb-camera
         tag: "latest"
         pullPolicy: IfNotPresent
+      mqtt:
+        repository: edgexfoundry/device-mqtt
+        tag: "2.3.0"
+        pullPolicy: IfNotPresent
     ui:
       repository: edgexfoundry/edgex-ui
       tag: "2.3.0"
@@ -122,7 +128,10 @@ edgex:
       repository: nexus3.edgexfoundry.org:10003/edgex-devops/edgex-modbus-simulator
       tag: "latest"
       pullPolicy: IfNotPresent
-
+    mqttbroker:
+      repository: eclipse-mosquitto
+      tag: "2.0"
+      pullPolicy: IfNotPresent
   # port defines configuration properties for container, target and host ports
   port:
     core:
@@ -139,12 +148,14 @@ edgex:
       rest: 59986
       usbcamera: 59983
       onvifcamera: 59984
+      mqtt: 59982
     system: 58890
     ui: 4000
     consul: 8500
     redis: 6379
     ekuiper: 59720
     modbussimulator: 1502
+    mqttbroker: 1883
 
   # ports used by security bootstrapping for stage gating edgex init
   bootstrap:
@@ -176,12 +187,14 @@ edgex:
       rest: 1
       usbcamera: 0
       onvifcamera: 0
+      mqtt: 0
     ui: 1
     system: 1
     consul: 1
     redis: 1
     ekuiper: 1
     modbussimulator: 0
+    mqttbroker: 0
 
   # UID/GID for container user
   security:
@@ -189,9 +202,9 @@ edgex:
     runAsUser: 2002
     runAsGroup: 2001
     tlsHost: edgex
-    addConsulRoles: "device-onvif-camera,device-usb-camera"
-    addServiceTokens: "device-rest, device-virtual, device-onvif-camera, device-usb-camera"
-    addKnownSecrets: "redisdb[app-rules-engine],redisdb[device-rest],redisdb[device-virtual],redisdb[device-onvif-camera],redisdb[device-usb-camera]"
+    addConsulRoles: "device-onvif-camera,device-usb-camera,device-mqtt"
+    addServiceTokens: "device-rest, device-virtual, device-onvif-camera, device-usb-camera, device-mqtt"
+    addKnownSecrets: "redisdb[app-rules-engine],redisdb[device-rest],redisdb[device-virtual],redisdb[device-onvif-camera],redisdb[device-usb-camera],redisdb[device-mqtt]"
 
   # resources defines the cpu and memory limits and requests for the respective application
   resources:
@@ -279,6 +292,14 @@ edgex:
         requests:
           cpu: 0.5
           memory: 256Mi
+      mqtt:
+        enforceLimits: false
+        limits:
+          cpu: 1
+          memory: 512Mi
+        requests:
+          cpu: 0.5
+          memory: 256Mi
     ui:
       enforceLimits: false
       limits:
@@ -351,7 +372,14 @@ edgex:
       requests:
         cpu: 0.5
         memory: 256Mi
-
+    mqttbroker:
+      enforceLimits: false
+      limits:
+        cpu: 1
+        memory: 512Mi
+      requests:
+        cpu: 0.5
+        memory: 256Mi
   storage:
     useHostPath: true
 
