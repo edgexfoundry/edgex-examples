@@ -1,0 +1,18 @@
+# Copyright (C) 2022 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    org.edgexfoundry.service: {{.Values.edgex.app.device.snmp}}
+  name: {{.Values.edgex.app.device.snmp}}
+spec:
+  ports:
+  - name: "{{.Values.edgex.port.device.snmp}}"
+    port: {{.Values.edgex.port.device.snmp}}
+  selector:
+    org.edgexfoundry.service: {{.Values.edgex.app.device.snmp}}
+  type: {{.Values.expose.type}}
+
