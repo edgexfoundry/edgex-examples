@@ -25,6 +25,8 @@ edgex:
       scheduler: edgex-support-scheduler
     appservice:
       rules: edgex-app-rules-engine
+      mqttexport: edgex-app-mqtt-export
+      httpexport: edgex-app-http-export
     device:
       virtual: edgex-device-virtual
       rest: edgex-device-rest
@@ -75,6 +77,14 @@ edgex:
       rules:
         repository: edgexfoundry/app-service-configurable
         tag: "2.3.0"
+        pullPolicy: IfNotPresent
+      mqttexport:
+        repository: edgexfoundry/app-service-configurable
+        tag: "2.3.0"
+        pullPolicy: IfNotPresent
+      httpexport:
+        repository: nexus3.edgexfoundry.org:10004/app-service-configurable
+        tag: "latest"
         pullPolicy: IfNotPresent
     device:
       virtual:
@@ -168,6 +178,8 @@ edgex:
       scheduler: 59861
     appservice:
       rules: 59701
+      mqttexport: 59703
+      httpexport: 59704
     device:
       virtual: 59900
       rest: 59986
@@ -212,6 +224,8 @@ edgex:
       scheduler: 1
     appservice:
       rules: 1
+      mqttexport: 0
+      httpexport: 0
     device:
       virtual: 1
       rest: 1
@@ -237,9 +251,9 @@ edgex:
     runAsUser: 2002
     runAsGroup: 2001
     tlsHost: edgex
-    addConsulRoles: "device-onvif-camera,device-usb-camera,device-mqtt,device-modbus,device-bacnet,device-snmp,device-rfid-llrp, device-gpio"
-    addServiceTokens: "device-rest, device-virtual, device-onvif-camera, device-usb-camera, device-mqtt, device-modbus, device-bacnet, device-snmp, device-rfid-llrp, device-gpio"
-    addKnownSecrets: "redisdb[app-rules-engine],redisdb[device-rest],redisdb[device-virtual],redisdb[device-onvif-camera],redisdb[device-usb-camera],redisdb[device-mqtt],redisdb[device-modbus],redisdb[device-bacnet],redisdb[device-snmp],redisdb[device-rfid-llrp],redisdb[device-gpio]"
+    addConsulRoles: "device-onvif-camera,device-usb-camera,device-mqtt,device-modbus,device-bacnet,device-snmp,device-rfid-llrp,device-gpio,app-mqtt-export,app-http-export"
+    addServiceTokens: "device-rest, device-virtual, device-onvif-camera, device-usb-camera, device-mqtt, device-modbus, device-bacnet, device-snmp, device-rfid-llrp, device-gpio, app-mqtt-export, app-http-export"
+    addKnownSecrets: "redisdb[app-rules-engine],redisdb[device-rest],redisdb[device-virtual],redisdb[device-onvif-camera],redisdb[device-usb-camera],redisdb[device-mqtt],redisdb[device-modbus],redisdb[device-bacnet],redisdb[device-snmp],redisdb[device-rfid-llrp],redisdb[device-gpio],redisdb[app-mqtt-export],message-bus[app-mqtt-export],redisdb[app-http-export],message-bus[app-http-export]"
 
   # resources defines the cpu and memory limits and requests for the respective application
   resources:
@@ -287,6 +301,22 @@ edgex:
           memory: 256Mi
     appservice:
       rules:
+        enforceLimits: false
+        limits:
+          cpu: 1
+          memory: 512Mi
+        requests:
+          cpu: 0.5
+          memory: 256Mi
+      mqttexport:
+        enforceLimits: false
+        limits:
+          cpu: 1
+          memory: 512Mi
+        requests:
+          cpu: 0.5
+          memory: 256Mi
+      httpexport:
         enforceLimits: false
         limits:
           cpu: 1
