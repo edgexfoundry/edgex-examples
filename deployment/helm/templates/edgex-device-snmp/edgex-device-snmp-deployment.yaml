@@ -1,0 +1,94 @@
+# Copyright (C) 2022 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    org.edgexfoundry.service: {{.Values.edgex.app.device.snmp}}
+  name: {{.Values.edgex.app.device.snmp}}
+spec:
+  replicas: {{.Values.edgex.replicas.device.snmp}}
+  selector:
+    matchLabels:
+      org.edgexfoundry.service: {{.Values.edgex.app.device.snmp}}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        org.edgexfoundry.service: {{.Values.edgex.app.device.snmp}}
+    spec:
+    {{- if and (eq .Values.edgex.security.enabled true) (or (eq .Values.edgex.storage.sharedVolumesAccessMode "ReadWriteOnce") (eq .Values.edgex.storage.useHostPath true))}}
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  org.edgexfoundry.service: {{ .Values.edgex.app.secretstoresetup}}
+              topologyKey: "kubernetes.io/hostname"
+    {{- end}}
+      automountServiceAccountToken: false
+      containers:
+      - name: {{.Values.edgex.app.device.snmp}}
+        image: {{.Values.edgex.image.device.snmp.repository}}:{{.Values.edgex.image.device.snmp.tag}}
+        imagePullPolicy: {{.Values.edgex.image.device.snmp.pullPolicy}}
+      {{- if .Values.edgex.security.enabled }}
+        command: ["/edgex-init/ready_to_run_wait_install.sh"]
+        args: ["/device-snmp", "-cp=consul.http://edgex-core-consul:8500", "--registry", "--confdir=/res"]
+      {{- end}}
+        ports:
+        - containerPort: {{.Values.edgex.port.device.snmp}}
+      {{- if not .Values.edgex.security.enabled }}
+          hostPort: {{.Values.edgex.port.device.snmp}}
+          hostIP: {{.Values.edgex.hostPortInternalBind}}
+      {{- end}}
+        env:
+          - name: SERVICE_HOST
+            value: {{.Values.edgex.app.device.snmp}}
+        envFrom:
+        - configMapRef:
+            name: edgex-common-variables
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+        startupProbe:
+          tcpSocket:
+            port: {{.Values.edgex.port.device.snmp}}
+          periodSeconds: 1
+          failureThreshold: 120
+        livenessProbe:
+          tcpSocket:
+            port: {{.Values.edgex.port.device.snmp}}
+      {{- if .Values.edgex.security.enabled }}
+        volumeMounts:
+        - mountPath: /edgex-init
+          name: edgex-init
+        - mountPath: /tmp/edgex/secrets
+          name: edgex-secrets
+      {{- end }}
+      {{- if .Values.edgex.resources.device.snmp.enforceLimits }}
+        resources:
+          limits:
+            memory: {{ .Values.edgex.resources.device.snmp.limits.memory }}
+            cpu: {{ .Values.edgex.resources.device.snmp.limits.cpu }}
+          requests:
+            memory: {{ .Values.edgex.resources.device.snmp.requests.memory }}
+            cpu: {{ .Values.edgex.resources.device.snmp.requests.cpu }}
+      {{- end}}
+      hostname: {{.Values.edgex.app.device.snmp}}
+      restartPolicy: Always
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: {{ .Values.edgex.security.runAsUser }}
+        runAsGroup: {{ .Values.edgex.security.runAsGroup }}
+    {{- if .Values.edgex.security.enabled }}
+      volumes:
+      - name: edgex-init
+        persistentVolumeClaim:
+          claimName: edgex-init
+      - name: edgex-secrets
+        persistentVolumeClaim:
+          claimName: edgex-secrets
+    {{- end}}
