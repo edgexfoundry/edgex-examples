@@ -1,0 +1,18 @@
+# Copyright (C) 2022 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    org.edgexfoundry.service: {{.Values.edgex.app.device.gpio}}
+  name: {{.Values.edgex.app.device.gpio}}
+spec:
+  ports:
+  - name: "{{.Values.edgex.port.device.gpio}}"
+    port: {{.Values.edgex.port.device.gpio}}
+  selector:
+    org.edgexfoundry.service: {{.Values.edgex.app.device.gpio}}
+  type: {{.Values.expose.type}}
+
