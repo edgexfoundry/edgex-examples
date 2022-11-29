@@ -31,6 +31,7 @@ edgex:
       onvifcamera: edgex-device-onvif-camera
       usbcamera: edgex-device-usb-camera
       mqtt: edgex-device-mqtt
+      modbus: edgex-device-modbus
     ui: edgex-ui
     system: edgex-sys-mgmt-agent
     consul: edgex-core-consul
@@ -92,6 +93,10 @@ edgex:
         repository: edgexfoundry/device-mqtt
         tag: "2.3.0"
         pullPolicy: IfNotPresent
+      modbus:
+        repository: edgexfoundry/device-modbus
+        tag: "2.3.0"
+        pullPolicy: IfNotPresent
     ui:
       repository: edgexfoundry/edgex-ui
       tag: "2.3.0"
@@ -149,6 +154,7 @@ edgex:
       usbcamera: 59983
       onvifcamera: 59984
       mqtt: 59982
+      modbus: 59901
     system: 58890
     ui: 4000
     consul: 8500
@@ -188,6 +194,7 @@ edgex:
       usbcamera: 0
       onvifcamera: 0
       mqtt: 0
+      modbus: 0
     ui: 1
     system: 1
     consul: 1
@@ -202,9 +209,9 @@ edgex:
     runAsUser: 2002
     runAsGroup: 2001
     tlsHost: edgex
-    addConsulRoles: "device-onvif-camera,device-usb-camera,device-mqtt"
-    addServiceTokens: "device-rest, device-virtual, device-onvif-camera, device-usb-camera, device-mqtt"
-    addKnownSecrets: "redisdb[app-rules-engine],redisdb[device-rest],redisdb[device-virtual],redisdb[device-onvif-camera],redisdb[device-usb-camera],redisdb[device-mqtt]"
+    addConsulRoles: "device-onvif-camera,device-usb-camera,device-mqtt,device-modbus"
+    addServiceTokens: "device-rest, device-virtual, device-onvif-camera, device-usb-camera, device-mqtt, device-modbus"
+    addKnownSecrets: "redisdb[app-rules-engine],redisdb[device-rest],redisdb[device-virtual],redisdb[device-onvif-camera],redisdb[device-usb-camera],redisdb[device-mqtt],redisdb[device-modbus]"
 
   # resources defines the cpu and memory limits and requests for the respective application
   resources:
@@ -293,6 +300,14 @@ edgex:
           cpu: 0.5
           memory: 256Mi
       mqtt:
+        enforceLimits: false
+        limits:
+          cpu: 1
+          memory: 512Mi
+        requests:
+          cpu: 0.5
+          memory: 256Mi
+      modbus:
         enforceLimits: false
         limits:
           cpu: 1
