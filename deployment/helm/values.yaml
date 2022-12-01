@@ -35,6 +35,7 @@ edgex:
       bacnet: edgex-device-bacnet
       snmp: edgex-device-snmp
       rfidllrp: edgex-device-rfid-llrp
+      gpio: edgex-device-gpio
     ui: edgex-ui
     system: edgex-sys-mgmt-agent
     consul: edgex-core-consul
@@ -112,6 +113,10 @@ edgex:
         repository: edgexfoundry/device-rfid-llrp
         tag: "2.3.0"
         pullPolicy: IfNotPresent
+      gpio:
+        repository: edgexfoundry/device-gpio
+        tag: "2.3.0"
+        pullPolicy: IfNotPresent
     ui:
       repository: edgexfoundry/edgex-ui
       tag: "2.3.0"
@@ -173,6 +178,7 @@ edgex:
       modbus: 59901
       snmp: 59993
       rfidllrp: 59989
+      gpio: 59994
     system: 58890
     ui: 4000
     consul: 8500
@@ -216,6 +222,7 @@ edgex:
       bacnet: 0
       snmp: 0
       rfidllrp: 0
+      gpio: 0
     ui: 1
     system: 1
     consul: 1
@@ -230,9 +237,9 @@ edgex:
     runAsUser: 2002
     runAsGroup: 2001
     tlsHost: edgex
-    addConsulRoles: "device-onvif-camera,device-usb-camera,device-mqtt,device-modbus,device-bacnet,device-snmp,device-rfid-llrp"
-    addServiceTokens: "device-rest, device-virtual, device-onvif-camera, device-usb-camera, device-mqtt, device-modbus, device-bacnet, device-snmp, device-rfid-llrp"
-    addKnownSecrets: "redisdb[app-rules-engine],redisdb[device-rest],redisdb[device-virtual],redisdb[device-onvif-camera],redisdb[device-usb-camera],redisdb[device-mqtt],redisdb[device-modbus],redisdb[device-bacnet],redisdb[device-snmp],redisdb[device-rfid-llrp]"
+    addConsulRoles: "device-onvif-camera,device-usb-camera,device-mqtt,device-modbus,device-bacnet,device-snmp,device-rfid-llrp, device-gpio"
+    addServiceTokens: "device-rest, device-virtual, device-onvif-camera, device-usb-camera, device-mqtt, device-modbus, device-bacnet, device-snmp, device-rfid-llrp, device-gpio"
+    addKnownSecrets: "redisdb[app-rules-engine],redisdb[device-rest],redisdb[device-virtual],redisdb[device-onvif-camera],redisdb[device-usb-camera],redisdb[device-mqtt],redisdb[device-modbus],redisdb[device-bacnet],redisdb[device-snmp],redisdb[device-rfid-llrp],redisdb[device-gpio]"
 
   # resources defines the cpu and memory limits and requests for the respective application
   resources:
@@ -353,6 +360,14 @@ edgex:
           cpu: 0.5
           memory: 256Mi
       rfidllrp:
+        enforceLimits: false
+        limits:
+          cpu: 1
+          memory: 512Mi
+        requests:
+          cpu: 0.5
+          memory: 256Mi
+      gpio:
         enforceLimits: false
         limits:
           cpu: 1
