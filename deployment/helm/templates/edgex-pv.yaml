@@ -235,3 +235,21 @@ spec:
   hostPath:
     path: "/mnt/edgex-device-usb-camera"
 {{- end}}
+---
+{{- if .Values.edgex.storage.useHostPath }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: edgex-app-rfid-llrp-inventory
+spec:
+  storageClassName: ""
+  claimRef:
+    name: app-rfid-llrp-inventory
+    namespace: {{ .Release.Namespace }}
+  capacity:
+    storage: 128Mi
+  accessModes:
+    - {{.Values.edgex.storage.nonSharedVolumesAccessMode}}
+  hostPath:
+    path: "/mnt/edgex-app-rfid-llrp-inventory"
+{{- end}}
