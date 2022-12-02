@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: as-common-variables
+data:
+  DATABASE_HOST: edgex-redis
+  {{- if (eq .Values.edgex.features.messagebusbackend "redis") }}
+  TRIGGER_EDGEXMESSAGEBUS_SUBSCRIBEHOST_HOST: edgex-redis
+  TRIGGER_EDGEXMESSAGEBUS_PUBLISHHOST_HOST: edgex-redis
+  {{- end}}

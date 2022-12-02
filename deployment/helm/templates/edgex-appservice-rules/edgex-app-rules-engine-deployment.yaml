@@ -51,10 +51,33 @@ spec:
           value: "rules-engine"
         - name: SERVICE_HOST
           value: {{.Values.edgex.app.appservice.rules}}
+        {{- if (eq .Values.edgex.features.messagebusbackend "redis") }}
         - name: TRIGGER_EDGEXMESSAGEBUS_PUBLISHHOST_HOST
           value: {{.Values.edgex.app.redis}}
         - name: TRIGGER_EDGEXMESSAGEBUS_SUBSCRIBEHOST_HOST
           value: {{.Values.edgex.app.redis}}
+        {{- end}}
+        {{- if (eq .Values.edgex.features.messagebusbackend "nats") }}
+        - name: TRIGGER_EDGEXMESSAGEBUS_OPTIONAL_AUTHMODE
+          value: none
+        - name: TRIGGER_EDGEXMESSAGEBUS_PUBLISHHOST_HOST
+          value: edgex-nats-server
+        - name: TRIGGER_EDGEXMESSAGEBUS_PUBLISHHOST_PORT
+          value: "4222"
+        - name: TRIGGER_EDGEXMESSAGEBUS_PUBLISHHOST_PROTOCOL
+          value: tcp
+        - name: TRIGGER_EDGEXMESSAGEBUS_PUBLISHHOST_PUBLISHTOPIC
+          value: edgex/rules-events
+        - name: TRIGGER_EDGEXMESSAGEBUS_SUBSCRIBEHOST_HOST
+          value: edgex-nats-server
+        - name: TRIGGER_EDGEXMESSAGEBUS_SUBSCRIBEHOST_PORT
+          value: "4222"
+        - name: TRIGGER_EDGEXMESSAGEBUS_SUBSCRIBEHOST_PROTOCOL
+          value: tcp
+        - name: TRIGGER_EDGEXMESSAGEBUS_TYPE
+          value: nats-jetstream
+        {{- end}}
+
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true

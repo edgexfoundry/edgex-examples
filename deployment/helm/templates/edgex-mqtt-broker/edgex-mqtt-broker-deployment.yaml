@@ -46,7 +46,7 @@ spec:
         livenessProbe:
           tcpSocket:
             port: {{.Values.edgex.port.mqttbroker}}
-      {{- if .Values.edgex.resources.device.usbcamera.enforceLimits }}
+      {{- if .Values.edgex.resources.mqttbroker.enforceLimits }}
         resources:
           limits:
             memory: {{ .Values.edgex.resources.mqttbroker.limits.memory }}

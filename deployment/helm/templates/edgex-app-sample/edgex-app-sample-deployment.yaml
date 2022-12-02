@@ -46,15 +46,19 @@ spec:
         envFrom:
         - configMapRef:
             name: edgex-common-variables
+        - configMapRef:
+            name: as-common-variables
         env:
         - name: EDGEX_PROFILE
           value: "sample"
         - name: SERVICE_HOST
           value: {{.Values.edgex.app.appservice.appsample}}
+      {{- if (eq .Values.edgex.features.messagebusbackend "redis") }}
         - name: TRIGGER_EDGEXMESSAGEBUS_PUBLISHHOST_HOST
           value: {{.Values.edgex.app.redis}}
         - name: TRIGGER_EDGEXMESSAGEBUS_SUBSCRIBEHOST_HOST
           value: {{.Values.edgex.app.redis}}
+      {{end}}
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true

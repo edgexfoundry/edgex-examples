@@ -253,3 +253,21 @@ spec:
   hostPath:
     path: "/mnt/edgex-app-rfid-llrp-inventory"
 {{- end}}
+---
+{{- if .Values.edgex.storage.useHostPath }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: edgex-nats-server
+spec:
+  storageClassName: ""
+  claimRef:
+    name: nats-server
+    namespace: {{ .Release.Namespace }}
+  capacity:
+    storage: 128Mi
+  accessModes:
+    - {{.Values.edgex.storage.nonSharedVolumesAccessMode}}
+  hostPath:
+    path: "/tmp/nats"
+{{- end}}

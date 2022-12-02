@@ -49,13 +49,23 @@ spec:
             value: "http-export"
           - name: SERVICE_HOST
             value: {{.Values.edgex.app.appservice.httpexport}}
+          {{- if (eq .Values.edgex.features.messagebusbackend "redis") }}
           - name: TRIGGER_EDGEXMESSAGEBUS_PUBLISHHOST_HOST
             value: {{.Values.edgex.app.redis}}
           - name: TRIGGER_EDGEXMESSAGEBUS_SUBSCRIBEHOST_HOST
             value: {{.Values.edgex.app.redis}}
+          {{- end}}
+          {{- if (eq .Values.edgex.features.messagebusbackend "nats") }}
+          - name: WRITABLE_PIPELINE_FUNCTIONS_HTTPEXPORT_PARAMETERS_URL
+            value: "{{.Values.edgex.features.httpExportURL}}"
+          - name: WRITABLE_LOGLEVEL
+            value: INFO
+          {{- end}}
         envFrom:
         - configMapRef:
             name: edgex-common-variables
+        - configMapRef:
+            name: as-common-variables
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true

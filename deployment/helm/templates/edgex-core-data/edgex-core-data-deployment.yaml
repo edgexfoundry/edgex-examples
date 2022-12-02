@@ -51,6 +51,20 @@ spec:
         - name: SECRETSTORE_TOKENFILE
           value: /tmp/edgex/secrets/core-data/secrets-token.json
       {{- end}}
+      {{- if (eq .Values.edgex.features.messagebusbackend "nats") }}
+        - name: MESSAGEQUEUE_AUTHMODE
+          value: none
+        - name: MESSAGEQUEUE_HOST
+          value: edgex-nats-server
+        - name: MESSAGEQUEUE_OPTIONAL_CLIENTID
+          value: core-data
+        - name: MESSAGEQUEUE_PORT
+          value: '4222'
+        - name: MESSAGEQUEUE_PROTOCOL
+          value: tcp
+        - name: MESSAGEQUEUE_TYPE
+          value: nats-jetstream
+      {{end}}
         envFrom:
         - configMapRef:
             name: edgex-common-variables

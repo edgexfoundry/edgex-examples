@@ -60,6 +60,7 @@ spec:
           value: "true"
         - name: KUIPER__BASIC__RESTPORT
           value: "{{.Values.edgex.port.ekuiper}}"
+        {{- if (eq .Values.edgex.features.messagebusbackend "redis") }}
         - name: EDGEX__DEFAULT__SERVER
           value: {{.Values.edgex.app.redis}}
         - name: EDGEX__DEFAULT__PROTOCOL
@@ -68,6 +69,31 @@ spec:
           value: "{{.Values.edgex.port.redis}}"
         - name: EDGEX__DEFAULT__TOPIC
           value: "rules-events"
+        {{end}}
+        {{- if (eq .Values.edgex.features.messagebusbackend "nats") }}
+        - name: MESSAGEQUEUE_HOST
+          value: edgex-nats-server
+        - name: MESSAGEQUEUE_OPTIONAL_CLIENTID
+          value: kuiper-rules-engine
+        - name: MESSAGEQUEUE_PORT
+          value: '4222'
+        - name: MESSAGEQUEUE_PROTOCOL
+          value: tcp
+        - name: MESSAGEQUEUE_TYPE
+          value: nats-jetstream
+        - name: EDGEX__DEFAULT__OPTIONAL__CLIENTID
+          value: kuiper-rules-engine
+        - name: EDGEX__DEFAULT__PORT
+          value: '4222'
+        - name: EDGEX__DEFAULT__PROTOCOL
+          value: tcp
+        - name: EDGEX__DEFAULT__SERVER
+          value: edgex-nats-server
+        - name: EDGEX__DEFAULT__TOPIC
+          value: edgex/rules-events
+        - name: EDGEX__DEFAULT__TYPE
+          value: nats-jetstream
+        {{end}}
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: false

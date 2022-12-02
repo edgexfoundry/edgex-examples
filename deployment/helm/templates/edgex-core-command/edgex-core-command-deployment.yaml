@@ -47,6 +47,18 @@ spec:
         env:
         - name: SERVICE_HOST
           value: {{.Values.edgex.app.core.command}}
+        {{- if (eq .Values.edgex.features.messagebusbackend "nats") }}
+        - name: MESSAGEQUEUE_INTERNAL_AUTHMODE
+          value: none
+        - name: MESSAGEQUEUE_INTERNAL_HOST
+          value: edgex-nats-server
+        - name: MESSAGEQUEUE_INTERNAL_PORT
+          value: "4222"
+        - name: MESSAGEQUEUE_INTERNAL_PROTOCOL
+          value: tcp
+        - name: MESSAGEQUEUE_INTERNAL_TYPE
+          value: nats-jetstream
+        {{end}}
         envFrom:
         - configMapRef:
             name: edgex-common-variables

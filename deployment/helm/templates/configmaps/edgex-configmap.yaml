@@ -12,9 +12,11 @@ data:
   CLIENTS_CORE_COMMAND_HOST: {{.Values.edgex.app.core.command}}
   CLIENTS_SUPPORT_NOTIFICATIONS_HOST: {{.Values.edgex.app.support.notifications}}
   CLIENTS_SUPPORT_SCHEDULER_HOST: {{.Values.edgex.app.support.scheduler}}
-  MESSAGEQUEUE_HOST: {{.Values.edgex.app.redis}}
   REGISTRY_HOST: {{.Values.edgex.app.consul}}
   DATABASES_PRIMARY_HOST: {{.Values.edgex.app.redis}}
+{{- if (eq .Values.edgex.features.messagebusbackend "redis") }}
+  MESSAGEQUEUE_HOST: {{.Values.edgex.app.redis}}
+{{- end}}
 {{- if .Values.edgex.security.enabled }}
   EDGEX_SECURITY_SECRET_STORE: "true"
   SECRETSTORE_HOST: edgex-vault
