@@ -48,7 +48,7 @@ spec:
             name: edgex-common-variables
         env:
         - name: EDGEX_PROFILE
-          value: "edgex-app-external-mqtt-trigger"
+          value: "external-mqtt-trigger"
         - name: SERVICE_HOST
           value: {{.Values.edgex.app.appservice.externalmqtttrigger}}
         - name: WRITABLE_LOGLEVEL
