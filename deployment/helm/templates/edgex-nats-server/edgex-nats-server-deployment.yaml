@@ -1,0 +1,59 @@
+# Copyright (C) 2022 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    org.edgexfoundry.service: {{.Values.edgex.app.natsserver}}
+  name: {{.Values.edgex.app.natsserver}}
+spec:
+  replicas: {{.Values.edgex.replicas.natsserver}}
+  selector:
+    matchLabels:
+      org.edgexfoundry.service: {{.Values.edgex.app.natsserver}}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        org.edgexfoundry.service: {{.Values.edgex.app.natsserver}}
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - name: {{.Values.edgex.app.natsserver}}
+        image: {{.Values.edgex.image.natsserver.repository}}:{{.Values.edgex.image.natsserver.tag}}
+        imagePullPolicy: {{.Values.edgex.image.natsserver.pullPolicy}}
+        ports:
+        - containerPort: {{.Values.edgex.port.natsserver}}
+      {{- if not .Values.edgex.security.enabled }}
+          hostPort: {{.Values.edgex.port.natsserver}}
+          hostIP: {{.Values.edgex.hostPortInternalBind}}
+      {{- end}}
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+        startupProbe:
+          tcpSocket:
+            port: {{.Values.edgex.port.natsserver}}
+          periodSeconds: 1
+          failureThreshold: 120
+        livenessProbe:
+          tcpSocket:
+            port: {{.Values.edgex.port.natsserver}}
+      {{- if .Values.edgex.resources.natsserver.enforceLimits }}
+        resources:
+          limits:
+            memory: {{ .Values.edgex.resources.natsserver.limits.memory }}
+            cpu: {{ .Values.edgex.resources.natsserver.limits.cpu }}
+          requests:
+            memory: {{ .Values.edgex.resources.natsserver.requests.memory }}
+            cpu: {{ .Values.edgex.resources.natsserver.requests.cpu }}
+      {{- end}}
+      hostname: {{.Values.edgex.app.natsserver}}
+      restartPolicy: Always
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: {{ .Values.edgex.security.runAsUser }}
+        runAsGroup: {{ .Values.edgex.security.runAsGroup }}

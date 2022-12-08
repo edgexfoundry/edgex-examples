@@ -30,6 +30,7 @@ edgex:
       appsample: edgex-app-sample
       metricsinfluxdb: edgex-app-metrics-influxdb
       rfidllrpinventory: edgex-app-rfid-llrp-inventory
+      externalmqtttrigger: edgex-app-external-mqtt-trigger
     device:
       virtual: edgex-device-virtual
       rest: edgex-device-rest
@@ -51,6 +52,7 @@ edgex:
     secretstoresetup: edgex-security-secretstore-setup
     modbussimulator: edgex-modbus-simulator
     mqttbroker: edgex-mqtt-broker
+    natsserver: edgex-nats-server
 
   # image defines configuration properties for docker-image-level concerns
   image:
@@ -98,8 +100,12 @@ edgex:
         tag: "2.3.0"
         pullPolicy: IfNotPresent
       httpexport:
-        repository: nexus3.edgexfoundry.org:10004/app-service-configurable
-        tag: "latest"
+        repository: edgexfoundry/app-service-configurable
+        tag: "2.3.0"
+        pullPolicy: IfNotPresent
+      externalmqtttrigger:
+        repository: edgexfoundry/app-service-configurable
+        tag: "2.3.0"
         pullPolicy: IfNotPresent
     device:
       virtual:
@@ -182,6 +188,10 @@ edgex:
       repository: eclipse-mosquitto
       tag: "2.0"
       pullPolicy: IfNotPresent
+    natsserver:
+      repository: nats
+      tag: "2.9.3-alpine"
+      pullPolicy: IfNotPresent
   # port defines configuration properties for container, target and host ports
   port:
     core:
@@ -198,6 +208,7 @@ edgex:
       appsample: 59700
       metricsinfluxdb: 59707
       rfidllrpinventory: 59711
+      externalmqtttrigger: 59706
     device:
       virtual: 59900
       rest: 59986
@@ -216,6 +227,7 @@ edgex:
     ekuiper: 59720
     modbussimulator: 1502
     mqttbroker: 1883
+    natsserver: 4222
 
   # ports used by security bootstrapping for stage gating edgex init
   bootstrap:
@@ -247,6 +259,7 @@ edgex:
       appsample: 0
       metricsinfluxdb: 0
       rfidllrpinventory: 0
+      externalmqtttrigger: 0
     device:
       virtual: 1
       rest: 1
@@ -265,6 +278,7 @@ edgex:
     ekuiper: 1
     modbussimulator: 0
     mqttbroker: 0
+    natsserver: 0
 
   # UID/GID for container user
   security:
@@ -369,6 +383,14 @@ edgex:
         requests:
           cpu: 0.5
           memory: 256Mi
+      externalmqtttrigger:
+        enforceLimits: false
+        limits:
+          cpu: 1
+          memory: 512Mi
+        requests:
+          cpu: 0.5
+          memory: 256Mi
     device:
       virtual:
         enforceLimits: false
@@ -530,6 +552,14 @@ edgex:
       requests:
         cpu: 0.5
         memory: 256Mi
+    natsserver:
+      enforceLimits: false
+      limits:
+        cpu: 1
+        memory: 512Mi
+      requests:
+        cpu: 0.5
+        memory: 256Mi
   storage:
     useHostPath: true
 
@@ -541,3 +571,11 @@ edgex:
     sharedVolumesClassName: "rook-cephfs"
     # If this value is set to "ReadWriteOnce" it will trigger pod affinity rules.
     sharedVolumesAccessMode: "ReadWriteMany"
+
+  features:
+    # Available messagebus options: redis|mqtt|nats
+    messagebusbackend: redis
+    # MQTT broker address
+    mqttBrokerAddress: ""
+    # Writable pipeline functions HTTP export parameter URL
+    httpExportURL: ""

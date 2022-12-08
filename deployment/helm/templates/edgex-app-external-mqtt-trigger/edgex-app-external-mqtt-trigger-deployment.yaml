@@ -6,18 +6,18 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    org.edgexfoundry.service: {{.Values.edgex.app.appservice.rfidllrpinventory}}
-  name: {{.Values.edgex.app.appservice.rfidllrpinventory}}
+    org.edgexfoundry.service: {{.Values.edgex.app.appservice.externalmqtttrigger}}
+  name: {{.Values.edgex.app.appservice.externalmqtttrigger}}
 spec:
-  replicas: {{.Values.edgex.replicas.appservice.rfidllrpinventory}}
+  replicas: {{.Values.edgex.replicas.appservice.externalmqtttrigger}}
   selector:
     matchLabels:
-      org.edgexfoundry.service: {{.Values.edgex.app.appservice.rfidllrpinventory}}
+      org.edgexfoundry.service: {{.Values.edgex.app.appservice.externalmqtttrigger}}
   strategy: {}
   template:
     metadata:
       labels:
-        org.edgexfoundry.service: {{.Values.edgex.app.appservice.rfidllrpinventory}}
+        org.edgexfoundry.service: {{.Values.edgex.app.appservice.externalmqtttrigger}}
     spec:
     {{- if and (eq .Values.edgex.security.enabled true) (or (eq .Values.edgex.storage.sharedVolumesAccessMode "ReadWriteOnce") (eq .Values.edgex.storage.useHostPath true))}}
       affinity:
@@ -30,65 +30,75 @@ spec:
     {{- end}}
       automountServiceAccountToken: false
       containers:
-      - name: {{.Values.edgex.app.appservice.rfidllrpinventory}}
-        image: {{.Values.edgex.image.appservice.rfidllrpinventory.repository}}:{{.Values.edgex.image.appservice.rfidllrpinventory.tag}}
-        imagePullPolicy: {{.Values.edgex.image.appservice.rfidllrpinventory.pullPolicy}}
+      - name: {{.Values.edgex.app.appservice.externalmqtttrigger}}
+        image: {{.Values.edgex.image.appservice.externalmqtttrigger.repository}}:{{.Values.edgex.image.appservice.externalmqtttrigger.tag}}
+        imagePullPolicy: {{.Values.edgex.image.appservice.externalmqtttrigger.pullPolicy}}
       {{- if .Values.edgex.security.enabled }}
         command: ["/edgex-init/ready_to_run_wait_install.sh"]
-        args: ["/app-rfid-llrp-inventory", "-cp=consul.http://edgex-core-consul:8500", "--registry", "--confdir=/res"]
+        args: ["/app-service-configurable", "-cp=consul.http://edgex-core-consul:8500", "--registry", "--confdir=/res"]
       {{- end}}
         ports:
-        - containerPort: {{.Values.edgex.port.appservice.rfidllrpinventory}}
+        - containerPort: {{.Values.edgex.port.appservice.externalmqtttrigger}}
       {{- if not .Values.edgex.security.enabled }}
-          hostPort: {{.Values.edgex.port.appservice.rfidllrpinventory}}
+          hostPort: {{.Values.edgex.port.appservice.externalmqtttrigger}}
           hostIP: {{.Values.edgex.hostPortInternalBind}}
       {{- end}}
         envFrom:
         - configMapRef:
             name: edgex-common-variables
-        - configMapRef:
-            name: as-common-variables
         env:
+        - name: EDGEX_PROFILE
+          value: "edgex-app-external-mqtt-trigger"
         - name: SERVICE_HOST
-          value: {{.Values.edgex.app.appservice.rfidllrpinventory}}
-      {{- if (eq .Values.edgex.features.messagebusbackend "redis") }}
+          value: {{.Values.edgex.app.appservice.externalmqtttrigger}}
+        - name: WRITABLE_LOGLEVEL
+          value: INFO
+        {{- if (eq .Values.edgex.features.messagebusbackend "redis") }}
         - name: TRIGGER_EDGEXMESSAGEBUS_PUBLISHHOST_HOST
           value: {{.Values.edgex.app.redis}}
         - name: TRIGGER_EDGEXMESSAGEBUS_SUBSCRIBEHOST_HOST
           value: {{.Values.edgex.app.redis}}
-      {{end}}
+        {{- end}}
+        {{- if (eq .Values.edgex.features.messagebusbackend "mqtt") }}
+        - name: WRITABLE_PIPELINE_FUNCTIONS_MQTTEXPORT_PARAMETERS_BROKERADDRESS
+          value: "{{.Values.edgex.features.mqttBrokerAddress}}"
+        - name: WRITABLE_PIPELINE_FUNCTIONS_MQTTEXPORT_PARAMETERS_TOPIC
+          value: edgex-export
+        - name: TRIGGER_EXTERNALMQTT_URL
+          value: "{{.Values.edgex.features.mqttBrokerAddress}}"
+        {{- end}}
+
+
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
         startupProbe:
           httpGet:
             path: /api/v2/ping
-            port: {{.Values.edgex.port.appservice.rfidllrpinventory}}
+            port: {{.Values.edgex.port.appservice.externalmqtttrigger}}
           periodSeconds: 1
           failureThreshold: 120
         livenessProbe:
           httpGet:
             path: /api/v2/ping
-            port: {{.Values.edgex.port.appservice.rfidllrpinventory}}
+            port: {{.Values.edgex.port.appservice.externalmqtttrigger}}
       {{- if .Values.edgex.security.enabled }}
         volumeMounts:
         - mountPath: /edgex-init
           name: edgex-init
         - mountPath: /tmp/edgex/secrets
           name: edgex-secrets
-        - mountPath: /tmp/edgex/edgex-app-rfid-llrp-inventory
-          name: edgex-app-rfid-llrp-inventory
       {{- end }}
-      {{- if .Values.edgex.resources.appservice.rfidllrpinventory.enforceLimits }}
+      {{- if .Values.edgex.resources.appservice.externalmqtttrigger.enforceLimits }}
         resources:
           limits:
-            memory: {{ .Values.edgex.resources.appservice.rfidllrpinventory.limits.memory }}
-            cpu: {{ .Values.edgex.resources.appservice.rfidllrpinventory.limits.cpu }}
+            memory: {{ .Values.edgex.resources.appservice.externalmqtttrigger.limits.memory }}
+            cpu: {{ .Values.edgex.resources.appservice.externalmqtttrigger.limits.cpu }}
           requests:
-            memory: {{ .Values.edgex.resources.appservice.rfidllrpinventory.requests.memory }}
-            cpu: {{ .Values.edgex.resources.appservice.rfidllrpinventory.requests.cpu }}
+            memory: {{ .Values.edgex.resources.appservice.externalmqtttrigger.requests.memory }}
+            cpu: {{ .Values.edgex.resources.appservice.externalmqtttrigger.requests.cpu }}
       {{- end}}
-      hostname: {{.Values.edgex.app.appservice.rfidllrpinventory}}
+      hostname: {{.Values.edgex.app.appservice.externalmqtttrigger}}
       restartPolicy: Always
       securityContext:
         runAsNonRoot: true
@@ -102,7 +112,4 @@ spec:
       - name: edgex-secrets
         persistentVolumeClaim:
           claimName: edgex-secrets
-      - name: edgex-app-rfid-llrp-inventory
-        persistentVolumeClaim:
-          claimName: app-rfid-llrp-inventory
     {{- end}}

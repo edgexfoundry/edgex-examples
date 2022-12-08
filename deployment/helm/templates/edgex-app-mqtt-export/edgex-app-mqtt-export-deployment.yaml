@@ -46,15 +46,31 @@ spec:
         envFrom:
         - configMapRef:
             name: edgex-common-variables
+        - configMapRef:
+            name: as-common-variables
         env:
         - name: EDGEX_PROFILE
           value: "mqtt-export"
         - name: SERVICE_HOST
           value: {{.Values.edgex.app.appservice.mqttexport}}
+        - name: WRITABLE_PIPELINE_FUNCTIONS_MQTTEXPORT_PARAMETERS_BROKERADDRESS
+          value: "{{.Values.edgex.features.mqttBrokerAddress}}"
+        - name: WRITABLE_PIPELINE_FUNCTIONS_MQTTEXPORT_PARAMETERS_TOPIC
+          value: edgex-events
+        - name: WRITABLE_LOGLEVEL
+          value: INFO
+        {{- if (eq .Values.edgex.features.messagebusbackend "redis") }}
         - name: TRIGGER_EDGEXMESSAGEBUS_PUBLISHHOST_HOST
           value: {{.Values.edgex.app.redis}}
-        - name: TRIGGER_EDGEXMESSAGEBUS_SUBSCRIBEHOST_HOST
+        - name: WRITABLE_PIPELINE_FUNCTIONS_MQTTEXPORT_PARAMETERS_BROKERADDRESS
           value: {{.Values.edgex.app.redis}}
+        {{- end}}
+        {{- if (eq .Values.edgex.features.messagebusbackend "nats") }}
+        - name: TRIGGER_EDGEXMESSAGEBUS_SUBSCRIBEHOST_HOST
+          value: "{{.Values.edgex.features.mqttBrokerAddress}}"
+        - name: WRITABLE_PIPELINE_FUNCTIONS_MQTTEXPORT_PARAMETERS_TOPIC
+          value: edgex-events
+        {{- end}}
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true

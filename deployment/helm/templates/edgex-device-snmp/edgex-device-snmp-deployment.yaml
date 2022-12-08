@@ -50,6 +50,8 @@ spec:
         envFrom:
         - configMapRef:
             name: edgex-common-variables
+        - configMapRef:
+            name: device-common-variables
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
