@@ -271,3 +271,39 @@ spec:
   hostPath:
     path: "/tmp/nats"
 {{- end}}
+---
+{{- if .Values.edgex.storage.useHostPath }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: kuiper-sources
+spec:
+  storageClassName: ""
+  claimRef:
+    name: kuiper-sources
+    namespace: {{ .Release.Namespace }}
+  capacity:
+    storage: 128Mi
+  accessModes:
+    - {{.Values.edgex.storage.nonSharedVolumesAccessMode}}
+  hostPath:
+    path: "/mnt/kuiper-sources"
+{{- end }}
+---
+{{- if .Values.edgex.storage.useHostPath }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: kuiper-connections
+spec:
+  storageClassName: ""
+  claimRef:
+    name: kuiper-connections
+    namespace: {{ .Release.Namespace }}
+  capacity:
+    storage: 128Mi
+  accessModes:
+    - {{.Values.edgex.storage.nonSharedVolumesAccessMode}}
+  hostPath:
+    path: "/mnt/kuiper-connections"
+{{- end }}
