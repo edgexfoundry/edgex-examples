@@ -27,8 +27,10 @@ spec:
         imagePullPolicy: {{.Values.edgex.image.ui.pullPolicy}}
         ports:
         - containerPort: {{.Values.edgex.port.ui}}
+        {{- if .Values.edgex.features.enableHostPort}}
           hostPort: {{.Values.edgex.port.ui}}
           hostIP: {{.Values.edgex.hostPortExternalBind}}
+        {{- end}}
         env:
         - name: EDGEX_SECURITY_SECRET_STORE
       {{- if .Values.edgex.security.enabled }}

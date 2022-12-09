@@ -50,8 +50,10 @@ spec:
         ports:
         - containerPort: {{.Values.edgex.port.ekuiper}}
       {{- if not .Values.edgex.security.enabled }}
+        {{- if .Values.edgex.features.enableHostPort}}
           hostPort: {{.Values.edgex.port.ekuiper}}
           hostIP: {{.Values.edgex.hostPortInternalBind}}
+        {{- end}}
       {{- end}}
         env:
 #        - name: KUIPER__BASIC__DEBUG

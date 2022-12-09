@@ -40,8 +40,10 @@ spec:
         ports:
         - containerPort: {{.Values.edgex.port.appservice.rules}}
       {{- if not .Values.edgex.security.enabled }}
+        {{- if .Values.edgex.features.enableHostPort}}
           hostPort: {{.Values.edgex.port.appservice.rules}}
           hostIP: {{.Values.edgex.hostPortInternalBind}}
+        {{- end}}
       {{- end}}
         envFrom:
         - configMapRef:

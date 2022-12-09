@@ -41,8 +41,10 @@ spec:
         ports:
         - containerPort: {{.Values.edgex.port.support.scheduler}}
       {{- if not .Values.edgex.security.enabled }}
+        {{- if .Values.edgex.features.enableHostPort}}
           hostPort: {{.Values.edgex.port.support.scheduler}}
           hostIP: {{.Values.edgex.hostPortInternalBind}}
+        {{- end}}
       {{- end}}
         envFrom:
         - configMapRef:

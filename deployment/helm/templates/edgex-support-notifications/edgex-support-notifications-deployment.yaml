@@ -41,8 +41,10 @@ spec:
         ports:
         - containerPort: {{.Values.edgex.port.support.notifications}}
       {{- if not .Values.edgex.security.enabled }}
+        {{- if .Values.edgex.features.enableHostPort}}
           hostPort: {{.Values.edgex.port.support.notifications}}
           hostIP: {{.Values.edgex.hostPortInternalBind}}
+        {{- end}}
       {{- end}}
         env:
         - name: SERVICE_HOST

@@ -40,8 +40,10 @@ spec:
         args: ["agent", "-ui", "-bootstrap", "-server", "-client", "0.0.0.0"]
         ports:
         - containerPort: {{.Values.edgex.port.consul}}
+        {{- if .Values.edgex.features.enableHostPort}}
           hostPort: {{.Values.edgex.port.consul}}
           hostIP: {{.Values.edgex.hostPortExternalBind}}
+        {{- end}}
       {{- if .Values.edgex.security.enabled }}
         env:
         - name: EDGEX_USER
