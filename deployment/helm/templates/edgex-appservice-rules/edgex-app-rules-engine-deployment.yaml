@@ -97,6 +97,10 @@ spec:
           name: edgex-init
         - mountPath: /tmp/edgex/secrets
           name: edgex-secrets
+        - mountPath: /kuiper/etc/sources
+          name: kuiper-sources
+        - mountPath: /kuiper/etc/connections
+          name: kuiper-connections
       {{- end }}
       {{- if .Values.edgex.resources.appservice.rules.enforceLimits }}
         resources:
@@ -121,4 +125,10 @@ spec:
       - name: edgex-secrets
         persistentVolumeClaim:
           claimName: edgex-secrets
+      - name: kuiper-sources
+        persistentVolumeClaim:
+          claimName: kuiper-sources
+      - name: kuiper-connections
+        persistentVolumeClaim:
+          claimName: kuiper-connections
     {{- end}}
