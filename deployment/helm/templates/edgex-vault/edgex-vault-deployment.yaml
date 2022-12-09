@@ -98,6 +98,14 @@ spec:
             memory: {{ .Values.edgex.resources.vault.requests.memory }}
             cpu: {{ .Values.edgex.resources.vault.requests.cpu }}
       {{- end}}
+        startupProbe:
+          tcpSocket:
+            port: {{.Values.edgex.port.vault}}
+          periodSeconds: 1
+          failureThreshold: 120
+        livenessProbe:
+          tcpSocket:
+            port: {{.Values.edgex.port.vault}}
       hostname: {{.Values.edgex.app.vault}}
       restartPolicy: Always
       securityContext:

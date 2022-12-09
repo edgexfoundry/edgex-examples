@@ -49,6 +49,14 @@ spec:
             memory: {{ .Values.edgex.resources.vault.requests.memory }}
             cpu: {{ .Values.edgex.resources.vault.requests.cpu }}
       {{- end}}
+        startupProbe:
+          tcpSocket:
+            port: {{.Values.edgex.bootstrap.port.start}}
+          periodSeconds: 1
+          failureThreshold: 120
+        livenessProbe:
+          tcpSocket:
+            port: {{.Values.edgex.bootstrap.port.start}}
       hostname: {{.Values.edgex.app.bootstrapper}}
       restartPolicy: Always
       securityContext:

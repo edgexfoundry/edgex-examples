@@ -58,12 +58,14 @@ spec:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
         startupProbe:
-          tcpSocket:
+          httpGet:
+            path: /api/v2/ping
             port: {{.Values.edgex.port.device.mqtt}}
           periodSeconds: 1
           failureThreshold: 120
         livenessProbe:
-          tcpSocket:
+          httpGet:
+            path: /api/v2/ping
             port: {{.Values.edgex.port.device.mqtt}}
       {{- if .Values.edgex.security.enabled }}
         volumeMounts:
