@@ -580,3 +580,4 @@ edgex:
     mqttBrokerAddress: ""
     # Writable pipeline functions HTTP export parameter URL
     httpExportURL: ""
+    enableHostPort: false

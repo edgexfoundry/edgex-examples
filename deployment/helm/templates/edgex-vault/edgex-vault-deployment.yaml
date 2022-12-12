@@ -56,8 +56,10 @@ spec:
         ports:
         - containerPort: 8200
       {{- if not .Values.edgex.security.enabled }}
+        {{- if .Values.edgex.features.enableHostPort}}
           hostPort: 8200
           hostIP: 0.0.0.0
+        {{- end}}
       {{- end}}
         env:
         - name: VAULT_ADDR

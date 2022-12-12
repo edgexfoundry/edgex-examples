@@ -32,8 +32,10 @@ spec:
         ports:
         - containerPort: {{.Values.edgex.port.mqttbroker}}
       {{- if not .Values.edgex.security.enabled }}
+        {{- if .Values.edgex.features.enableHostPort}}
           hostPort: {{.Values.edgex.port.mqttbroker}}
           hostIP: {{.Values.edgex.hostPortInternalBind}}
+        {{- end}}
       {{- end}}
         securityContext:
           allowPrivilegeEscalation: false
