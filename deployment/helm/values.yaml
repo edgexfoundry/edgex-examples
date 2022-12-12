@@ -287,7 +287,7 @@ edgex:
     runAsUser: 2002
     runAsGroup: 2001
     tlsHost: edgex
-    addConsulRoles: "app-external-mqtt-trigger,app-http-export,app-mqtt-export,device-bacnet,device-gpio,device-modbus,device-mqtt,device-onvif-camera,device-rfid-llrp,device-snmp,device-usb-camera"
+    addConsulRoles: "app-external-mqtt-trigger,app-http-export,app-metrics-influxdb,app-mqtt-export,app-rfid-llrp-inventory,app-sample,device-bacnet,device-gpio,device-modbus,device-mqtt,device-onvif-camera,device-rfid-llrp,device-snmp,device-usb-camera"
     addServiceTokens: "app-external-mqtt-trigger, app-http-export, app-metrics-influxdb, app-mqtt-export, app-rfid-llrp-inventory, app-sample, device-bacnet, device-gpio, device-modbus, device-mqtt, device-onvif-camera, device-rest, device-rfid-llrp, device-snmp, device-usb-camera, device-virtual"
     addKnownSecrets: "message-bus[app-mqtt-export],message-bus[app-http-export],redisdb[app-external-mqtt-trigger],redisdb[app-http-export],redisdb[app-metrics-influxdb], redisdb[app-metrics-influxdb],redisdb[app-mqtt-export],redisdb[app-rfid-llrp-inventory],redisdb[app-sample],redisdb[device-bacnet],redisdb[device-gpio],redisdb[device-modbus],redisdb[device-mqtt],redisdb[device-onvif-camera],redisdb[device-rest],redisdb[device-rfid-llrp],redisdb[device-snmp], redisdb[device-usb-camera],redisdb[device-virtual]"
 
