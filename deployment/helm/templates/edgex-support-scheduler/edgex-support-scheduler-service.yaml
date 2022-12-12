@@ -14,4 +14,4 @@ spec:
     port: {{.Values.edgex.port.support.scheduler}}
   selector:
     org.edgexfoundry.service: {{.Values.edgex.app.support.scheduler}}
-  type: {{.Values.expose.type}}
+  type: {{.Values.expose.type.support.scheduler}}

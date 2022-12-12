@@ -14,5 +14,5 @@ spec:
     port: {{.Values.edgex.port.mqttbroker}}
   selector:
     org.edgexfoundry.service: {{.Values.edgex.app.mqttbroker}}
-  type: {{.Values.expose.type}}
+  type: {{.Values.expose.type.mqttbroker}}
 

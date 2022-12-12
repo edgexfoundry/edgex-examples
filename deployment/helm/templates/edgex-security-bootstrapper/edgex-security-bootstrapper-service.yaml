@@ -15,7 +15,7 @@ spec:
     port: {{ .Values.edgex.bootstrap.port.start }}
   selector:
     org.edgexfoundry.service: {{.Values.edgex.app.bootstrapper}}
-  type: ClusterIP
+  type: {{.Values.expose.type.bootstrapper}}
   # Do not allocate cluster IP - point DNS directly at the Pod IP - ignore targetPort's
   clusterIP: None
 {{- end}}

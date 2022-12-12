@@ -14,4 +14,4 @@ spec:
     port: {{.Values.edgex.port.appservice.mqttexport}}
   selector:
     org.edgexfoundry.service: {{.Values.edgex.app.appservice.mqttexport}}
-  type: {{.Values.expose.type}}
+  type: {{.Values.expose.type.appservice.mqttexport}}

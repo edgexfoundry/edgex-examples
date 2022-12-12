@@ -14,5 +14,5 @@ spec:
     port: {{.Values.edgex.port.appservice.httpexport}}
   selector:
     org.edgexfoundry.service: {{.Values.edgex.app.appservice.httpexport}}
-  type: {{.Values.expose.type}}
+  type: {{.Values.expose.type.appservice.httpexport}}
 

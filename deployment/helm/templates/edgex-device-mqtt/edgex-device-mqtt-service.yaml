@@ -14,5 +14,5 @@ spec:
     port: {{.Values.edgex.port.device.mqtt}}
   selector:
     org.edgexfoundry.service: {{.Values.edgex.app.device.mqtt}}
-  type: {{.Values.expose.type}}
+  type: {{.Values.expose.type.device.mqtt}}
 
