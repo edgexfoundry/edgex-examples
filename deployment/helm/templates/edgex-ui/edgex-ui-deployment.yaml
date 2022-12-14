@@ -27,6 +27,7 @@ spec:
         imagePullPolicy: {{.Values.edgex.image.ui.pullPolicy}}
         ports:
         - containerPort: {{.Values.edgex.port.ui}}
+          name: "http"
         {{- if .Values.edgex.features.enableHostPort}}
           hostPort: {{.Values.edgex.port.ui}}
           hostIP: {{.Values.edgex.hostPortExternalBind}}

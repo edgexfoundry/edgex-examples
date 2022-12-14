@@ -27,6 +27,7 @@ spec:
         imagePullPolicy: {{.Values.edgex.image.modbussimulator.pullPolicy}}
         ports:
         - containerPort: {{.Values.edgex.port.modbussimulator}}
+          name: "mbap"
       {{- if not .Values.edgex.security.enabled }}
         {{- if .Values.edgex.features.enableHostPort}}
           hostPort: {{.Values.edgex.port.modbussimulator}}

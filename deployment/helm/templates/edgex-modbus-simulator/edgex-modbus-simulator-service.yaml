@@ -10,7 +10,7 @@ metadata:
   name: {{.Values.edgex.app.modbussimulator}}
 spec:
   ports:
-  - name: "{{.Values.edgex.port.modbussimulator}}"
+  - name: "modbus-simulator-mbap"
     port: {{.Values.edgex.port.modbussimulator}}
   selector:
     org.edgexfoundry.service: {{.Values.edgex.app.modbussimulator}}

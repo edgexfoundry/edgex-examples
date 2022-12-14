@@ -10,7 +10,7 @@ metadata:
   name: {{.Values.edgex.app.appservice.rfidllrpinventory}}
 spec:
   ports:
-  - name: "http"
+  - name: "app-rfid-llrp-inventory-http"
     port: {{.Values.edgex.port.appservice.rfidllrpinventory}}
   selector:
     org.edgexfoundry.service: {{.Values.edgex.app.appservice.rfidllrpinventory}}

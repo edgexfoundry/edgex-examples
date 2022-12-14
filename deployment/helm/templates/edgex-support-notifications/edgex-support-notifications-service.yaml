@@ -10,7 +10,7 @@ metadata:
   name: {{.Values.edgex.app.support.notifications}}
 spec:
   ports:
-  - name: "http"
+  - name: "support-notifications-http"
     port: {{.Values.edgex.port.support.notifications}}
   selector:
     org.edgexfoundry.service: {{.Values.edgex.app.support.notifications}}

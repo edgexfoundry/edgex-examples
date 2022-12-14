@@ -11,7 +11,7 @@ metadata:
   name: {{.Values.edgex.app.bootstrapper}}
 spec:
   ports:
-  - name: "start"
+  - name: "bootstrapper-http"
     port: {{ .Values.edgex.bootstrap.port.start }}
   selector:
     org.edgexfoundry.service: {{.Values.edgex.app.bootstrapper}}

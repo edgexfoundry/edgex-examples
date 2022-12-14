@@ -10,7 +10,7 @@ metadata:
   name: {{.Values.edgex.app.system}}
 spec:
   ports:
-  - name: "http"
+  - name: "system-mgmt-agent-http"
     port: {{.Values.edgex.port.system}}
   selector:
     org.edgexfoundry.service: {{.Values.edgex.app.system}}

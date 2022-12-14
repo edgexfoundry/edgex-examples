@@ -10,7 +10,7 @@ metadata:
   name: {{.Values.edgex.app.device.modbus}}
 spec:
   ports:
-  - name: "{{.Values.edgex.port.device.modbus}}"
+  - name: "device-modbus-http"
     port: {{.Values.edgex.port.device.modbus}}
   selector:
     org.edgexfoundry.service: {{.Values.edgex.app.device.modbus}}

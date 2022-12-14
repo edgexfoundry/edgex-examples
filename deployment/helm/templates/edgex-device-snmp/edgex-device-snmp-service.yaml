@@ -10,7 +10,7 @@ metadata:
   name: {{.Values.edgex.app.device.snmp}}
 spec:
   ports:
-  - name: "{{.Values.edgex.port.device.snmp}}"
+  - name: "device-snmp-http"
     port: {{.Values.edgex.port.device.snmp}}
   selector:
     org.edgexfoundry.service: {{.Values.edgex.app.device.snmp}}

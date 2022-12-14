@@ -10,7 +10,7 @@ metadata:
   name: {{.Values.edgex.app.device.gpio}}
 spec:
   ports:
-  - name: "{{.Values.edgex.port.device.gpio}}"
+  - name: "device-gpio-http"
     port: {{.Values.edgex.port.device.gpio}}
   selector:
     org.edgexfoundry.service: {{.Values.edgex.app.device.gpio}}

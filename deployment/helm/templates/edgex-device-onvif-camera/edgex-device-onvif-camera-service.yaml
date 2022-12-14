@@ -10,7 +10,7 @@ metadata:
   name: {{.Values.edgex.app.device.onvifcamera}}
 spec:
   ports:
-  - name: "{{.Values.edgex.port.device.onvifcamera}}"
+  - name: "device-onvif-camera-http"
     port: {{.Values.edgex.port.device.onvifcamera}}
   selector:
     org.edgexfoundry.service: {{.Values.edgex.app.device.onvifcamera}}

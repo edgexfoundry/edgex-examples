@@ -27,6 +27,7 @@ spec:
         imagePullPolicy: {{.Values.edgex.image.natsserver.pullPolicy}}
         ports:
         - containerPort: {{.Values.edgex.port.natsserver}}
+          name: "http"
       {{- if not .Values.edgex.security.enabled }}
         {{- if .Values.edgex.features.enableHostPort}}
           hostPort: {{.Values.edgex.port.natsserver}}

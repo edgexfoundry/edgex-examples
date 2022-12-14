@@ -39,6 +39,7 @@ spec:
       {{- end}}
         ports:
         - containerPort: {{.Values.edgex.port.appservice.metricsinfluxdb}}
+          name: "http"
       {{- if not .Values.edgex.security.enabled }}
         {{- if .Values.edgex.features.enableHostPort}}
           hostPort: {{.Values.edgex.port.appservice.metricsinfluxdb}}

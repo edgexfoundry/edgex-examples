@@ -10,7 +10,7 @@ metadata:
   name: {{.Values.edgex.app.core.command}}
 spec:
   ports:
-  - name: "http"
+  - name: "core-command-http"
     port: {{.Values.edgex.port.core.command}}
   selector:
     org.edgexfoundry.service: {{.Values.edgex.app.core.command}}
