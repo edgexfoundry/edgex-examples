@@ -14,4 +14,4 @@ spec:
     port: {{.Values.edgex.port.ekuiper}}
   selector:
     org.edgexfoundry.service: {{.Values.edgex.app.ekuiper}}
-  type: {{.Values.expose.type}}
+  type: {{.Values.expose.type.ekuiper}}

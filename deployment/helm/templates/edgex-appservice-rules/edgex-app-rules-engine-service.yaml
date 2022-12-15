@@ -14,4 +14,4 @@ spec:
     port: {{.Values.edgex.port.appservice.rules}}
   selector:
     org.edgexfoundry.service: {{.Values.edgex.app.appservice.rules}}
-  type: {{.Values.expose.type}}
+  type: {{.Values.expose.type.appservice.rules}}

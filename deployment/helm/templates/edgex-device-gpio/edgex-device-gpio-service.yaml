@@ -14,5 +14,5 @@ spec:
     port: {{.Values.edgex.port.device.gpio}}
   selector:
     org.edgexfoundry.service: {{.Values.edgex.app.device.gpio}}
-  type: {{.Values.expose.type}}
+  type: {{.Values.expose.type.device.gpio}}
 

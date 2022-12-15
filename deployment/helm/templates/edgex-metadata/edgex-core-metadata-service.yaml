@@ -14,5 +14,5 @@ spec:
     port: {{.Values.edgex.port.core.metadata}}
   selector:
     org.edgexfoundry.service: {{.Values.edgex.app.core.metadata}}
-  type: {{.Values.expose.type}}
+  type: {{.Values.expose.type.core.metadata}}
 

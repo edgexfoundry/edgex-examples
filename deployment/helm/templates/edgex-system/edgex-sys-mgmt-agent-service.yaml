@@ -14,4 +14,4 @@ spec:
     port: {{.Values.edgex.port.system}}
   selector:
     org.edgexfoundry.service: {{.Values.edgex.app.system}}
-  type: {{.Values.expose.type}}
+  type: {{.Values.expose.type.system}}

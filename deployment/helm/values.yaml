@@ -7,8 +7,44 @@
 # Declare variables to be passed into your templates.
 
 expose:
-  # Option value: ClusterIP/NodePort/LoadBalancer
-  type: ClusterIP
+  type:
+    # Option value: ClusterIP/NodePort/LoadBalancer
+    core:
+      command: ClusterIP
+      data:  ClusterIP
+      metadata: ClusterIP
+    support:
+      notifications: ClusterIP
+      scheduler: ClusterIP
+    appservice:
+      rules: ClusterIP
+      mqttexport: ClusterIP
+      httpexport: ClusterIP
+      appsample: ClusterIP
+      metricsinfluxdb: ClusterIP
+      rfidllrpinventory: ClusterIP
+      externalmqtttrigger: ClusterIP
+    device:
+      virtual: ClusterIP
+      rest: ClusterIP
+      usbcamera: ClusterIP
+      onvifcamera: ClusterIP
+      mqtt: ClusterIP
+      modbus: ClusterIP
+      bacnet: ClusterIP
+      snmp: ClusterIP
+      rfidllrp: ClusterIP
+      gpio: ClusterIP
+    ui: NodePort
+    system: ClusterIP
+    consul: NodePort
+    redis: ClusterIP
+    ekuiper: ClusterIP
+    modbussimulator: ClusterIP
+    mqttbroker: ClusterIP
+    natsserver: ClusterIP
+    bootstrapper: ClusterIP
+    vault: ClusterIP
 
 # edgex defines a set of configuration properties for application-level concerns
 edgex:
