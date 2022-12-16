@@ -10,7 +10,7 @@ metadata:
   name: {{.Values.edgex.app.appservice.mqttexport}}
 spec:
   ports:
-  - name: "http"
+  - name: "app-mqtt-export-http"
     port: {{.Values.edgex.port.appservice.mqttexport}}
   selector:
     org.edgexfoundry.service: {{.Values.edgex.app.appservice.mqttexport}}

@@ -31,6 +31,7 @@ spec:
       {{- end}}
         ports:
         - containerPort: {{.Values.edgex.port.mqttbroker}}
+          name: "mqtt"
       {{- if not .Values.edgex.security.enabled }}
         {{- if .Values.edgex.features.enableHostPort}}
           hostPort: {{.Values.edgex.port.mqttbroker}}

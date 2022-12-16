@@ -10,7 +10,7 @@ metadata:
   name: {{.Values.edgex.app.support.scheduler}}
 spec:
   ports:
-  - name: "http"
+  - name: "support-scheduler-http"
     port: {{.Values.edgex.port.support.scheduler}}
   selector:
     org.edgexfoundry.service: {{.Values.edgex.app.support.scheduler}}

@@ -10,7 +10,7 @@ metadata:
   name: {{.Values.edgex.app.device.rest}}
 spec:
   ports:
-  - name: "http"
+  - name: "device-rest-http"
     port: {{.Values.edgex.port.device.rest}}
   selector:
     org.edgexfoundry.service: {{.Values.edgex.app.device.rest}}

@@ -10,7 +10,7 @@ metadata:
   name: {{.Values.edgex.app.ekuiper}}
 spec:
   ports:
-  - name: "http"
+  - name: "ekuiper-http"
     port: {{.Values.edgex.port.ekuiper}}
   selector:
     org.edgexfoundry.service: {{.Values.edgex.app.ekuiper}}

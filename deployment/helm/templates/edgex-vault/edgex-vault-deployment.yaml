@@ -55,6 +55,7 @@ spec:
         args: [ "server" ]
         ports:
         - containerPort: 8200
+          name: "http"
       {{- if not .Values.edgex.security.enabled }}
         {{- if .Values.edgex.features.enableHostPort}}
           hostPort: 8200

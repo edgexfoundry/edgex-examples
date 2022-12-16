@@ -10,7 +10,7 @@ metadata:
   name: {{.Values.edgex.app.ui}}
 spec:
   ports:
-  - name: "http"
+  - name: "ui-http"
     port: {{.Values.edgex.port.ui}}
   selector:
     org.edgexfoundry.service: {{.Values.edgex.app.ui}}

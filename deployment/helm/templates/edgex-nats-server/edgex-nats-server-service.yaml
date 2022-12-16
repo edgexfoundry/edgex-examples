@@ -10,7 +10,7 @@ metadata:
   name: {{.Values.edgex.app.natsserver}}
 spec:
   ports:
-  - name: "{{.Values.edgex.port.natsserver}}"
+  - name: "nats-server-http"
     port: {{.Values.edgex.port.natsserver}}
   selector:
     org.edgexfoundry.service: {{.Values.edgex.app.natsserver}}

@@ -10,7 +10,7 @@ metadata:
   name: {{.Values.edgex.app.appservice.externalmqtttrigger}}
 spec:
   ports:
-  - name: "http"
+  - name: "app-mqtt-trigger-http"
     port: {{.Values.edgex.port.appservice.externalmqtttrigger}}
   selector:
     org.edgexfoundry.service: {{.Values.edgex.app.appservice.externalmqtttrigger}}

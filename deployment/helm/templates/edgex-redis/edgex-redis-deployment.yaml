@@ -39,6 +39,7 @@ spec:
       {{- end}}
         ports:
           - containerPort: {{.Values.edgex.port.redis}}
+            name: "redis"
         envFrom:
           - configMapRef:
               name: edgex-common-variables

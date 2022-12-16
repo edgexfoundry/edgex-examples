@@ -10,7 +10,7 @@ metadata:
   name: {{.Values.edgex.app.appservice.appsample}}
 spec:
   ports:
-  - name: "http"
+  - name: "app-sample-http"
     port: {{.Values.edgex.port.appservice.appsample}}
   selector:
     org.edgexfoundry.service: {{.Values.edgex.app.appservice.appsample}}

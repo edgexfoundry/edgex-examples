@@ -10,7 +10,7 @@ metadata:
   name: {{.Values.edgex.app.device.rfidllrp}}
 spec:
   ports:
-  - name: "{{.Values.edgex.port.device.rfidllrp}}"
+  - name: "device-rfid-llrp-http"
     port: {{.Values.edgex.port.device.rfidllrp}}
   selector:
     org.edgexfoundry.service: {{.Values.edgex.app.device.rfidllrp}}

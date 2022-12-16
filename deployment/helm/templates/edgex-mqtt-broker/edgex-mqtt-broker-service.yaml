@@ -10,7 +10,7 @@ metadata:
   name: {{.Values.edgex.app.mqttbroker}}
 spec:
   ports:
-  - name: "{{.Values.edgex.port.mqttbroker}}"
+  - name: "mqtt-broker-mqtt"
     port: {{.Values.edgex.port.mqttbroker}}
   selector:
     org.edgexfoundry.service: {{.Values.edgex.app.mqttbroker}}

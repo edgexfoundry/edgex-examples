@@ -10,7 +10,7 @@ metadata:
   name: {{.Values.edgex.app.appservice.metricsinfluxdb}}
 spec:
   ports:
-  - name: "http"
+  - name: "app-metrics-influxdb-http"
     port: {{.Values.edgex.port.appservice.metricsinfluxdb}}
   selector:
     org.edgexfoundry.service: {{.Values.edgex.app.appservice.metricsinfluxdb}}
