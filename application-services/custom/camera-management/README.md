@@ -5,6 +5,8 @@ results to MQTT broker.
 
 This app uses [EdgeX Core Services][edgex-core-services], [Edgex Onvif device service][device-onvif-camera] and [Edge Video Analytics Microservice][evam].
 
+A brief video demonstration of building and using the example app service can be found [here](https://www.youtube.com/watch?v=vZqd3j2Zn2Y).
+
 ## Steps for running this example:
 We expect you'll be running in a relatively modern Linux environment
 with `docker`, `docker-compose`, and `make` installed.
