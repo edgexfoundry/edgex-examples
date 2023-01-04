@@ -115,7 +115,6 @@ you can implement your customized version based on this.
 | edgex-device-rest           | 59986         
 | edgex-device-virtual        | 59900         
 | edgex-ui                    | 4000          
-| edgex-sys-mgmt-agent        | 58890         
 | edgex-redis                 | Not Exposed 
 | edgex-core-consul           | 8500          
 

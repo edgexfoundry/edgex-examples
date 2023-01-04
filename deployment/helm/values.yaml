@@ -79,7 +79,6 @@ edgex:
       rfidllrp: edgex-device-rfid-llrp
       gpio: edgex-device-gpio
     ui: edgex-ui
-    system: edgex-sys-mgmt-agent
     consul: edgex-core-consul
     redis: edgex-redis
     ekuiper: edgex-kuiper
@@ -186,10 +185,6 @@ edgex:
         pullPolicy: IfNotPresent
     ui:
       repository: edgexfoundry/edgex-ui
-      tag: "2.3.0"
-      pullPolicy: IfNotPresent
-    system:
-      repository: edgexfoundry/sys-mgmt-agent
       tag: "2.3.0"
       pullPolicy: IfNotPresent
     consul:
