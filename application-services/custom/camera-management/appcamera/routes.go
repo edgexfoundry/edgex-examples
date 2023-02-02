@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	panTiltPreset = 0.05
+	panTiltOffset = 0.05
 	zoomIn        = 1
 	zoomOut       = -1
 
@@ -254,17 +254,18 @@ func (app *CameraManagementApp) ptzRoute(w http.ResponseWriter, req *http.Reques
 	var res dtosCommon.BaseResponse
 	var err error
 
+	// Get pan/tilt x,y range for a particular device
 	ptzConfigs, err := app.getPTZConfiguration(deviceName)
 	if err != nil {
 		respondError(app.lc, w, http.StatusInternalServerError,
-			fmt.Sprintf("Failed to do ptz: %v", err))
+			fmt.Sprintf("Failed to get PTZ configuration for the device %s: %v", deviceName, err))
 		return
 	}
-
-	left := panTiltPreset * ptzConfigs.PTZConfiguration[0].PanTiltLimits.Range.XRange.Min
-	right := panTiltPreset * ptzConfigs.PTZConfiguration[0].PanTiltLimits.Range.XRange.Max
-	up := panTiltPreset * ptzConfigs.PTZConfiguration[0].PanTiltLimits.Range.YRange.Max
-	down := panTiltPreset * ptzConfigs.PTZConfiguration[0].PanTiltLimits.Range.YRange.Min
+	// Offset x,y max/min values by 5%(or some small percentage)
+	left := panTiltOffset * ptzConfigs.PTZConfiguration[0].PanTiltLimits.Range.XRange.Min
+	right := panTiltOffset * ptzConfigs.PTZConfiguration[0].PanTiltLimits.Range.XRange.Max
+	up := panTiltOffset * ptzConfigs.PTZConfiguration[0].PanTiltLimits.Range.YRange.Max
+	down := panTiltOffset * ptzConfigs.PTZConfiguration[0].PanTiltLimits.Range.YRange.Min
 
 	switch action {
 	case "left":

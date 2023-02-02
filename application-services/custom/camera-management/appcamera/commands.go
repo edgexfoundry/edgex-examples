@@ -23,9 +23,7 @@ const (
 	getPresetsCommand        = "GetPresets"
 	getConfigurationsCommand = "GetConfigurations"
 
-	moveScaleX = 10
-	moveScaleY = 5
-	zoomScale  = 1
+	zoomScale = 1
 )
 
 func (app *CameraManagementApp) getProfiles(deviceName string) (ProfilesResponse, error) {
@@ -101,17 +99,16 @@ func (app *CameraManagementApp) getPresets(deviceName string, profileToken strin
 func (app *CameraManagementApp) getPTZConfiguration(deviceName string) (GetPTZConfigurationsResponse, error) {
 	cmd := &ptz.GetConfigurations{}
 
-	configs, err := app.issueGetCommand(context.Background(), deviceName, getConfigurationsCommand, cmd)
+	config, err := app.issueGetCommand(context.Background(), deviceName, getConfigurationsCommand, cmd)
 	if err != nil {
 		return GetPTZConfigurationsResponse{}, errors.Wrapf(err, "failed to issue get configurations command")
 	}
 
-	val := configs.Event.Readings[0].ObjectValue
+	val := config.Event.Readings[0].ObjectValue
 	js, err := json.Marshal(val)
 	if err != nil {
 		return GetPTZConfigurationsResponse{}, errors.Wrapf(err, "failed to marshal configurations json object")
 	}
-
 	pr := GetPTZConfigurationsResponse{}
 	err = json.Unmarshal(js, &pr)
 	return pr, err
