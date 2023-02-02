@@ -17,12 +17,9 @@ import (
 )
 
 const (
-	left    = -1
-	right   = 1
-	up      = 1
-	down    = -1
-	zoomIn  = 1
-	zoomOut = -1
+	panTiltPreset = 0.05
+	zoomIn        = 1
+	zoomOut       = -1
 
 	webUIDistDir = "./web-ui/dist"
 
@@ -256,6 +253,18 @@ func (app *CameraManagementApp) ptzRoute(w http.ResponseWriter, req *http.Reques
 
 	var res dtosCommon.BaseResponse
 	var err error
+
+	ptzConfigs, err := app.getPTZConfiguration(deviceName)
+	if err != nil {
+		respondError(app.lc, w, http.StatusInternalServerError,
+			fmt.Sprintf("Failed to do ptz: %v", err))
+		return
+	}
+
+	left := panTiltPreset * ptzConfigs.PTZConfiguration[0].PanTiltLimits.Range.XRange.Min
+	right := panTiltPreset * ptzConfigs.PTZConfiguration[0].PanTiltLimits.Range.XRange.Max
+	up := panTiltPreset * ptzConfigs.PTZConfiguration[0].PanTiltLimits.Range.YRange.Max
+	down := panTiltPreset * ptzConfigs.PTZConfiguration[0].PanTiltLimits.Range.YRange.Min
 
 	switch action {
 	case "left":
