@@ -16,8 +16,6 @@ import (
 	"github.com/edgexfoundry/go-mod-core-contracts/v2/dtos/responses"
 	"io"
 	"net/http"
-	"net/url"
-	"path"
 )
 
 const (
@@ -52,20 +50,10 @@ func issuePostRequest(ctx context.Context, res interface{}, baseUrl string, reqP
 }
 
 func issueGetRequest(ctx context.Context, res interface{}, baseUrl string, requestPath string) (err error) {
-	u, err := url.Parse(baseUrl)
-	if err != nil {
-		return err
-	}
-	requestPath = path.Join(u.Path, requestPath)
 	return utils.GetRequest(ctx, &res, baseUrl, requestPath, nil)
 }
 
 func issueDeleteRequest(ctx context.Context, res interface{}, baseUrl string, requestPath string) (err error) {
-	u, err := url.Parse(baseUrl)
-	if err != nil {
-		return err
-	}
-	requestPath = path.Join(u.Path, requestPath)
 	return utils.DeleteRequest(ctx, &res, baseUrl, requestPath)
 }
 
