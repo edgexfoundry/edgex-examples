@@ -150,7 +150,7 @@ func (app *CameraManagementApp) getProfilesRoute(w http.ResponseWriter, req *htt
 }
 
 func (app *CameraManagementApp) getCamerasRoute(w http.ResponseWriter, _ *http.Request) {
-	devices, err := app.getDevices()
+	devices, err := app.getAllDevices()
 	if err != nil {
 		respondError(app.lc, w, http.StatusInternalServerError,
 			fmt.Sprintf("Failed to get cameras list: %v", err))

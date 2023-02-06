@@ -106,7 +106,8 @@ TokenFile = "/tmp/edgex/secrets/app-camera-management/secrets-token.json"
 Type="http"
 
 [AppCustom]
-DeviceServiceName = "device-onvif-camera"
+OnvifDeviceServiceName = "device-onvif-camera"
+USBDeviceServiceName = "device-usb-camera"
 EvamBaseUrl = "http://localhost:8080"
 MqttAddress = "broker:1883"
 MqttTopic = "incoming/data/edge-video-analytics/inference-event"

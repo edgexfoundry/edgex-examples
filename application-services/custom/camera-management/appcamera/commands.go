@@ -8,6 +8,7 @@ package appcamera
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/IOTechSystems/onvif/ptz"
 	"github.com/IOTechSystems/onvif/xsd/onvif"
 	"github.com/edgexfoundry/go-mod-core-contracts/v2/dtos"
@@ -115,21 +116,31 @@ func (app *CameraManagementApp) sendPutCommand(deviceName string, commandName st
 		})
 }
 
-func (app *CameraManagementApp) getDevices() ([]dtos.Device, error) {
-	response, err := app.service.DeviceClient().DevicesByServiceName(context.Background(), app.config.AppCustom.DeviceServiceName, 0, -1)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to get devices for the device service %s", app.config.AppCustom.DeviceServiceName)
-	}
-	if len(response.Devices) <= 0 {
-		return nil, errors.Errorf("no devices registered yet for the device service %s", app.config.AppCustom.DeviceServiceName)
+func (app *CameraManagementApp) getAllDevices() ([]dtos.Device, error) {
+	response1, err1 := app.service.DeviceClient().DevicesByServiceName(context.Background(), app.config.AppCustom.OnvifDeviceServiceName, 0, -1)
+	response2, err2 := app.service.DeviceClient().DevicesByServiceName(context.Background(), app.config.AppCustom.USBDeviceServiceName, 0, -1)
+
+	// if both failed, throw an error
+	if err1 != nil && err2 != nil {
+		return nil, fmt.Errorf("failed to get devices for the device services: %v, %v", err1, err2)
 	}
 
-	// filter out the control-plane device
 	var devices []dtos.Device
-	for _, d := range response.Devices {
-		if d.Name != d.ServiceName {
+	if err1 == nil {
+		// if the first one succeeded, just overwrite the slice
+		devices = response1.Devices
+	}
+	if err2 == nil {
+		// if the second one succeeded, append all items
+		for _, d := range response2.Devices {
 			devices = append(devices, d)
 		}
 	}
+
+	if len(devices) <= 0 {
+		return nil, errors.Errorf("no devices registered yet for the device services %s or %s",
+			app.config.AppCustom.OnvifDeviceServiceName, app.config.AppCustom.USBDeviceServiceName)
+	}
+
 	return devices, nil
 }

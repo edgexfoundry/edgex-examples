@@ -39,7 +39,7 @@ services:
     entrypoint: ["./run.sh"]
     ports:
       - '8080:8080'
-      - '8554:8554'
+      - '8555:8554'
     networks:
       - evam_network
     environment:

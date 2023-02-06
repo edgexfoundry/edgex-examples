@@ -188,9 +188,9 @@ type GetPresetsResponse struct {
 		Name        string `json:"Name"`
 		PTZPosition struct {
 			PanTilt struct {
-				Space string `json:"Space"`
-				X     int    `json:"X"`
-				Y     int    `json:"Y"`
+				Space string  `json:"Space"`
+				X     float64 `json:"X"`
+				Y     float64 `json:"Y"`
 			} `json:"PanTilt"`
 		} `json:"PTZPosition"`
 		Token string `json:"Token"`

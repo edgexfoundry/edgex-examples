@@ -6,6 +6,9 @@ import { HttpRequest, HttpResponseBase } from "@angular/common/http";
 import { Device, Preset, ProfilesEntity } from "./camera-api.types";
 import { Pipeline, PipelineInfoStatus, PipelineStatus } from "./pipeline-api.types";
 
+const onvifServiceName = "device-onvif-camera";
+const usbServiceName = "device-usb-camera";
+
 /**
  * Represents a page that users can navigate to, either via
  * a URL route, the navbar, or from other component interactions.
@@ -30,6 +33,7 @@ export class APILogItem {
 })
 export class DataService {
   public cameras: Device[];
+  public cameraMap: Map<string, Device>
   public selectedCamera: string;
 
   public profiles: ProfilesEntity[];
@@ -60,5 +64,10 @@ export class DataService {
   constructor() {
     this.apiLog = new Array<APILogItem>();
     this.pipelineMap = new Map<string, PipelineInfoStatus>();
+  }
+
+  cameraIsOnvif(cameraName: string) {
+    let camera = this.cameraMap.get(cameraName);
+    return camera != null && camera.serviceName === onvifServiceName;
   }
 }

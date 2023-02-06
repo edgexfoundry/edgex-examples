@@ -37,11 +37,16 @@ export class CameraApiService {
 
   updateCameraList() {
     this.data.cameras = undefined;
+    this.data.cameraMap = undefined;
     this.httpClient
       .get<Device[]>(this.camerasUrl)
       .subscribe({
         next: data => {
           this.data.cameras = data;
+          this.data.cameraMap = new Map<string, Device>();
+          for (let camera of data) {
+            this.data.cameraMap.set(camera.name, camera);
+          }
           if (data.length > 0) {
             this.data.selectedCamera = data[0].name;
             this.updateProfiles(this.data.selectedCamera);
@@ -51,6 +56,7 @@ export class CameraApiService {
           }
         }, error: _ => {
           this.data.cameras = undefined;
+          this.data.cameraMap = undefined;
         }
       });
   }
@@ -58,6 +64,12 @@ export class CameraApiService {
   updateProfiles(cameraName: string) {
     this.data.selectedProfile = undefined;
     this.data.profiles = undefined;
+
+    let camera = this.data.cameraMap.get(cameraName);
+    if (camera == null || !this.data.cameraIsOnvif(cameraName)) {
+      this.data.presets = undefined;
+      return;
+    }
 
     this.httpClient.get<GetProfilesResponse>(
       this.makeCameraUrl(cameraName, '/profiles'))

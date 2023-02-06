@@ -7,10 +7,11 @@ package appcamera
 
 // CustomConfig holds the values for the app configuration
 type CustomConfig struct {
-	DeviceServiceName string
-	EvamBaseUrl       string
-	MqttAddress       string
-	MqttTopic         string
+	OnvifDeviceServiceName string
+	USBDeviceServiceName   string
+	EvamBaseUrl            string
+	MqttAddress            string
+	MqttTopic              string
 }
 
 // ServiceConfig a struct that wraps CustomConfig which holds the values for driver configuration
