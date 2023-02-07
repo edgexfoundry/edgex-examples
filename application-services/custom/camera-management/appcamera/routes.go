@@ -309,9 +309,8 @@ func (app *CameraManagementApp) ptzRoute(w http.ResponseWriter, req *http.Reques
 func (app *CameraManagementApp) getPanTiltRange(deviceName string) (PanTiltRange, error) {
 	app.panTiltMutex.Lock()
 	defer app.panTiltMutex.Unlock()
-	val, exists := app.panTiltMap[deviceName]
+	panTiltRange, exists := app.panTiltMap[deviceName]
 	if !exists {
-		fmt.Println("Device does not exist")
 		ptzConfigs, err := app.getPTZConfiguration(deviceName)
 		if err != nil {
 			return PanTiltRange{}, err
@@ -319,12 +318,11 @@ func (app *CameraManagementApp) getPanTiltRange(deviceName string) (PanTiltRange
 
 		xRange := ptzConfigs.PTZConfiguration[0].PanTiltLimits.Range.XRange.Max - ptzConfigs.PTZConfiguration[0].PanTiltLimits.Range.XRange.Min
 		yRange := ptzConfigs.PTZConfiguration[0].PanTiltLimits.Range.YRange.Max - ptzConfigs.PTZConfiguration[0].PanTiltLimits.Range.YRange.Min
-		panTiltRange := PanTiltRange{
+		panTiltRange = PanTiltRange{
 			XRange: xRange,
 			YRange: yRange,
 		}
 		app.panTiltMap[deviceName] = panTiltRange
-		return panTiltRange, nil
 	}
-	return val, nil
+	return panTiltRange, nil
 }
