@@ -239,3 +239,8 @@ type StartPipelineRequest struct {
 	PipelineName    string `json:"pipeline_name"`
 	PipelineVersion string `json:"pipeline_version"`
 }
+
+type PanTiltRange struct {
+	XRange float64 `json:"XRange"`
+	YRange float64 `json:"YRange"`
+}

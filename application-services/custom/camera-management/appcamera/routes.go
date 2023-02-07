@@ -254,18 +254,17 @@ func (app *CameraManagementApp) ptzRoute(w http.ResponseWriter, req *http.Reques
 	var res dtosCommon.BaseResponse
 	var err error
 
-	// Get pan/tilt x,y range for a particular device
-	ptzConfigs, err := app.getPTZConfiguration(deviceName)
+	panTiltRange, err := app.getPanTiltRange(deviceName)
 	if err != nil {
 		respondError(app.lc, w, http.StatusInternalServerError,
 			fmt.Sprintf("Failed to get PTZ configuration for the device %s: %v", deviceName, err))
 		return
 	}
-	// Offset x,y max/min values by 5%(or some small percentage)
-	left := panTiltOffset * ptzConfigs.PTZConfiguration[0].PanTiltLimits.Range.XRange.Min
-	right := panTiltOffset * ptzConfigs.PTZConfiguration[0].PanTiltLimits.Range.XRange.Max
-	up := panTiltOffset * ptzConfigs.PTZConfiguration[0].PanTiltLimits.Range.YRange.Max
-	down := panTiltOffset * ptzConfigs.PTZConfiguration[0].PanTiltLimits.Range.YRange.Min
+
+	right := panTiltOffset * panTiltRange.XRange
+	left := -right
+	up := panTiltOffset * panTiltRange.YRange
+	down := -up
 
 	switch action {
 	case "left":
@@ -305,4 +304,27 @@ func (app *CameraManagementApp) ptzRoute(w http.ResponseWriter, req *http.Reques
 	if err != nil {
 		app.lc.Error(err.Error())
 	}
+}
+
+func (app *CameraManagementApp) getPanTiltRange(deviceName string) (PanTiltRange, error) {
+	app.panTiltMutex.Lock()
+	defer app.panTiltMutex.Unlock()
+	val, exists := app.panTiltMap[deviceName]
+	if !exists {
+		fmt.Println("Device does not exist")
+		ptzConfigs, err := app.getPTZConfiguration(deviceName)
+		if err != nil {
+			return PanTiltRange{}, err
+		}
+
+		xRange := ptzConfigs.PTZConfiguration[0].PanTiltLimits.Range.XRange.Max - ptzConfigs.PTZConfiguration[0].PanTiltLimits.Range.XRange.Min
+		yRange := ptzConfigs.PTZConfiguration[0].PanTiltLimits.Range.YRange.Max - ptzConfigs.PTZConfiguration[0].PanTiltLimits.Range.YRange.Min
+		panTiltRange := PanTiltRange{
+			XRange: xRange,
+			YRange: yRange,
+		}
+		app.panTiltMap[deviceName] = panTiltRange
+		return panTiltRange, nil
+	}
+	return val, nil
 }
