@@ -188,17 +188,59 @@ type GetPresetsResponse struct {
 		Name        string `json:"Name"`
 		PTZPosition struct {
 			PanTilt struct {
-				Space string `json:"Space"`
-				X     int    `json:"X"`
-				Y     int    `json:"Y"`
+				Space string  `json:"Space"`
+				X     float64 `json:"X"`
+				Y     float64 `json:"Y"`
 			} `json:"PanTilt"`
 		} `json:"PTZPosition"`
 		Token string `json:"Token"`
 	} `json:"Preset"`
 }
 
+type GetPTZConfigurationsResponse struct {
+	PTZConfiguration []struct {
+		DefaultAbsolutePantTiltPositionSpace  string `json:"DefaultAbsolutePantTiltPositionSpace"`
+		DefaultAbsoluteZoomPositionSpace      string `json:"DefaultAbsoluteZoomPositionSpace"`
+		DefaultContinuousPanTiltVelocitySpace string `json:"DefaultContinuousPanTiltVelocitySpace"`
+		DefaultContinuousZoomVelocitySpace    string `json:"DefaultContinuousZoomVelocitySpace"`
+		DefaultPTZSpeed                       struct {
+		} `json:"DefaultPTZSpeed"`
+		DefaultPTZTimeout                      string `json:"DefaultPTZTimeout"`
+		DefaultRelativePanTiltTranslationSpace string `json:"DefaultRelativePanTiltTranslationSpace"`
+		DefaultRelativeZoomTranslationSpace    string `json:"DefaultRelativeZoomTranslationSpace"`
+		PanTiltLimits                          struct {
+			Range struct {
+				URI    string `json:"URI"`
+				XRange struct {
+					Max float64 `json:"Max"`
+					Min float64 `json:"Min"`
+				} `json:"XRange"`
+				YRange struct {
+					Max float64 `json:"Max"`
+					Min float64 `json:"Min"`
+				} `json:"YRange"`
+			} `json:"Range"`
+		} `json:"PanTiltLimits"`
+		Token      string `json:"Token"`
+		ZoomLimits struct {
+			Range struct {
+				URI    string `json:"URI"`
+				XRange struct {
+					Max float64 `json:"Max"`
+					Min float64 `json:"Min"`
+				} `json:"XRange"`
+			} `json:"Range"`
+		} `json:"ZoomLimits"`
+	} `json:"PTZConfiguration"`
+}
+
 type StartPipelineRequest struct {
 	ProfileToken    string `json:"profile_token"`
 	PipelineName    string `json:"pipeline_name"`
 	PipelineVersion string `json:"pipeline_version"`
+}
+
+type PanTiltRange struct {
+	XRange float64 `json:"XRange"`
+	YRange float64 `json:"YRange"`
 }

@@ -16,15 +16,14 @@ import (
 )
 
 const (
-	relativeMoveCommand = "RelativeMove"
-	gotoPresetCommand   = "GotoPreset"
-	streamUriCommand    = "StreamUri"
-	profilesCommand     = "Profiles"
-	getPresetsCommand   = "GetPresets"
+	relativeMoveCommand      = "RelativeMove"
+	gotoPresetCommand        = "GotoPreset"
+	streamUriCommand         = "StreamUri"
+	profilesCommand          = "Profiles"
+	getPresetsCommand        = "GetPresets"
+	getConfigurationsCommand = "GetConfigurations"
 
-	moveScaleX = 10
-	moveScaleY = 5
-	zoomScale  = 1
+	zoomScale = 1
 )
 
 func (app *CameraManagementApp) getProfiles(deviceName string) (ProfilesResponse, error) {
@@ -60,8 +59,8 @@ func (app *CameraManagementApp) queryStreamUri(deviceName, profileToken string) 
 func (app *CameraManagementApp) doPTZ(deviceName, profileToken string, x, y, zoom float64) (dtosCommon.BaseResponse, error) {
 	trans := ptz.Vector{
 		PanTilt: &onvif.Vector2D{
-			X: x * moveScaleX,
-			Y: y * moveScaleY,
+			X: x,
+			Y: y,
 		},
 	}
 	if zoom != 0 {
@@ -93,6 +92,24 @@ func (app *CameraManagementApp) getPresets(deviceName string, profileToken strin
 		return GetPresetsResponse{}, errors.Wrapf(err, "failed to marshal presets json object")
 	}
 	pr := GetPresetsResponse{}
+	err = json.Unmarshal(js, &pr)
+	return pr, err
+}
+
+func (app *CameraManagementApp) getPTZConfiguration(deviceName string) (GetPTZConfigurationsResponse, error) {
+	cmd := &ptz.GetConfigurations{}
+
+	config, err := app.issueGetCommand(context.Background(), deviceName, getConfigurationsCommand, cmd)
+	if err != nil {
+		return GetPTZConfigurationsResponse{}, errors.Wrapf(err, "failed to issue get configurations command")
+	}
+
+	val := config.Event.Readings[0].ObjectValue
+	js, err := json.Marshal(val)
+	if err != nil {
+		return GetPTZConfigurationsResponse{}, errors.Wrapf(err, "failed to marshal configurations json object")
+	}
+	pr := GetPTZConfigurationsResponse{}
 	err = json.Unmarshal(js, &pr)
 	return pr, err
 }
