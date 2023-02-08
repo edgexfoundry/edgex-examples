@@ -22,6 +22,8 @@ const (
 	streamUriCommand    = "StreamUri"
 	profilesCommand     = "Profiles"
 	getPresetsCommand   = "GetPresets"
+	StartStreamingCommand = "StartStreaming"
+	StopStreamingCommand  = "StopStreaming"
 
 	moveScaleX = 10
 	moveScaleY = 5
@@ -105,6 +107,18 @@ func (app *CameraManagementApp) gotoPreset(deviceName string, profile string, pr
 	}
 
 	return app.sendPutCommand(deviceName, gotoPresetCommand, cmd)
+}
+
+func (app *CameraManagementApp) startStreaming(deviceName string, inputImageSize string, outputVideoQuality string) (dtosCommon.BaseResponse, error) {
+
+	req := StartStreamingRequest{InputImageSize: inputImageSize, OutputVideoQuality: outputVideoQuality}
+
+	return app.sendPutCommand(deviceName, StartStreamingCommand, req)
+}
+
+func (app *CameraManagementApp) stopStreaming(deviceName string) (dtosCommon.BaseResponse, error) {
+
+	return app.sendPutCommand(deviceName, StopStreamingCommand, nil)
 }
 
 func (app *CameraManagementApp) sendPutCommand(deviceName string, commandName string, commandValue interface{}) (dtosCommon.BaseResponse, error) {
