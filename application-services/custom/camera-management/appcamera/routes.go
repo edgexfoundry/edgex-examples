@@ -7,10 +7,11 @@ package appcamera
 
 import (
 	"fmt"
-	dtosCommon "github.com/edgexfoundry/go-mod-core-contracts/v2/dtos/common"
-	"github.com/gorilla/mux"
 	"net/http"
 	"path"
+
+	dtosCommon "github.com/edgexfoundry/go-mod-core-contracts/v2/dtos/common"
+	"github.com/gorilla/mux"
 
 	"github.com/edgexfoundry/go-mod-core-contracts/v2/common"
 	"github.com/pkg/errors"
@@ -42,6 +43,12 @@ const (
 	ptzPath        = cameraProfileApiBase + "/ptz/{action}"
 	getPresetsPath = cameraProfileApiBase + "/presets"
 	gotoPresetPath = cameraProfileApiBase + "/presets/{preset}"
+
+	startStreamingBase = common.ApiBase + "/startstreaming"
+	startStreamingPath = startStreamingBase + "/{name}"
+
+	stopStreamingBase = common.ApiBase + "/stopstreaming"
+	stopStreamingPath = stopStreamingBase + "/{name}"
 )
 
 func (app *CameraManagementApp) addRoutes() error {
@@ -91,6 +98,14 @@ func (app *CameraManagementApp) addRoutes() error {
 		return err
 	}
 
+	if err := app.addRoute(
+		startStreamingPath, http.MethodPost, app.startStreamingRoute); err != nil {
+		return err
+	}
+	if err := app.addRoute(
+		stopStreamingPath, http.MethodPost, app.stopStreamingRoute); err != nil {
+		return err
+	}
 	app.fileServer = http.FileServer(http.Dir(webUIDistDir))
 	// this is a bit of a hack to get refreshing working, as the path is /home
 	if err := app.addRoute("/home", http.MethodGet, app.index); err != nil {
@@ -294,5 +309,27 @@ func (app *CameraManagementApp) ptzRoute(w http.ResponseWriter, req *http.Reques
 	_, err = w.Write([]byte(res.Message))
 	if err != nil {
 		app.lc.Error(err.Error())
+	}
+}
+
+func (app *CameraManagementApp) startStreamingRoute(w http.ResponseWriter, req *http.Request) {
+	rv := mux.Vars(req)
+	deviceName := rv["name"]
+	inputImageSize := rv["inputImageSize"]
+	outputVideoQuality := rv["outputVideoQuality"]
+	if _, err := app.startStreaming(deviceName, inputImageSize, outputVideoQuality); err != nil {
+		respondError(app.lc, w, http.StatusInternalServerError,
+			fmt.Sprintf("failed to stop pipeline: %v", err))
+		return
+	}
+}
+
+func (app *CameraManagementApp) stopStreamingRoute(w http.ResponseWriter, req *http.Request) {
+	rv := mux.Vars(req)
+	deviceName := rv["name"]
+	if _, err := app.stopStreaming(deviceName); err != nil {
+		respondError(app.lc, w, http.StatusInternalServerError,
+			fmt.Sprintf("failed to stop pipeline: %v", err))
+		return
 	}
 }
