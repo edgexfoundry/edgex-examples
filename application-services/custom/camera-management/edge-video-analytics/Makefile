@@ -6,7 +6,7 @@ include ../make/base.mk
 .PHONY: run download-models install patch-pipelines sniff-events stop
 
 GITHUB_URL = https://github.com/intel/edge-video-analytics-microservice.git
-VERSION ?= v0.7.0
+VERSION ?= v0.7.2
 SRC = src_$(VERSION)
 MODELS_DIR = models
 PIPELINES_LINK = pipelines

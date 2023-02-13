@@ -33,23 +33,29 @@ services:
       - evam_network
 
   edge_video_analytics_microservice:
-    image: intel/edge_video_analytics_microservice:0.7.0
+    image: intel/edge_video_analytics_microservice:0.7.2
     hostname: edge_video_analytics_microservice
     privileged: true
     entrypoint: ["./run.sh"]
     ports:
       - '8080:8080'
-      - '8555:8554'
+      - '8555:8555'
     networks:
       - evam_network
     environment:
       ENABLE_RTSP: "true"
-      RTSP_PORT: 8554
+      RTSP_PORT: 8555
       RUN_MODE: EVA
+      ENABLE_WEBRTC: "false"
+      WEBRTC_SIGNALING_SERVER: ws://localhost:8443
+      # Default Detection and Classification Device
+      DETECTION_DEVICE: CPU
+      CLASSIFICATION_DEVICE: CPU
       GST_DEBUG: "*:2,python*:4"
     volumes:
-      - "./pipelines/:/app/pipelines/"
-      - "./models:/app/models/"
+      - "./pipelines/:/home/pipeline-server/pipelines/"
+      - "./models:/home/pipeline-server/models/"
+      - "./config.json:/home/pipeline-server/config.json"
     device_cgroup_rules:
       # Default run - device-cgroup-rule='c 189:* rmw'
       # NCS2 run - device-cgroup-rule='c 209:* rmw'
