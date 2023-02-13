@@ -38,6 +38,7 @@ export class DataService {
 
   public profiles: ProfilesEntity[];
   public selectedProfile: string;
+  public selectedPreset: string;
 
   // usb config options
   public outputVideoQuality: string;

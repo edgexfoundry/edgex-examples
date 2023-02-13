@@ -64,6 +64,7 @@ export class CameraApiService {
   updateProfiles(cameraName: string) {
     this.data.selectedProfile = undefined;
     this.data.profiles = undefined;
+    this.data.selectedPreset = undefined;
 
     let camera = this.data.cameraMap.get(cameraName);
     if (camera == null || !this.data.cameraIsOnvif(cameraName)) {
