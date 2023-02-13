@@ -35,7 +35,7 @@ func parseStreamUri(res *responses.EventResponse) (string, error) {
 	return sr.MediaURI.URI, nil
 }
 
-func (app *CameraManagementApp) issueGetCommand(ctx context.Context, deviceName string, commandName string, jsonValue interface{}) (*responses.EventResponse, error) {
+func (app *CameraManagementApp) issueGetCommandWithJson(ctx context.Context, deviceName string, commandName string, jsonValue interface{}) (*responses.EventResponse, error) {
 	jsonStr, err := json.Marshal(jsonValue)
 	if err != nil {
 		return nil, err
@@ -43,6 +43,10 @@ func (app *CameraManagementApp) issueGetCommand(ctx context.Context, deviceName 
 
 	return app.service.CommandClient().IssueGetCommandByNameWithQueryParams(ctx, deviceName, commandName,
 		map[string]string{"jsonObject": base64.URLEncoding.EncodeToString(jsonStr)})
+}
+
+func (app *CameraManagementApp) issueGetCommand(ctx context.Context, deviceName string, commandName string) (*responses.EventResponse, error) {
+	return app.service.CommandClient().IssueGetCommandByName(ctx, deviceName, commandName, "no", "yes")
 }
 
 func issuePostRequest(ctx context.Context, res interface{}, baseUrl string, reqPath string, jsonValue []byte) (err error) {

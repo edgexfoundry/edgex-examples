@@ -6,6 +6,7 @@
 package appcamera
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"path"
@@ -40,12 +41,6 @@ const (
 	ptzPath        = cameraProfileApiBase + "/ptz/{action}"
 	getPresetsPath = cameraProfileApiBase + "/presets"
 	gotoPresetPath = cameraProfileApiBase + "/presets/{preset}"
-
-	startStreamingBase = common.ApiBase + "/startstreaming"
-	startStreamingPath = startStreamingBase + "/{name}"
-
-	stopStreamingBase = common.ApiBase + "/stopstreaming"
-	stopStreamingPath = stopStreamingBase + "/{name}"
 )
 
 func (app *CameraManagementApp) addRoutes() error {
@@ -95,14 +90,6 @@ func (app *CameraManagementApp) addRoutes() error {
 		return err
 	}
 
-	if err := app.addRoute(
-		startStreamingPath, http.MethodPost, app.startStreamingRoute); err != nil {
-		return err
-	}
-	if err := app.addRoute(
-		stopStreamingPath, http.MethodPost, app.stopStreamingRoute); err != nil {
-		return err
-	}
 	app.fileServer = http.FileServer(http.Dir(webUIDistDir))
 	// this is a bit of a hack to get refreshing working, as the path is /home
 	if err := app.addRoute("/home", http.MethodGet, app.index); err != nil {
@@ -196,7 +183,7 @@ func (app *CameraManagementApp) startPipelineRoute(w http.ResponseWriter, req *h
 		return
 	}
 
-	if err := app.startPipeline(deviceName, sr.ProfileToken, sr.PipelineName, sr.PipelineVersion); err != nil {
+	if err := app.startPipeline(deviceName, sr); err != nil {
 		respondError(app.lc, w, http.StatusInternalServerError, fmt.Sprintf("Failed to start pipeline: %v", err))
 		return
 	}
@@ -235,6 +222,26 @@ func (app *CameraManagementApp) allPipelineStatusesRoute(w http.ResponseWriter, 
 func (app *CameraManagementApp) stopPipelineRoute(w http.ResponseWriter, req *http.Request) {
 	rv := mux.Vars(req)
 	deviceName := rv["name"]
+
+	defer func() {
+		resp, err := app.service.DeviceClient().DeviceByName(context.Background(), deviceName)
+		if err != nil {
+			respondError(app.lc, w, http.StatusBadRequest,
+				fmt.Sprintf("failed to query device %s: %v", deviceName, err))
+			return
+		}
+
+		// if the device is a usb device, stop streaming after shutting off the pipeline
+		if resp.Device.ServiceName == app.config.AppCustom.USBDeviceServiceName {
+			_, err := app.stopStreaming(deviceName)
+			if err != nil {
+				respondError(app.lc, w, http.StatusInternalServerError,
+					fmt.Sprintf("failed to stop streaming usb camera %s: %v", deviceName, err))
+				return
+			}
+		}
+	}()
+
 	if err := app.stopPipeline(deviceName); err != nil {
 		respondError(app.lc, w, http.StatusInternalServerError,
 			fmt.Sprintf("failed to stop pipeline: %v", err))
@@ -340,26 +347,4 @@ func (app *CameraManagementApp) getPanTiltRange(deviceName string) (PanTiltRange
 		app.panTiltMap[deviceName] = panTiltRange
 	}
 	return panTiltRange, nil
-}
-
-func (app *CameraManagementApp) startStreamingRoute(w http.ResponseWriter, req *http.Request) {
-	rv := mux.Vars(req)
-	deviceName := rv["name"]
-	inputImageSize := rv["inputImageSize"]
-	outputVideoQuality := rv["outputVideoQuality"]
-	if _, err := app.startStreaming(deviceName, inputImageSize, outputVideoQuality); err != nil {
-		respondError(app.lc, w, http.StatusInternalServerError,
-			fmt.Sprintf("failed to stop pipeline: %v", err))
-		return
-	}
-}
-
-func (app *CameraManagementApp) stopStreamingRoute(w http.ResponseWriter, req *http.Request) {
-	rv := mux.Vars(req)
-	deviceName := rv["name"]
-	if _, err := app.stopStreaming(deviceName); err != nil {
-		respondError(app.lc, w, http.StatusInternalServerError,
-			fmt.Sprintf("failed to stop pipeline: %v", err))
-		return
-	}
 }

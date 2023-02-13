@@ -7,7 +7,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { Device, GetPresetsResponse, GetProfilesResponse } from "./camera-api.types";
 import { DataService } from "./data.service";
-import { Pipeline, PipelineInfoStatus, PipelineStatus, StartPipelineRequest } from "./pipeline-api.types";
+import { Pipeline, PipelineInfoStatus, PipelineStatus, StartPipelineRequest, USBConfig } from "./pipeline-api.types";
 import { ApiLogIgnoreHeader, JsonHeaders } from "../constants";
 
 @Injectable({
@@ -104,9 +104,18 @@ export class CameraApiService {
       .subscribe();
   }
 
-  startPipeline(cameraName: string, profileToken: string, name: string, version: string) {
+  startOnvifPipeline(cameraName: string, name: string, version: string, profileToken: string) {
     let url = this.makePipelineUrl(cameraName, '/start');
-    let req = new StartPipelineRequest(profileToken, name, version);
+    let req = StartPipelineRequest.forOnvif(name, version, {profile_token: profileToken});
+    this.httpClient.post<any>(url, JSON.stringify(req), JsonHeaders).subscribe(_ => {
+      // todo: do at an interval?
+      this.refreshPipelineStatus(this.data.selectedCamera, true);
+    });
+  }
+
+  startUSBPipeline(cameraName: string, name: string, version: string, usb: USBConfig) {
+    let url = this.makePipelineUrl(cameraName, '/start');
+    let req = StartPipelineRequest.forUSB(name, version, usb);
     this.httpClient.post<any>(url, JSON.stringify(req), JsonHeaders).subscribe(_ => {
       // todo: do at an interval?
       this.refreshPipelineStatus(this.data.selectedCamera, true);

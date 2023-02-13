@@ -35,14 +35,41 @@ export interface Pipeline {
   version: string;
 }
 
-export class StartPipelineRequest {
+export interface OnvifConfig {
   profile_token: string
+}
+
+export interface USBConfig {
+  InputFps?: string
+  InputImageSize?: string
+  InputPixelFormat?: string
+  OutputFrames?: string
+  OutputFps?: string
+  OutputImageSize?: string
+  OutputAspect?: string
+  OutputVideoCodec?: string
+  OutputVideoQuality?: string
+}
+
+export class StartPipelineRequest {
+  onvif?: OnvifConfig
+  usb?: USBConfig
   pipeline_name: string
   pipeline_version: string
 
-  constructor(profile_token: string, pipeline_name: string, pipeline_version: string) {
-    this.profile_token = profile_token;
-    this.pipeline_name = pipeline_name;
-    this.pipeline_version = pipeline_version;
+  static forUSB(pipeline_name: string, pipeline_version: string, usb: USBConfig): StartPipelineRequest {
+    let req = new StartPipelineRequest();
+    req.usb = usb
+    req.pipeline_name = pipeline_name;
+    req.pipeline_version = pipeline_version;
+    return req;
+  }
+
+  static forOnvif(pipeline_name: string, pipeline_version: string, onvif: OnvifConfig): StartPipelineRequest {
+    let req = new StartPipelineRequest();
+    req.onvif = onvif
+    req.pipeline_name = pipeline_name;
+    req.pipeline_version = pipeline_version;
+    return req;
   }
 }

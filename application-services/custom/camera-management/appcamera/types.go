@@ -12,16 +12,16 @@ type StreamUriRequest struct {
 	StreamSetup  StreamSetup `json:"StreamSetup"`
 	ProfileToken string      `json:"ProfileToken"`
 }
-type StartStreamingRequest struct {
-	InputFps         string `json:"InputFps"`
-	InputImageSize   string `json:"InputImageSize"`
-	InputPixelFormat string `json:"InputPixelFormat"`
-	OutputFrames       string `json:"OutputFrames"`
-	OutputFps          string `json:"OutputFps"`
-	OutputImageSize    string `json:"OutputImageSize"`
-	OutputAspect       string `json:"OutputAspect"`
-	OutputVideoCodec   string `json:"OutputVideoCodec"`
-	OutputVideoQuality string `json:"OutputVideoQuality"`
+type USBStartStreamingRequest struct {
+	InputFps           string `json:"InputFps,omitempty"`
+	InputImageSize     string `json:"InputImageSize,omitempty"`
+	InputPixelFormat   string `json:"InputPixelFormat,omitempty"`
+	OutputFrames       string `json:"OutputFrames,omitempty"`
+	OutputFps          string `json:"OutputFps,omitempty"`
+	OutputImageSize    string `json:"OutputImageSize,omitempty"`
+	OutputAspect       string `json:"OutputAspect,omitempty"`
+	OutputVideoCodec   string `json:"OutputVideoCodec,omitempty"`
+	OutputVideoQuality string `json:"OutputVideoQuality,omitempty"`
 }
 type Transport struct {
 	Protocol string `json:"Protocol"`
@@ -245,10 +245,15 @@ type GetPTZConfigurationsResponse struct {
 	} `json:"PTZConfiguration"`
 }
 
+type OnvifPipelineConfig struct {
+	ProfileToken string `json:"profile_token"`
+}
+
 type StartPipelineRequest struct {
-	ProfileToken    string `json:"profile_token"`
-	PipelineName    string `json:"pipeline_name"`
-	PipelineVersion string `json:"pipeline_version"`
+	Onvif           *OnvifPipelineConfig      `json:"onvif,omitempty"`
+	USB             *USBStartStreamingRequest `json:"usb,omitempty"`
+	PipelineName    string                    `json:"pipeline_name"`
+	PipelineVersion string                    `json:"pipeline_version"`
 }
 
 type PanTiltRange struct {

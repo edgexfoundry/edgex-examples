@@ -4,7 +4,7 @@
 import { Injectable } from '@angular/core';
 import { HttpRequest, HttpResponseBase } from "@angular/common/http";
 import { Device, Preset, ProfilesEntity } from "./camera-api.types";
-import { Pipeline, PipelineInfoStatus, PipelineStatus } from "./pipeline-api.types";
+import { Pipeline, PipelineInfoStatus, PipelineStatus, USBConfig } from "./pipeline-api.types";
 
 const onvifServiceName = "device-onvif-camera";
 const usbServiceName = "device-usb-camera";
@@ -39,6 +39,12 @@ export class DataService {
   public profiles: ProfilesEntity[];
   public selectedProfile: string;
 
+  // usb config options
+  public outputVideoQuality: string;
+  public inputImageSize: string;
+  public inputPixelFormat: string;
+  public inputFps: string;
+
   public pipelineStatus: PipelineStatus;
 
   public pipelineMap: Map<string, PipelineInfoStatus>;
@@ -69,5 +75,14 @@ export class DataService {
   cameraIsOnvif(cameraName: string) {
     let camera = this.cameraMap.get(cameraName);
     return camera != null && camera.serviceName === onvifServiceName;
+  }
+
+  getUSBConfig(): USBConfig {
+    return {
+      InputFps: this.inputFps,
+      InputImageSize: this.inputImageSize,
+      InputPixelFormat: this.inputPixelFormat,
+      OutputVideoQuality: this.outputVideoQuality
+    }
   }
 }

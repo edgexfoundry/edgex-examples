@@ -17,20 +17,21 @@ import (
 )
 
 const (
-	relativeMoveCommand = "RelativeMove"
-	gotoPresetCommand   = "GotoPreset"
-	streamUriCommand    = "StreamUri"
-	profilesCommand     = "Profiles"
-	getPresetsCommand   = "GetPresets"
+	relativeMoveCommand      = "RelativeMove"
+	gotoPresetCommand        = "GotoPreset"
+	streamUriCommand         = "StreamUri"
+	profilesCommand          = "Profiles"
+	getPresetsCommand        = "GetPresets"
 	getConfigurationsCommand = "GetConfigurations"
-	startStreamingCommand = "StartStreaming"
-	stopStreamingCommand  = "StopStreaming"
+	startStreamingCommand    = "StartStreaming"
+	stopStreamingCommand     = "StopStreaming"
+	usbStreamUriCommand      = "StreamURI"
 
 	zoomScale = 1
 )
 
 func (app *CameraManagementApp) getProfiles(deviceName string) (ProfilesResponse, error) {
-	profiles, err := app.issueGetCommand(context.Background(), deviceName, profilesCommand, struct{}{})
+	profiles, err := app.issueGetCommandWithJson(context.Background(), deviceName, profilesCommand, struct{}{})
 	if err != nil {
 		return ProfilesResponse{}, errors.Wrapf(err, "failed to issue get Profiles command")
 	}
@@ -43,20 +44,6 @@ func (app *CameraManagementApp) getProfiles(deviceName string) (ProfilesResponse
 	pr := ProfilesResponse{}
 	err = json.Unmarshal(js, &pr)
 	return pr, err
-}
-
-func (app *CameraManagementApp) queryStreamUri(deviceName, profileToken string) (string, error) {
-	req := StreamUriRequest{ProfileToken: profileToken}
-	cmdResponse, err := app.issueGetCommand(context.Background(), deviceName, streamUriCommand, req)
-	if err != nil {
-		return "", errors.Wrapf(err, "failed to issue get StreamUri command")
-	}
-	streamUri, errUri := parseStreamUri(cmdResponse)
-	if errUri != nil {
-		return "", errors.Wrapf(errUri, "failed to get stream Uri from the device %s", deviceName)
-	}
-
-	return streamUri, nil
 }
 
 func (app *CameraManagementApp) doPTZ(deviceName, profileToken string, x, y, zoom float64) (dtosCommon.BaseResponse, error) {
@@ -84,7 +71,7 @@ func (app *CameraManagementApp) getPresets(deviceName string, profileToken strin
 		ProfileToken: onvif.ReferenceToken(profileToken),
 	}
 
-	presets, err := app.issueGetCommand(context.Background(), deviceName, getPresetsCommand, cmd)
+	presets, err := app.issueGetCommandWithJson(context.Background(), deviceName, getPresetsCommand, cmd)
 	if err != nil {
 		return GetPresetsResponse{}, errors.Wrapf(err, "failed to issue get presets command")
 	}
@@ -102,7 +89,7 @@ func (app *CameraManagementApp) getPresets(deviceName string, profileToken strin
 func (app *CameraManagementApp) getPTZConfiguration(deviceName string) (GetPTZConfigurationsResponse, error) {
 	cmd := &ptz.GetConfigurations{}
 
-	config, err := app.issueGetCommand(context.Background(), deviceName, getConfigurationsCommand, cmd)
+	config, err := app.issueGetCommandWithJson(context.Background(), deviceName, getConfigurationsCommand, cmd)
 	if err != nil {
 		return GetPTZConfigurationsResponse{}, errors.Wrapf(err, "failed to issue get configurations command")
 	}
@@ -126,13 +113,12 @@ func (app *CameraManagementApp) gotoPreset(deviceName string, profile string, pr
 	return app.sendPutCommand(deviceName, gotoPresetCommand, cmd)
 }
 
-func (app *CameraManagementApp) startStreaming(deviceName string, inputImageSize string, outputVideoQuality string) (dtosCommon.BaseResponse, error) {
-	req := StartStreamingRequest{InputImageSize: inputImageSize, OutputVideoQuality: outputVideoQuality}
+func (app *CameraManagementApp) startStreaming(deviceName string, req USBStartStreamingRequest) (dtosCommon.BaseResponse, error) {
 	return app.sendPutCommand(deviceName, startStreamingCommand, req)
 }
 
 func (app *CameraManagementApp) stopStreaming(deviceName string) (dtosCommon.BaseResponse, error) {
-	return app.sendPutCommand(deviceName, stopStreamingCommand, nil)
+	return app.sendPutCommand(deviceName, stopStreamingCommand, true)
 }
 
 func (app *CameraManagementApp) sendPutCommand(deviceName string, commandName string, commandValue interface{}) (dtosCommon.BaseResponse, error) {

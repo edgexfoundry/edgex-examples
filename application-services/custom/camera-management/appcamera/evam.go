@@ -26,8 +26,8 @@ type PipelineInfo struct {
 	// Version is the second part of the pipeline's full name. In the case of 'object_detection/person_vehicle_bike'
 	// the version is 'person_vehicle_bike'
 	Version string `json:"version,omitempty"`
-	// Profile is the ProfileToken for the specific stream
-	Profile string `json:"profile,omitempty"`
+
+	// todo: how to add back usb/onvif data?
 }
 
 type PipelineInfoStatus struct {
@@ -78,12 +78,51 @@ func (app *CameraManagementApp) getPipelineInfo(camera string) (PipelineInfo, bo
 	return val, found
 }
 
-func (app *CameraManagementApp) startPipeline(deviceName, profileToken, pipelineName, pipelineVersion string) error {
-	streamUri, err := app.queryStreamUri(deviceName, profileToken)
+func (app *CameraManagementApp) queryStreamUri(deviceName string, sr StartPipelineRequest) (string, error) {
+	if sr.USB != nil {
+		return app.getUSBStreamUri(deviceName)
+	} else if sr.Onvif != nil {
+		return app.getOnvifStreamUri(deviceName, sr.Onvif.ProfileToken)
+	}
+	return "", errors.New("missing usb or onvif stream configuration")
+}
+
+func (app *CameraManagementApp) getOnvifStreamUri(deviceName string, profileToken string) (string, error) {
+	req := StreamUriRequest{ProfileToken: profileToken}
+	cmdResponse, err := app.issueGetCommandWithJson(context.Background(), deviceName, streamUriCommand, req)
+	if err != nil {
+		return "", errors.Wrapf(err, "failed to issue get StreamUri command")
+	}
+	streamUri, errUri := parseStreamUri(cmdResponse)
+	if errUri != nil {
+		return "", errors.Wrapf(errUri, "failed to get stream Uri from the device %s", deviceName)
+	}
+
+	return streamUri, nil
+}
+
+func (app *CameraManagementApp) getUSBStreamUri(deviceName string) (string, error) {
+	cmdResponse, err := app.issueGetCommand(context.Background(), deviceName, usbStreamUriCommand)
+	if err != nil {
+		return "", errors.Wrapf(err, "failed to issue get StreamUri command")
+	}
+	return cmdResponse.Event.Readings[0].Value, nil
+}
+
+func (app *CameraManagementApp) startPipeline(deviceName string, sr StartPipelineRequest) error {
+	streamUri, err := app.queryStreamUri(deviceName, sr)
 	if err != nil {
 		return err
 	}
 	app.lc.Infof("Received stream uri for the device %s: %s", deviceName, streamUri)
+
+	// if device is usb camera, start streaming first
+	if sr.USB != nil {
+		_, err := app.startStreaming(deviceName, *sr.USB)
+		if err != nil {
+			return errors.Wrapf(err, "failed to start streaming usb camera %s", deviceName)
+		}
+	}
 
 	body, err := app.createPipelineRequestBody(streamUri, deviceName)
 	if err != nil {
@@ -91,9 +130,8 @@ func (app *CameraManagementApp) startPipeline(deviceName, profileToken, pipeline
 	}
 
 	info := PipelineInfo{
-		Name:    pipelineName,
-		Version: pipelineVersion,
-		Profile: profileToken,
+		Name:    sr.PipelineName,
+		Version: sr.PipelineVersion,
 	}
 	var res interface{}
 	baseUrl, err := url.Parse(app.config.AppCustom.EvamBaseUrl)
@@ -103,7 +141,14 @@ func (app *CameraManagementApp) startPipeline(deviceName, profileToken, pipeline
 	reqPath := path.Join("pipelines", info.Name, info.Version)
 
 	if err = issuePostRequest(context.Background(), &res, baseUrl.String(), reqPath, body); err != nil {
-		return errors.Wrap(err, "POST request to start EVAM pipeline failed")
+		err = errors.Wrap(err, "POST request to start EVAM pipeline failed")
+		// if we started the streaming on usb camera, we need to stop it
+		if sr.USB != nil {
+			if _, err2 := app.stopStreaming(deviceName); err2 != nil {
+				err = errors.Wrapf(err, "failed to stop streaming usb camera %s", deviceName)
+			}
+		}
+		return err
 	}
 	info.Id = fmt.Sprintf("%v", res)
 
@@ -112,7 +157,7 @@ func (app *CameraManagementApp) startPipeline(deviceName, profileToken, pipeline
 	}
 
 	app.lc.Infof("Successfully started EVAM pipeline for the device %s", deviceName)
-	app.lc.Infof("View inference results at 'rtsp://<SYSTEM_IP_ADDRESS>:8554/%s'", deviceName)
+	app.lc.Infof("View inference results at 'rtsp://<SYSTEM_IP_ADDRESS>:8555/%s'", deviceName)
 
 	return nil
 }
