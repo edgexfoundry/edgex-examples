@@ -22,12 +22,11 @@ const (
 	streamUriCommand    = "StreamUri"
 	profilesCommand     = "Profiles"
 	getPresetsCommand   = "GetPresets"
-	StartStreamingCommand = "StartStreaming"
-	StopStreamingCommand  = "StopStreaming"
+	getConfigurationsCommand = "GetConfigurations"
+	startStreamingCommand = "StartStreaming"
+	stopStreamingCommand  = "StopStreaming"
 
-	moveScaleX = 10
-	moveScaleY = 5
-	zoomScale  = 1
+	zoomScale = 1
 )
 
 func (app *CameraManagementApp) getProfiles(deviceName string) (ProfilesResponse, error) {
@@ -63,8 +62,8 @@ func (app *CameraManagementApp) queryStreamUri(deviceName, profileToken string) 
 func (app *CameraManagementApp) doPTZ(deviceName, profileToken string, x, y, zoom float64) (dtosCommon.BaseResponse, error) {
 	trans := ptz.Vector{
 		PanTilt: &onvif.Vector2D{
-			X: x * moveScaleX,
-			Y: y * moveScaleY,
+			X: x,
+			Y: y,
 		},
 	}
 	if zoom != 0 {
@@ -100,6 +99,24 @@ func (app *CameraManagementApp) getPresets(deviceName string, profileToken strin
 	return pr, err
 }
 
+func (app *CameraManagementApp) getPTZConfiguration(deviceName string) (GetPTZConfigurationsResponse, error) {
+	cmd := &ptz.GetConfigurations{}
+
+	config, err := app.issueGetCommand(context.Background(), deviceName, getConfigurationsCommand, cmd)
+	if err != nil {
+		return GetPTZConfigurationsResponse{}, errors.Wrapf(err, "failed to issue get configurations command")
+	}
+
+	val := config.Event.Readings[0].ObjectValue
+	js, err := json.Marshal(val)
+	if err != nil {
+		return GetPTZConfigurationsResponse{}, errors.Wrapf(err, "failed to marshal configurations json object")
+	}
+	pr := GetPTZConfigurationsResponse{}
+	err = json.Unmarshal(js, &pr)
+	return pr, err
+}
+
 func (app *CameraManagementApp) gotoPreset(deviceName string, profile string, preset string) (dtosCommon.BaseResponse, error) {
 	cmd := &ptz.GotoPreset{
 		ProfileToken: (*onvif.ReferenceToken)(&profile),
@@ -110,15 +127,12 @@ func (app *CameraManagementApp) gotoPreset(deviceName string, profile string, pr
 }
 
 func (app *CameraManagementApp) startStreaming(deviceName string, inputImageSize string, outputVideoQuality string) (dtosCommon.BaseResponse, error) {
-
 	req := StartStreamingRequest{InputImageSize: inputImageSize, OutputVideoQuality: outputVideoQuality}
-
-	return app.sendPutCommand(deviceName, StartStreamingCommand, req)
+	return app.sendPutCommand(deviceName, startStreamingCommand, req)
 }
 
 func (app *CameraManagementApp) stopStreaming(deviceName string) (dtosCommon.BaseResponse, error) {
-
-	return app.sendPutCommand(deviceName, StopStreamingCommand, nil)
+	return app.sendPutCommand(deviceName, stopStreamingCommand, nil)
 }
 
 func (app *CameraManagementApp) sendPutCommand(deviceName string, commandName string, commandValue interface{}) (dtosCommon.BaseResponse, error) {

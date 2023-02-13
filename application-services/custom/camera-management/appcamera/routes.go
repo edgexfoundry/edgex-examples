@@ -18,12 +18,9 @@ import (
 )
 
 const (
-	left    = -1
-	right   = 1
-	up      = 1
-	down    = -1
-	zoomIn  = 1
-	zoomOut = -1
+	panTiltOffset = 0.05
+	zoomIn        = 1
+	zoomOut       = -1
 
 	webUIDistDir = "./web-ui/dist"
 
@@ -272,6 +269,18 @@ func (app *CameraManagementApp) ptzRoute(w http.ResponseWriter, req *http.Reques
 	var res dtosCommon.BaseResponse
 	var err error
 
+	panTiltRange, err := app.getPanTiltRange(deviceName)
+	if err != nil {
+		respondError(app.lc, w, http.StatusInternalServerError,
+			fmt.Sprintf("Failed to get PTZ configuration for the device %s: %v", deviceName, err))
+		return
+	}
+
+	right := panTiltOffset * panTiltRange.XRange
+	left := -right
+	up := panTiltOffset * panTiltRange.YRange
+	down := -up
+
 	switch action {
 	case "left":
 		res, err = app.doPTZ(deviceName, profileToken, left, 0, 0)
@@ -310,6 +319,27 @@ func (app *CameraManagementApp) ptzRoute(w http.ResponseWriter, req *http.Reques
 	if err != nil {
 		app.lc.Error(err.Error())
 	}
+}
+
+func (app *CameraManagementApp) getPanTiltRange(deviceName string) (PanTiltRange, error) {
+	app.panTiltMutex.Lock()
+	defer app.panTiltMutex.Unlock()
+	panTiltRange, exists := app.panTiltMap[deviceName]
+	if !exists {
+		ptzConfigs, err := app.getPTZConfiguration(deviceName)
+		if err != nil {
+			return PanTiltRange{}, err
+		}
+
+		xRange := ptzConfigs.PTZConfiguration[0].PanTiltLimits.Range.XRange.Max - ptzConfigs.PTZConfiguration[0].PanTiltLimits.Range.XRange.Min
+		yRange := ptzConfigs.PTZConfiguration[0].PanTiltLimits.Range.YRange.Max - ptzConfigs.PTZConfiguration[0].PanTiltLimits.Range.YRange.Min
+		panTiltRange = PanTiltRange{
+			XRange: xRange,
+			YRange: yRange,
+		}
+		app.panTiltMap[deviceName] = panTiltRange
+	}
+	return panTiltRange, nil
 }
 
 func (app *CameraManagementApp) startStreamingRoute(w http.ResponseWriter, req *http.Request) {
