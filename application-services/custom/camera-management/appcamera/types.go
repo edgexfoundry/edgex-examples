@@ -12,6 +12,17 @@ type StreamUriRequest struct {
 	StreamSetup  StreamSetup `json:"StreamSetup"`
 	ProfileToken string      `json:"ProfileToken"`
 }
+type StartStreamingRequest struct {
+	InputFps         string `json:"InputFps"`
+	InputImageSize   string `json:"InputImageSize"`
+	InputPixelFormat string `json:"InputPixelFormat"`
+	OutputFrames       string `json:"OutputFrames"`
+	OutputFps          string `json:"OutputFps"`
+	OutputImageSize    string `json:"OutputImageSize"`
+	OutputAspect       string `json:"OutputAspect"`
+	OutputVideoCodec   string `json:"OutputVideoCodec"`
+	OutputVideoQuality string `json:"OutputVideoQuality"`
+}
 type Transport struct {
 	Protocol string `json:"Protocol"`
 }
