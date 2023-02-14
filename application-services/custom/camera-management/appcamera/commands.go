@@ -27,12 +27,21 @@ const (
 	stopStreamingCommand      = "StopStreaming"
 	usbStreamUriCommand       = "StreamURI"
 	usbStreamingStatusCommand = "StreamingStatus"
+	usbImageFormatsCommand    = "ImageFormats"
 
 	zoomScale = 1
 )
 
+func (app *CameraManagementApp) getImageFormats(deviceName string) (interface{}, error) {
+	resp, err := app.issueGetCommand(context.Background(), deviceName, usbImageFormatsCommand)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to issue get ImageFormats command")
+	}
+	return resp.Event.Readings[0].ObjectValue, nil
+}
+
 func (app *CameraManagementApp) getProfiles(deviceName string) (ProfilesResponse, error) {
-	profiles, err := app.issueGetCommandWithJson(context.Background(), deviceName, profilesCommand, struct{}{})
+	profiles, err := app.issueGetCommand(context.Background(), deviceName, profilesCommand)
 	if err != nil {
 		return ProfilesResponse{}, errors.Wrapf(err, "failed to issue get Profiles command")
 	}

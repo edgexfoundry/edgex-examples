@@ -5,7 +5,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 import { environment } from '../../environments/environment';
-import { Device, GetPresetsResponse, GetProfilesResponse } from "./camera-api.types";
+import { Device, GetImageFormatsResponse, GetPresetsResponse, GetProfilesResponse } from "./camera-api.types";
 import { DataService } from "./data.service";
 import { Pipeline, PipelineInfoStatus, PipelineStatus, StartPipelineRequest, USBConfig } from "./pipeline-api.types";
 import { ApiLogIgnoreHeader, JsonHeaders } from "../constants";
@@ -61,17 +61,26 @@ export class CameraApiService {
       });
   }
 
-  updateProfiles(cameraName: string) {
+  clearCameraInfo() {
     this.data.selectedProfile = undefined;
     this.data.profiles = undefined;
     this.data.selectedPreset = undefined;
+    this.data.presets = undefined;
+    this.data.imageFormats = undefined;
+    this.data.inputPixelFormat = undefined;
+    this.data.inputImageSize = undefined;
+  }
 
-    let camera = this.data.cameraMap.get(cameraName);
-    if (camera == null || !this.data.cameraIsOnvif(cameraName)) {
-      this.data.presets = undefined;
-      return;
+  updateCameraChanged(cameraName: string) {
+    this.clearCameraInfo();
+    if (this.data.cameraIsOnvif(cameraName)) {
+      this.updateProfiles(cameraName);
+    } else {
+      this.updateImageFormats(cameraName);
     }
+  }
 
+  updateProfiles(cameraName: string) {
     this.httpClient.get<GetProfilesResponse>(
       this.makeCameraUrl(cameraName, '/profiles'))
       .subscribe({
@@ -87,14 +96,27 @@ export class CameraApiService {
   }
 
   updatePresets(cameraName: string, profileToken: string) {
-    this.data.presets = undefined;
     this.httpClient.get<GetPresetsResponse>(
       this.makeProfileUrl(cameraName, profileToken, '/presets'))
       .subscribe({
         next: data => {
           this.data.presets = data.Preset;
+          this.data.selectedPreset = data.Preset.length > 0 ? data.Preset[0].Token: undefined;
         }, error: _ => {
           this.data.presets = undefined;
+        }
+      });
+  }
+
+  updateImageFormats(cameraName: string) {
+    this.data.imageFormats = undefined;
+    this.httpClient.get<GetImageFormatsResponse>(
+      this.makeCameraUrl(cameraName, '/imageformats'))
+      .subscribe({
+        next: data => {
+          this.data.imageFormats = data.ImageFormats;
+        }, error: _ => {
+          this.data.imageFormats = undefined;
         }
       });
   }

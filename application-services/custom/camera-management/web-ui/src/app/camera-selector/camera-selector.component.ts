@@ -25,8 +25,12 @@ export class CameraSelectorComponent implements OnInit, OnDestroy {
   }
 
   cameraSelectionChanged(value) {
-    this.api.updateProfiles(value);
+    this.api.updateCameraChanged(value);
     this.api.refreshPipelineStatus(value, true);
+  }
+
+  pixelSelectionChanged(value) {
+    this.data.imageSizes = this.data.imageFormats[value].FrameSizes;
   }
 
   profileSelectionChanged(value) {

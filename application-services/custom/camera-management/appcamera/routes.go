@@ -28,19 +28,19 @@ const (
 	getCamerasPath = common.ApiBase + "/cameras"
 	cameraApiBase  = getCamerasPath + "/{name}"
 
-	getProfilesPath      = cameraApiBase + "/profiles"
-	cameraProfileApiBase = getProfilesPath + "/{profile}"
-
-	getPipelinesPath        = common.ApiBase + "/pipelines"
-	allPipelineStatusesPath = getPipelinesPath + "/status/all"
-
 	startPipelinePath  = cameraApiBase + "/pipeline/start"
 	stopPipelinePath   = cameraApiBase + "/pipeline/stop"
 	pipelineStatusPath = cameraApiBase + "/pipeline/status"
+	imageFormatsPath   = cameraApiBase + "/imageformats"
 
-	ptzPath        = cameraProfileApiBase + "/ptz/{action}"
-	getPresetsPath = cameraProfileApiBase + "/presets"
-	gotoPresetPath = cameraProfileApiBase + "/presets/{preset}"
+	getProfilesPath      = cameraApiBase + "/profiles"
+	cameraProfileApiBase = getProfilesPath + "/{profile}"
+	ptzPath              = cameraProfileApiBase + "/ptz/{action}"
+	getPresetsPath       = cameraProfileApiBase + "/presets"
+	gotoPresetPath       = cameraProfileApiBase + "/presets/{preset}"
+
+	getPipelinesPath        = common.ApiBase + "/pipelines"
+	allPipelineStatusesPath = getPipelinesPath + "/status/all"
 )
 
 func (app *CameraManagementApp) addRoutes() error {
@@ -90,6 +90,11 @@ func (app *CameraManagementApp) addRoutes() error {
 		return err
 	}
 
+	if err := app.addRoute(
+		imageFormatsPath, http.MethodGet, app.getImageFormatsRoute); err != nil {
+		return err
+	}
+
 	app.fileServer = http.FileServer(http.Dir(webUIDistDir))
 	// this is a bit of a hack to get refreshing working, as the path is /home
 	if err := app.addRoute("/home", http.MethodGet, app.index); err != nil {
@@ -132,6 +137,20 @@ func (app *CameraManagementApp) getPresetsRoute(w http.ResponseWriter, req *http
 	}
 
 	respondJson(app.lc, w, presets)
+}
+
+func (app *CameraManagementApp) getImageFormatsRoute(w http.ResponseWriter, req *http.Request) {
+	rv := mux.Vars(req)
+	deviceName := rv["name"]
+
+	formats, err := app.getImageFormats(deviceName)
+	if err != nil {
+		respondError(app.lc, w, http.StatusInternalServerError,
+			fmt.Sprintf("Failed to get image formats: %v", err))
+		return
+	}
+
+	respondJson(app.lc, w, formats)
 }
 
 func (app *CameraManagementApp) getProfilesRoute(w http.ResponseWriter, req *http.Request) {

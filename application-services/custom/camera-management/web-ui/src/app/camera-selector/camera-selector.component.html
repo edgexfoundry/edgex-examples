@@ -17,7 +17,23 @@ SPDX-License-Identifier: Apache-2.0 -->
   </mat-select>
 </mat-form-field>
 
-<br *ngIf="data.cameraIsOnvif(data.selectedCamera)" />
+<mat-form-field *ngIf="!data.cameraIsOnvif(data.selectedCamera)" appearance="fill">
+  <mat-label>Select image format</mat-label>
+  <mat-select [(value)]="data.inputPixelFormat" (valueChange)="pixelSelectionChanged($event)">
+    <mat-option *ngFor="let fmt of data.imageFormats; index as i" value="{{i}}">{{fmt.PixelFormat}}</mat-option>
+  </mat-select>
+</mat-form-field>
+
+<br />
+
+<mat-form-field *ngIf="!data.cameraIsOnvif(data.selectedCamera)" appearance="fill">
+  <mat-label>Select image resolution</mat-label>
+  <mat-select [(value)]="data.inputImageSize">
+    <mat-option *ngFor="let sz of data.imageSizes; index as i" value="{{i}}">{{sz.Size.MaxWidth}}x{{sz.Size.MaxHeight}}</mat-option>
+  </mat-select>
+</mat-form-field>
+
+<br *ngIf="!data.cameraIsOnvif(data.selectedCamera)"/>
 
 <mat-form-field class="pipeline-picker" appearance="fill">
   <mat-label>Select a pipeline</mat-label>
