@@ -17,15 +17,16 @@ import (
 )
 
 const (
-	relativeMoveCommand      = "RelativeMove"
-	gotoPresetCommand        = "GotoPreset"
-	streamUriCommand         = "StreamUri"
-	profilesCommand          = "Profiles"
-	getPresetsCommand        = "GetPresets"
-	getConfigurationsCommand = "GetConfigurations"
-	startStreamingCommand    = "StartStreaming"
-	stopStreamingCommand     = "StopStreaming"
-	usbStreamUriCommand      = "StreamURI"
+	relativeMoveCommand       = "RelativeMove"
+	gotoPresetCommand         = "GotoPreset"
+	streamUriCommand          = "StreamUri"
+	profilesCommand           = "Profiles"
+	getPresetsCommand         = "GetPresets"
+	getConfigurationsCommand  = "GetConfigurations"
+	startStreamingCommand     = "StartStreaming"
+	stopStreamingCommand      = "StopStreaming"
+	usbStreamUriCommand       = "StreamURI"
+	usbStreamingStatusCommand = "StreamingStatus"
 
 	zoomScale = 1
 )
@@ -113,7 +114,33 @@ func (app *CameraManagementApp) gotoPreset(deviceName string, profile string, pr
 	return app.sendPutCommand(deviceName, gotoPresetCommand, cmd)
 }
 
+func (app *CameraManagementApp) isStreaming(deviceName string) (bool, error) {
+	resp, err := app.issueGetCommand(context.Background(), deviceName, usbStreamingStatusCommand)
+	if err != nil {
+		return false, err
+	}
+	val := resp.Event.Readings[0].ObjectValue
+	js, err := json.Marshal(val)
+	if err != nil {
+		return false, errors.Wrapf(err, "failed to marshal json object")
+	}
+	ss := StreamingStatusResponse{}
+	err = json.Unmarshal(js, &ss)
+	if err != nil {
+		return false, errors.Wrapf(err, "failed to unmarshal json object")
+	}
+	return ss.IsStreaming, nil
+}
+
 func (app *CameraManagementApp) startStreaming(deviceName string, req USBStartStreamingRequest) (dtosCommon.BaseResponse, error) {
+	isStreaming, err := app.isStreaming(deviceName)
+	if err == nil && isStreaming {
+		// skip if already streaming
+		return dtosCommon.BaseResponse{}, nil
+	}
+	if err != nil {
+		app.lc.Errorf(err.Error())
+	}
 	return app.sendPutCommand(deviceName, startStreamingCommand, req)
 }
 

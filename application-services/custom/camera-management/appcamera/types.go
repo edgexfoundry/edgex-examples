@@ -31,6 +31,18 @@ type StreamSetup struct {
 	Transport Transport `json:"Transport"`
 }
 
+type StreamingStatusResponse struct {
+	Error              string `json:"Error"`
+	InputFps           string `json:"InputFps"`
+	InputImageSize     string `json:"InputImageSize"`
+	IsStreaming        bool   `json:"IsStreaming"`
+	OutputAspect       string `json:"OutputAspect"`
+	OutputFps          string `json:"OutputFps"`
+	OutputFrames       string `json:"OutputFrames"`
+	OutputImageSize    string `json:"OutputImageSize"`
+	OutputVideoQuality string `json:"OutputVideoQuality"`
+}
+
 type ProfilesResponse struct {
 	Profiles []struct {
 		AudioEncoderConfiguration struct {
