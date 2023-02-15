@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0 -->
 </mat-form-field>
 
 <mat-form-field *ngIf="!data.cameraIsOnvif(data.selectedCamera)" appearance="fill">
-  <mat-label>Select image format</mat-label>
+  <mat-label>Select image format (optional)</mat-label>
   <mat-select [(value)]="data.inputPixelFormat" (valueChange)="pixelSelectionChanged($event)">
     <mat-option *ngFor="let fmt of data.imageFormats; index as i" value="{{i}}">{{fmt.PixelFormat}}</mat-option>
   </mat-select>
@@ -27,7 +27,7 @@ SPDX-License-Identifier: Apache-2.0 -->
 <br />
 
 <mat-form-field *ngIf="!data.cameraIsOnvif(data.selectedCamera)" appearance="fill">
-  <mat-label>Select image resolution</mat-label>
+  <mat-label>Select image resolution (optional)</mat-label>
   <mat-select [(value)]="data.inputImageSize">
     <mat-option *ngFor="let sz of data.imageSizes; index as i" value="{{i}}">{{sz.Size.MaxWidth}}x{{sz.Size.MaxHeight}}</mat-option>
   </mat-select>
