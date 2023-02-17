@@ -49,7 +49,7 @@ export class CameraSelectorComponent implements OnInit, OnDestroy {
   shouldDisablePipeline() {
     return this.data.selectedCamera == undefined
       || (this.data.selectedProfile == undefined && this.data.cameraIsOnvif(this.data.selectedCamera))  // todo: should be a is selection correct. and support onvif and usb
-      || (this.data.pipelineMap.has(this.data.selectedCamera)
+      || (this.data.pipelineMap[this.data.selectedCamera] !== undefined
           && this.data.pipelineMap[this.data.selectedCamera].status.state == 'RUNNING')
   }
 }

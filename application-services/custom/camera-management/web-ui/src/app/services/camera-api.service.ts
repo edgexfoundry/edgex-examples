@@ -49,7 +49,7 @@ export class CameraApiService {
           }
           if (data.length > 0) {
             this.data.selectedCamera = data[0].name;
-            this.updateProfiles(this.data.selectedCamera);
+            this.updateCameraChanged(this.data.selectedCamera);
             this.refreshPipelineStatus(this.data.selectedCamera, true);
           } else {
             this.data.selectedCamera = undefined;
