@@ -18,6 +18,7 @@ $(SRC):
 	git clone --depth=1 --branch $(VERSION) $(GITHUB_URL) $@
 
 $(PIPELINES_LINK): $(SRC)
+	-rm -f $@
 	ln -sf $(SRC)/$@ $@
 
 $(MODELS_DIR):
@@ -26,6 +27,7 @@ $(MODELS_DIR):
 download-models: $(SRC) | $(MODELS_DIR)
 	chmod +x $(SRC)/tools/model_downloader/model_downloader.sh $(SRC)/docker/run.sh
 	$(SRC)/tools/model_downloader/model_downloader.sh --model-list $(SRC)/models_list/models.list.yml
+	$(SRC)/tools/model_downloader/model_downloader.sh --model-list models.list.extra.yml
 
 # patch pipeline to accept rtsp video
 patch-pipelines: $(PIPELINES_LINK)
