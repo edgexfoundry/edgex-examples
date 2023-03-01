@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2022 Intel Corporation
+// Copyright (C) 2022-2023 Intel Corporation
 //
 // SPDX-License-Identifier: Apache-2.0
 
@@ -19,8 +19,8 @@ type CameraManagementApp struct {
 	config         *ServiceConfig
 	pipelinesMap   map[string]PipelineInfo
 	pipelinesMutex sync.RWMutex
-	panTiltMap     map[string]PanTiltRange
-	panTiltMutex   sync.RWMutex
+	ptzRangeMap    map[string]PTZRange
+	ptzRangeMutex  sync.RWMutex
 	fileServer     http.Handler
 }
 
@@ -30,7 +30,7 @@ func NewCameraManagementApp(service interfaces.ApplicationService) *CameraManage
 		lc:           service.LoggingClient(),
 		config:       &ServiceConfig{},
 		pipelinesMap: make(map[string]PipelineInfo),
-		panTiltMap:   make(map[string]PanTiltRange),
+		ptzRangeMap:  make(map[string]PTZRange),
 	}
 }
 
@@ -41,6 +41,11 @@ func (app *CameraManagementApp) Run() error {
 
 	if err := app.addRoutes(); err != nil {
 		return err
+	}
+
+	if err := app.queryAllPipelineStatuses(); err != nil {
+		// do not exit, just log
+		app.lc.Errorf("Unable to query EVAM pipeline statuses. Is EVAM running? %s", err.Error())
 	}
 
 	if err := app.service.MakeItRun(); err != nil {

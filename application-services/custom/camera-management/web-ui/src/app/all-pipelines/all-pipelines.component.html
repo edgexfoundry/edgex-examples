@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2022 Intel Corporation
+<!-- Copyright (C) 2022-2023 Intel Corporation
 SPDX-License-Identifier: Apache-2.0 -->
 
 <mat-accordion>
@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           </mat-chip>
         </mat-chip-list>
       </mat-panel-title>
-      <mat-panel-description><span>{{item.key}} - {{item.value.info.name}}/{{item.value.info.version}}</span></mat-panel-description>
+      <mat-panel-description><span>{{item.value.camera}} - {{item.value.info.name}}/{{item.value.info.version}}</span></mat-panel-description>
       <mat-chip-list selectable="false">
         <mat-chip class="state-{{item.value.status.state}}">
           {{item.value.status.state}}
@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         </mat-chip>
         <button mat-icon-button color="warn"
                 class="stop-button"
-                (click)="api.stopPipeline(item.key)">
+                (click)="api.stopPipeline(item.value.camera, item.value.info.id)">
           <mat-icon>stop</mat-icon>
         </button>
       </mat-chip-list>

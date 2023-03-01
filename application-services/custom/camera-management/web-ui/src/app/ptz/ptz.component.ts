@@ -1,10 +1,10 @@
-// Copyright (C) 2022 Intel Corporation
+// Copyright (C) 2022-2023 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { DataService } from "../services/data.service";
-import { PtzService } from "../services/ptz.service";
-import { CameraApiService } from "../services/camera-api.service";
+import { DataService } from '../services/data.service';
+import { PtzService } from '../services/ptz.service';
+import { CameraApiService } from '../services/camera-api.service';
 
 @Component({
   selector: 'app-ptz',
@@ -23,11 +23,10 @@ export class PtzComponent implements OnInit, OnDestroy {
   }
 
   isPtzDisabled(): boolean {
-    return this.data.selectedCamera === undefined || this.data.selectedProfile === undefined;
+    return this.data.cameraFeatures === undefined || this.data.cameraFeatures.PTZ === false;
   }
 
   isZoomDisabled(): boolean {
-    // for now, always disable zoom buttons
-    return true;
+    return this.data.cameraFeatures === undefined || this.data.cameraFeatures.Zoom === false;
   }
 }

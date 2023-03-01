@@ -1,10 +1,10 @@
-// Copyright (C) 2022 Intel Corporation
+// Copyright (C) 2022-2023 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { DataService } from "../services/data.service";
-import { CameraApiService } from "../services/camera-api.service";
-import { EventMqttService } from "../services/event-mqtt.service";
+import { DataService } from '../services/data.service';
+import { CameraApiService } from '../services/camera-api.service';
+import { EventMqttService } from '../services/event-mqtt.service';
 
 @Component({
   selector: 'app-camera-selector',
@@ -24,24 +24,32 @@ export class CameraSelectorComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
   }
 
-  cameraSelectionChanged(value) {
-    this.api.updateProfiles(value);
+  cameraSelectionChanged(value): void {
+    this.api.updateCameraChanged(value);
     this.api.refreshPipelineStatus(value, true);
   }
 
-  profileSelectionChanged(value) {
+  pixelSelectionChanged(value): void {
+    this.data.imageSizes = this.data.imageFormats[value].FrameSizes;
+  }
+
+  profileSelectionChanged(value): void {
     this.api.updatePresets(this.data.selectedCamera, value);
   }
 
-  startPipeline() {
-    let tokens = this.data.selectedPipeline.split('/')
-    this.api.startPipeline(this.data.selectedCamera, this.data.selectedProfile, tokens[0], tokens[1]);
+  startPipeline(): void {
+    const tokens = this.data.selectedPipeline.split('/');
+    if (this.data.cameraIsOnvif()) {
+      this.api.startOnvifPipeline(this.data.selectedCamera, tokens[0], tokens[1], this.data.selectedProfile);
+    } else {
+      this.api.startUSBPipeline(this.data.selectedCamera, tokens[0], tokens[1], this.data.getUSBConfig());
+    }
   }
 
-  shouldDisablePipeline() {
-    return this.data.selectedCamera == undefined
-      || this.data.selectedProfile == undefined
-      || (this.data.pipelineMap[this.data.selectedCamera]
-          && this.data.pipelineMap[this.data.selectedCamera].status.state == 'RUNNING')
+  shouldDisablePipeline(): boolean {
+    return this.data.selectedCamera === undefined
+      || (this.data.selectedProfile === undefined && this.data.cameraIsOnvif())
+      || (this.data.pipelineMap[this.data.selectedCamera] !== undefined
+          && this.data.pipelineMap[this.data.selectedCamera].status.state === 'RUNNING');
   }
 }

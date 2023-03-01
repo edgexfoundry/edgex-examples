@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2022 Intel Corporation
+// Copyright (C) 2022-2023 Intel Corporation
 //
 // SPDX-License-Identifier: Apache-2.0
 
@@ -12,6 +12,17 @@ type StreamUriRequest struct {
 	StreamSetup  StreamSetup `json:"StreamSetup"`
 	ProfileToken string      `json:"ProfileToken"`
 }
+type USBStartStreamingRequest struct {
+	InputFps           string `json:"InputFps,omitempty"`
+	InputImageSize     string `json:"InputImageSize,omitempty"`
+	InputPixelFormat   string `json:"InputPixelFormat,omitempty"`
+	OutputFrames       string `json:"OutputFrames,omitempty"`
+	OutputFps          string `json:"OutputFps,omitempty"`
+	OutputImageSize    string `json:"OutputImageSize,omitempty"`
+	OutputAspect       string `json:"OutputAspect,omitempty"`
+	OutputVideoCodec   string `json:"OutputVideoCodec,omitempty"`
+	OutputVideoQuality string `json:"OutputVideoQuality,omitempty"`
+}
 type Transport struct {
 	Protocol string `json:"Protocol"`
 }
@@ -20,145 +31,30 @@ type StreamSetup struct {
 	Transport Transport `json:"Transport"`
 }
 
-type ProfilesResponse struct {
-	Profiles []struct {
-		AudioEncoderConfiguration struct {
-			Bitrate   int    `json:"Bitrate"`
-			Encoding  string `json:"Encoding"`
-			Multicast struct {
-				Address struct {
-					IPv4Address string `json:"IPv4Address"`
-					Type        string `json:"Type"`
-				} `json:"Address"`
-				AutoStart bool `json:"AutoStart"`
-				Port      int  `json:"Port"`
-				TTL       int  `json:"TTL"`
-			} `json:"Multicast"`
-			Name           string `json:"Name"`
-			SampleRate     int    `json:"SampleRate"`
-			SessionTimeout string `json:"SessionTimeout"`
-			Token          string `json:"Token"`
-			UseCount       int    `json:"UseCount"`
-		} `json:"AudioEncoderConfiguration"`
-		AudioSourceConfiguration struct {
-			Name        string `json:"Name"`
-			SourceToken string `json:"SourceToken"`
-			Token       string `json:"Token"`
-			UseCount    int    `json:"UseCount"`
-		} `json:"AudioSourceConfiguration"`
-		Extension             interface{} `json:"Extension"`
-		Fixed                 bool        `json:"Fixed"`
-		MetadataConfiguration interface{} `json:"MetadataConfiguration"`
-		Name                  string      `json:"Name"`
-		PTZConfiguration      struct {
-			DefaultAbsolutePantTiltPositionSpace  string `json:"DefaultAbsolutePantTiltPositionSpace"`
-			DefaultContinuousPanTiltVelocitySpace string `json:"DefaultContinuousPanTiltVelocitySpace"`
-			DefaultPTZSpeed                       struct {
-			} `json:"DefaultPTZSpeed"`
-			DefaultPTZTimeout                      string `json:"DefaultPTZTimeout"`
-			DefaultRelativePanTiltTranslationSpace string `json:"DefaultRelativePanTiltTranslationSpace"`
-			PanTiltLimits                          struct {
-				Range struct {
-					URI    string `json:"URI"`
-					XRange struct {
-						Max int `json:"Max"`
-						Min int `json:"Min"`
-					} `json:"XRange"`
-					YRange struct {
-						Max int `json:"Max"`
-						Min int `json:"Min"`
-					} `json:"YRange"`
-				} `json:"Range"`
-			} `json:"PanTiltLimits"`
-			Token string `json:"Token"`
-		} `json:"PTZConfiguration"`
-		Token                       string `json:"Token"`
-		VideoAnalyticsConfiguration struct {
-			AnalyticsEngineConfiguration struct {
-				AnalyticsModule []struct {
-					Name       string `json:"Name"`
-					Parameters struct {
-						ElementItem []struct {
-							Name string `json:"Name"`
-						} `json:"ElementItem"`
-						SimpleItem []struct {
-							Name  string `json:"Name"`
-							Value string `json:"Value"`
-						} `json:"SimpleItem"`
-					} `json:"Parameters"`
-					Type string `json:"Type"`
-				} `json:"AnalyticsModule"`
-			} `json:"AnalyticsEngineConfiguration"`
-			Name                    string `json:"Name"`
-			RuleEngineConfiguration struct {
-				Rule struct {
-					Name       string `json:"Name"`
-					Parameters struct {
-						SimpleItem []struct {
-							Name  string `json:"Name"`
-							Value string `json:"Value"`
-						} `json:"SimpleItem"`
-					} `json:"Parameters"`
-					Type string `json:"Type"`
-				} `json:"Rule"`
-			} `json:"RuleEngineConfiguration"`
-			Token    string `json:"Token"`
-			UseCount int    `json:"UseCount"`
-		} `json:"VideoAnalyticsConfiguration"`
-		VideoEncoderConfiguration struct {
-			Encoding string `json:"Encoding"`
-			H264     struct {
-				GovLength   int    `json:"GovLength"`
-				H264Profile string `json:"H264Profile"`
-			} `json:"H264"`
-			Multicast struct {
-				Address struct {
-					IPv4Address string `json:"IPv4Address"`
-					Type        string `json:"Type"`
-				} `json:"Address"`
-				AutoStart bool `json:"AutoStart"`
-				Port      int  `json:"Port"`
-				TTL       int  `json:"TTL"`
-			} `json:"Multicast"`
-			Name        string `json:"Name"`
-			Quality     int    `json:"Quality"`
-			RateControl struct {
-				BitrateLimit     int `json:"BitrateLimit"`
-				EncodingInterval int `json:"EncodingInterval"`
-				FrameRateLimit   int `json:"FrameRateLimit"`
-			} `json:"RateControl"`
-			Resolution struct {
-				Height int `json:"Height"`
-				Width  int `json:"Width"`
-			} `json:"Resolution"`
-			SessionTimeout string `json:"SessionTimeout"`
-			Token          string `json:"Token"`
-			UseCount       int    `json:"UseCount"`
-		} `json:"VideoEncoderConfiguration"`
-		VideoSourceConfiguration struct {
-			Bounds struct {
-				Height int `json:"Height"`
-				Width  int `json:"Width"`
-				X      int `json:"X"`
-				Y      int `json:"Y"`
-			} `json:"Bounds"`
-			Extension   interface{} `json:"Extension"`
-			Name        string      `json:"Name"`
-			SourceToken string      `json:"SourceToken"`
-			Token       string      `json:"Token"`
-			UseCount    int         `json:"UseCount"`
-			ViewMode    string      `json:"ViewMode"`
-		} `json:"VideoSourceConfiguration"`
-	} `json:"Profiles"`
+type StreamingStatusResponse struct {
+	Error              string `json:"Error"`
+	InputFps           string `json:"InputFps"`
+	InputImageSize     string `json:"InputImageSize"`
+	IsStreaming        bool   `json:"IsStreaming"`
+	OutputAspect       string `json:"OutputAspect"`
+	OutputFps          string `json:"OutputFps"`
+	OutputFrames       string `json:"OutputFrames"`
+	OutputImageSize    string `json:"OutputImageSize"`
+	OutputVideoQuality string `json:"OutputVideoQuality"`
 }
 
-type StreamUriResponse struct {
-	MediaURI struct {
-		InvalidAfterConnect bool   `json:"InvalidAfterConnect"`
-		InvalidAfterReboot  bool   `json:"InvalidAfterReboot"`
-		Timeout             string `json:"Timeout"`
-		URI                 string `json:"Uri"`
-	} `json:"MediaUri"`
+type CameraType string
+
+const (
+	USB     CameraType = "USB"
+	Onvif   CameraType = "Onvif"
+	Unknown CameraType = "Unknown"
+)
+
+type CameraFeatures struct {
+	PTZ        bool       `json:"PTZ"`
+	Zoom       bool       `json:"Zoom"`
+	CameraType CameraType `json:"CameraType"`
 }
 
 type PipelineRequest struct {
@@ -183,64 +79,65 @@ type Destination struct {
 	Frame    Frame    `json:"frame"`
 }
 
-type GetPresetsResponse struct {
-	Preset []struct {
-		Name        string `json:"Name"`
-		PTZPosition struct {
-			PanTilt struct {
-				Space string  `json:"Space"`
-				X     float64 `json:"X"`
-				Y     float64 `json:"Y"`
-			} `json:"PanTilt"`
-		} `json:"PTZPosition"`
-		Token string `json:"Token"`
-	} `json:"Preset"`
-}
-
-type GetPTZConfigurationsResponse struct {
-	PTZConfiguration []struct {
-		DefaultAbsolutePantTiltPositionSpace  string `json:"DefaultAbsolutePantTiltPositionSpace"`
-		DefaultAbsoluteZoomPositionSpace      string `json:"DefaultAbsoluteZoomPositionSpace"`
-		DefaultContinuousPanTiltVelocitySpace string `json:"DefaultContinuousPanTiltVelocitySpace"`
-		DefaultContinuousZoomVelocitySpace    string `json:"DefaultContinuousZoomVelocitySpace"`
-		DefaultPTZSpeed                       struct {
-		} `json:"DefaultPTZSpeed"`
-		DefaultPTZTimeout                      string `json:"DefaultPTZTimeout"`
-		DefaultRelativePanTiltTranslationSpace string `json:"DefaultRelativePanTiltTranslationSpace"`
-		DefaultRelativeZoomTranslationSpace    string `json:"DefaultRelativeZoomTranslationSpace"`
-		PanTiltLimits                          struct {
-			Range struct {
-				URI    string `json:"URI"`
-				XRange struct {
-					Max float64 `json:"Max"`
-					Min float64 `json:"Min"`
-				} `json:"XRange"`
-				YRange struct {
-					Max float64 `json:"Max"`
-					Min float64 `json:"Min"`
-				} `json:"YRange"`
-			} `json:"Range"`
-		} `json:"PanTiltLimits"`
-		Token      string `json:"Token"`
-		ZoomLimits struct {
-			Range struct {
-				URI    string `json:"URI"`
-				XRange struct {
-					Max float64 `json:"Max"`
-					Min float64 `json:"Min"`
-				} `json:"XRange"`
-			} `json:"Range"`
-		} `json:"ZoomLimits"`
-	} `json:"PTZConfiguration"`
+type OnvifPipelineConfig struct {
+	ProfileToken string `json:"profile_token"`
 }
 
 type StartPipelineRequest struct {
-	ProfileToken    string `json:"profile_token"`
-	PipelineName    string `json:"pipeline_name"`
-	PipelineVersion string `json:"pipeline_version"`
+	Onvif           *OnvifPipelineConfig      `json:"onvif,omitempty"`
+	USB             *USBStartStreamingRequest `json:"usb,omitempty"`
+	PipelineName    string                    `json:"pipeline_name"`
+	PipelineVersion string                    `json:"pipeline_version"`
 }
 
-type PanTiltRange struct {
+type PTZRange struct {
 	XRange float64 `json:"XRange"`
 	YRange float64 `json:"YRange"`
+	ZRange float64 `json:"ZRange"`
+}
+
+type PipelineStatus struct {
+	AvgFps             float64 `json:"avg_fps"`
+	AvgPipelineLatency float64 `json:"avg_pipeline_latency,omitempty"`
+	ElapsedTime        float64 `json:"elapsed_time"`
+	Id                 string  `json:"id"`
+	StartTime          float64 `json:"start_time"`
+	State              string  `json:"state"`
+}
+
+type PipelineInformationResponse struct {
+	Id            string `json:"id"`
+	LaunchCommand string `json:"launch_command"`
+	Request       struct {
+		AutoSource  string `json:"auto_source"`
+		Destination struct {
+			Frame struct {
+				CacheLength         int    `json:"cache-length"`
+				Class               string `json:"class"`
+				EncodeQuality       int    `json:"encode-quality"`
+				Path                string `json:"path"`
+				SyncWithDestination bool   `json:"sync-with-destination"`
+				SyncWithSource      bool   `json:"sync-with-source"`
+				Type                string `json:"type"`
+			} `json:"frame"`
+			Metadata struct {
+				Host  string `json:"host"`
+				Topic string `json:"topic"`
+				Type  string `json:"type"`
+			} `json:"metadata"`
+		} `json:"destination"`
+		Parameters struct {
+			DetectionDevice string `json:"detection-device"`
+		} `json:"parameters"`
+		Pipeline struct {
+			Name    string `json:"name"`
+			Version string `json:"version"`
+		} `json:"pipeline"`
+		Source struct {
+			Element string `json:"element"`
+			Type    string `json:"type"`
+			Uri     string `json:"uri"`
+		} `json:"source"`
+	} `json:"request"`
+	Type string `json:"type"`
 }
