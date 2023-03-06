@@ -1,4 +1,4 @@
-// Copyright (C) 2022 Intel Corporation
+// Copyright (C) 2022-2023 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
 export interface GetProfilesResponse {
@@ -162,6 +162,11 @@ export interface GetPresetsResponse {
   Preset: Preset[];
 }
 
+export interface GetImageFormatsResponse {
+  ImageFormats: ImageFormat[];
+}
+
+
 export interface AutoEvent {
   interval: string;
   onChange: boolean;
@@ -199,4 +204,36 @@ export interface Device {
   profileName: string;
   autoEvents: AutoEvent[];
   protocols: Protocols;
+}
+
+export interface Size {
+  MaxHeight: number;
+  MaxWidth: number;
+  MinHeight: number;
+  MinWidth: number;
+  StepHeight: number;
+  StepWidth: number;
+}
+
+export interface FrameSize {
+  Index: number;
+  PixelFormat: number;
+  Size: Size;
+  Type: number;
+}
+
+export interface ImageFormat {
+  BufType: number;
+  Description: string;
+  Flags: number;
+  FrameSizes: FrameSize[];
+  Index: number;
+  MbusCode: number;
+  PixelFormat: string;
+}
+
+export interface CameraFeatures {
+  PTZ: boolean;
+  Zoom: boolean;
+  CameraType: string;
 }

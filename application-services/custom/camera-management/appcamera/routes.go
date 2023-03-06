@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2022 Intel Corporation
+// Copyright (C) 2022-2023 Intel Corporation
 //
 // SPDX-License-Identifier: Apache-2.0
 
@@ -7,10 +7,11 @@ package appcamera
 
 import (
 	"fmt"
-	dtosCommon "github.com/edgexfoundry/go-mod-core-contracts/v2/dtos/common"
-	"github.com/gorilla/mux"
 	"net/http"
 	"path"
+
+	dtosCommon "github.com/edgexfoundry/go-mod-core-contracts/v2/dtos/common"
+	"github.com/gorilla/mux"
 
 	"github.com/edgexfoundry/go-mod-core-contracts/v2/common"
 	"github.com/pkg/errors"
@@ -18,23 +19,26 @@ import (
 
 const (
 	panTiltOffset = 0.05
-	zoomIn        = 1
-	zoomOut       = -1
+	zoomOffset    = 0.1
 
 	webUIDistDir = "./web-ui/dist"
 
 	getCamerasPath = common.ApiBase + "/cameras"
 	cameraApiBase  = getCamerasPath + "/{name}"
 
-	getProfilesPath      = cameraApiBase + "/profiles"
-	cameraProfileApiBase = getProfilesPath + "/{profile}"
-
 	getPipelinesPath        = common.ApiBase + "/pipelines"
 	allPipelineStatusesPath = getPipelinesPath + "/status/all"
 
 	startPipelinePath  = cameraApiBase + "/pipeline/start"
-	stopPipelinePath   = cameraApiBase + "/pipeline/stop"
+	stopPipelinePath   = cameraApiBase + "/pipeline/stop/{id}"
 	pipelineStatusPath = cameraApiBase + "/pipeline/status"
+
+	imageFormatsPath = cameraApiBase + "/imageformats"
+
+	getProfilesPath      = cameraApiBase + "/profiles"
+	cameraProfileApiBase = getProfilesPath + "/{profile}"
+
+	featuresPath = cameraApiBase + "/features"
 
 	ptzPath        = cameraProfileApiBase + "/ptz/{action}"
 	getPresetsPath = cameraProfileApiBase + "/presets"
@@ -88,6 +92,16 @@ func (app *CameraManagementApp) addRoutes() error {
 		return err
 	}
 
+	if err := app.addRoute(
+		featuresPath, http.MethodGet, app.getCameraFeaturesRoute); err != nil {
+		return err
+	}
+
+	if err := app.addRoute(
+		imageFormatsPath, http.MethodGet, app.getImageFormatsRoute); err != nil {
+		return err
+	}
+
 	app.fileServer = http.FileServer(http.Dir(webUIDistDir))
 	// this is a bit of a hack to get refreshing working, as the path is /home
 	if err := app.addRoute("/home", http.MethodGet, app.index); err != nil {
@@ -117,6 +131,20 @@ func (app *CameraManagementApp) serveWebUI(w http.ResponseWriter, req *http.Requ
 	app.fileServer.ServeHTTP(w, req)
 }
 
+func (app *CameraManagementApp) getCameraFeaturesRoute(w http.ResponseWriter, req *http.Request) {
+	rv := mux.Vars(req)
+	deviceName := rv["name"]
+
+	features, err := app.getCameraFeatures(deviceName)
+	if err != nil {
+		respondError(app.lc, w, http.StatusInternalServerError,
+			fmt.Sprintf("Failed to get camera features: %v", err))
+		return
+	}
+
+	respondJson(app.lc, w, features)
+}
+
 func (app *CameraManagementApp) getPresetsRoute(w http.ResponseWriter, req *http.Request) {
 	rv := mux.Vars(req)
 	deviceName := rv["name"]
@@ -130,6 +158,20 @@ func (app *CameraManagementApp) getPresetsRoute(w http.ResponseWriter, req *http
 	}
 
 	respondJson(app.lc, w, presets)
+}
+
+func (app *CameraManagementApp) getImageFormatsRoute(w http.ResponseWriter, req *http.Request) {
+	rv := mux.Vars(req)
+	deviceName := rv["name"]
+
+	formats, err := app.getImageFormats(deviceName)
+	if err != nil {
+		respondError(app.lc, w, http.StatusInternalServerError,
+			fmt.Sprintf("Failed to get image formats: %v", err))
+		return
+	}
+
+	respondJson(app.lc, w, formats)
 }
 
 func (app *CameraManagementApp) getProfilesRoute(w http.ResponseWriter, req *http.Request) {
@@ -147,7 +189,7 @@ func (app *CameraManagementApp) getProfilesRoute(w http.ResponseWriter, req *htt
 }
 
 func (app *CameraManagementApp) getCamerasRoute(w http.ResponseWriter, _ *http.Request) {
-	devices, err := app.getDevices()
+	devices, err := app.getAllDevices()
 	if err != nil {
 		respondError(app.lc, w, http.StatusInternalServerError,
 			fmt.Sprintf("Failed to get cameras list: %v", err))
@@ -181,7 +223,7 @@ func (app *CameraManagementApp) startPipelineRoute(w http.ResponseWriter, req *h
 		return
 	}
 
-	if err := app.startPipeline(deviceName, sr.ProfileToken, sr.PipelineName, sr.PipelineVersion); err != nil {
+	if err := app.startPipeline(deviceName, sr); err != nil {
 		respondError(app.lc, w, http.StatusInternalServerError, fmt.Sprintf("Failed to start pipeline: %v", err))
 		return
 	}
@@ -220,7 +262,28 @@ func (app *CameraManagementApp) allPipelineStatusesRoute(w http.ResponseWriter, 
 func (app *CameraManagementApp) stopPipelineRoute(w http.ResponseWriter, req *http.Request) {
 	rv := mux.Vars(req)
 	deviceName := rv["name"]
-	if err := app.stopPipeline(deviceName); err != nil {
+	id := rv["id"]
+
+	defer func() {
+		dev, err := app.getDeviceByName(deviceName)
+		if err != nil {
+			respondError(app.lc, w, http.StatusBadRequest,
+				fmt.Sprintf("failed to query device %s: %v", deviceName, err))
+			return
+		}
+
+		// if the device is a usb device, stop streaming after shutting off the pipeline
+		if dev.ServiceName == app.config.AppCustom.USBDeviceServiceName {
+			_, err := app.stopStreaming(deviceName)
+			if err != nil {
+				respondError(app.lc, w, http.StatusInternalServerError,
+					fmt.Sprintf("failed to stop streaming usb camera %s: %v", deviceName, err))
+				return
+			}
+		}
+	}()
+
+	if err := app.stopPipeline(deviceName, id); err != nil {
 		respondError(app.lc, w, http.StatusInternalServerError,
 			fmt.Sprintf("failed to stop pipeline: %v", err))
 		return
@@ -254,17 +317,19 @@ func (app *CameraManagementApp) ptzRoute(w http.ResponseWriter, req *http.Reques
 	var res dtosCommon.BaseResponse
 	var err error
 
-	panTiltRange, err := app.getPanTiltRange(deviceName)
+	ptzRange, err := app.getPTZRange(deviceName)
 	if err != nil {
 		respondError(app.lc, w, http.StatusInternalServerError,
 			fmt.Sprintf("Failed to get PTZ configuration for the device %s: %v", deviceName, err))
 		return
 	}
 
-	right := panTiltOffset * panTiltRange.XRange
+	right := panTiltOffset * ptzRange.XRange
 	left := -right
-	up := panTiltOffset * panTiltRange.YRange
+	up := panTiltOffset * ptzRange.YRange
 	down := -up
+	zoomIn := zoomOffset * ptzRange.ZRange
+	zoomOut := -zoomIn
 
 	switch action {
 	case "left":
@@ -306,23 +371,28 @@ func (app *CameraManagementApp) ptzRoute(w http.ResponseWriter, req *http.Reques
 	}
 }
 
-func (app *CameraManagementApp) getPanTiltRange(deviceName string) (PanTiltRange, error) {
-	app.panTiltMutex.Lock()
-	defer app.panTiltMutex.Unlock()
-	panTiltRange, exists := app.panTiltMap[deviceName]
+func (app *CameraManagementApp) getPTZRange(deviceName string) (PTZRange, error) {
+	app.ptzRangeMutex.Lock()
+	defer app.ptzRangeMutex.Unlock()
+	ptzRange, exists := app.ptzRangeMap[deviceName]
 	if !exists {
 		ptzConfigs, err := app.getPTZConfiguration(deviceName)
 		if err != nil {
-			return PanTiltRange{}, err
+			return PTZRange{}, err
 		}
 
 		xRange := ptzConfigs.PTZConfiguration[0].PanTiltLimits.Range.XRange.Max - ptzConfigs.PTZConfiguration[0].PanTiltLimits.Range.XRange.Min
 		yRange := ptzConfigs.PTZConfiguration[0].PanTiltLimits.Range.YRange.Max - ptzConfigs.PTZConfiguration[0].PanTiltLimits.Range.YRange.Min
-		panTiltRange = PanTiltRange{
+		var zRange float64
+		if ptzConfigs.PTZConfiguration[0].ZoomLimits != nil {
+			zRange = ptzConfigs.PTZConfiguration[0].ZoomLimits.Range.XRange.Max - ptzConfigs.PTZConfiguration[0].ZoomLimits.Range.XRange.Min
+		}
+		ptzRange = PTZRange{
 			XRange: xRange,
 			YRange: yRange,
+			ZRange: zRange,
 		}
-		app.panTiltMap[deviceName] = panTiltRange
+		app.ptzRangeMap[deviceName] = ptzRange
 	}
-	return panTiltRange, nil
+	return ptzRange, nil
 }

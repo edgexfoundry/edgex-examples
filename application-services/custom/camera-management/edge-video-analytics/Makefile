@@ -1,4 +1,4 @@
-# Copyright (C) 2022 Intel Corporation
+# Copyright (C) 2022-2023 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
 include ../make/base.mk
@@ -6,18 +6,19 @@ include ../make/base.mk
 .PHONY: run download-models install patch-pipelines sniff-events stop
 
 GITHUB_URL = https://github.com/intel/edge-video-analytics-microservice.git
-VERSION ?= v0.7.0
+VERSION ?= v0.7.2
 SRC = src_$(VERSION)
 MODELS_DIR = models
 PIPELINES_LINK = pipelines
 
-DOCKER_COMPOSE = docker-compose
+DOCKER_COMPOSE ?= docker compose
 COMPOSE_ARGS += -p edge-video-analytics
 
 $(SRC):
 	git clone --depth=1 --branch $(VERSION) $(GITHUB_URL) $@
 
 $(PIPELINES_LINK): $(SRC)
+	-rm -f $@
 	ln -sf $(SRC)/$@ $@
 
 $(MODELS_DIR):
@@ -26,6 +27,7 @@ $(MODELS_DIR):
 download-models: $(SRC) | $(MODELS_DIR)
 	chmod +x $(SRC)/tools/model_downloader/model_downloader.sh $(SRC)/docker/run.sh
 	$(SRC)/tools/model_downloader/model_downloader.sh --model-list $(SRC)/models_list/models.list.yml
+	$(SRC)/tools/model_downloader/model_downloader.sh --model-list models.list.extra.yml
 
 # patch pipeline to accept rtsp video
 patch-pipelines: $(PIPELINES_LINK)

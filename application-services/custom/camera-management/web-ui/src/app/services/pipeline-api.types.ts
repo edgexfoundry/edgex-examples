@@ -1,10 +1,10 @@
-// Copyright (C) 2022 Intel Corporation
+// Copyright (C) 2022-2023 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
 export interface PipelineStatus {
   avg_fps: number;
   elapsed_time: number;
-  id: number;
+  id: string;
   start_time: number;
   state: string;
 }
@@ -24,8 +24,8 @@ export interface PipelineInfo {
 
 export interface PipelineInfoStatus {
   camera: string;
-  info: PipelineInfo
-  status: PipelineStatus
+  info: PipelineInfo;
+  status: PipelineStatus;
 }
 
 export interface Pipeline {
@@ -35,14 +35,41 @@ export interface Pipeline {
   version: string;
 }
 
-export class StartPipelineRequest {
-  profile_token: string
-  pipeline_name: string
-  pipeline_version: string
+export interface OnvifConfig {
+  profile_token: string;
+}
 
-  constructor(profile_token: string, pipeline_name: string, pipeline_version: string) {
-    this.profile_token = profile_token;
-    this.pipeline_name = pipeline_name;
-    this.pipeline_version = pipeline_version;
+export interface USBConfig {
+  InputFps?: string;
+  InputImageSize?: string;
+  InputPixelFormat?: string;
+  OutputFrames?: string;
+  OutputFps?: string;
+  OutputImageSize?: string;
+  OutputAspect?: string;
+  OutputVideoCodec?: string;
+  OutputVideoQuality?: string;
+}
+
+export class StartPipelineRequest {
+  onvif?: OnvifConfig;
+  usb?: USBConfig;
+  pipeline_name: string;
+  pipeline_version: string;
+
+  static forUSB(pipeline_name: string, pipeline_version: string, usb: USBConfig): StartPipelineRequest {
+    const req = new StartPipelineRequest();
+    req.usb = usb;
+    req.pipeline_name = pipeline_name;
+    req.pipeline_version = pipeline_version;
+    return req;
+  }
+
+  static forOnvif(pipeline_name: string, pipeline_version: string, onvif: OnvifConfig): StartPipelineRequest {
+    const req = new StartPipelineRequest();
+    req.onvif = onvif;
+    req.pipeline_name = pipeline_name;
+    req.pipeline_version = pipeline_version;
+    return req;
   }
 }
