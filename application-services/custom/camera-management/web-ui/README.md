@@ -196,7 +196,7 @@ You can generate the following schematics:
 - service-worker
 - web-worker
 
-_**Note:** Do not include the suffix (`Component`, `Service`, etc). They are added for you_
+_**Note**: Do not include the suffix (`Component`, `Service`, etc). They are added for you_
 
 ## Testing
 
@@ -208,7 +208,7 @@ Run `make e2e` to execute the end-to-end tests via [Protractor](http://www.protr
 
 Run `make view-coverage` to view static code coverage HTML output. Alternatively, open [coverage/report-html/index.html](coverage/report-html/index.html) with your browser.
 
-**Note:** In order for the code coverage to be accurate, you must first _refresh_ the Karma unit test service at [http://127.0.0.1:9876](http://127.0.0.1:9876). 
+**Note**: In order for the code coverage to be accurate, you must first _refresh_ the Karma unit test service at [http://127.0.0.1:9876](http://127.0.0.1:9876). 
 It will then produce the HTML code coverage output for you to view in your browser as an HTML file.
 
 ## Native Tooling
