@@ -24,7 +24,7 @@ To enable running Docker commands without the preface of sudo, add the user to t
    ```bash
    sudo groupadd docker
    ```
-   > **Note:** If the group already exists, `groupadd` outputs a message: **groupadd: group `docker` already exists**. This is OK.
+   > **Note**: If the group already exists, `groupadd` outputs a message: **groupadd: group `docker` already exists**. This is OK.
 
 2. Add User to group:
    ```bash
@@ -82,7 +82,7 @@ sudo apt install build-essential
    ```
 
 3. Checkout the latest compatible release branch
-   > **Note:** The `levski` branch is the latest stable branch at the time of this writing.
+   > **Note**: The `levski` branch is the latest stable branch at the time of this writing.
    ```shell
    git checkout levski
    ```
@@ -94,7 +94,7 @@ sudo apt install build-essential
    ```
 
 5. (Optional) Update the `add-device-usb-camera.yml` file:
-   > **Note:** This step is only required if you plan on using USB cameras.
+   > **Note**: This step is only required if you plan on using USB cameras.
 
    a. Add the rtsp server hostname environment variable to the `device-usb-camera` service, 
       where `your-local-ip-address` is the ip address of the machine running the `device-usb-camera` service.
@@ -109,7 +109,7 @@ sudo apt install build-essential
 
 6. Run the following `make` command to run the edgex core services along with the Onvif and Usb device services. 
 
-  > **Note:** The `ds-onvif-camera` parameter can be omitted if no Onvif cameras are present, or the `ds-usb-camera` parameter can be omitted if no usb cameras are present.
+  > **Note**: The `ds-onvif-camera` parameter can be omitted if no Onvif cameras are present, or the `ds-usb-camera` parameter can be omitted if no usb cameras are present.
 ```shell
    make run no-secty ds-onvif-camera ds-usb-camera 
 ```   
@@ -117,7 +117,7 @@ sudo apt install build-essential
 
 ### 2. Start [Edge Video Analytics Microservice][evam] running for inference.
 
-> **Note:** The port for EVAM result streams has been changed from 8554 to 8555 to avoid conflicts with the device-usb-camera service.
+> **Note**: The port for EVAM result streams has been changed from 8554 to 8555 to avoid conflicts with the device-usb-camera service.
 
 ```shell
 # Go back to the root of this example app
@@ -133,14 +133,16 @@ make run-edge-video-analytics
 # Leave this running
 ```
 
-> **Note:** If you press `Ctrl-C` it will stop the EVAM services. If you then run `make stop-edge-video-analytics`,
+> **Note**: If you press `Ctrl-C` it will stop the EVAM services. If you then run `make stop-edge-video-analytics`,
 > it will also remove the containers and free up the port mappings.
 
 ### 3. Build and run the example application service
 
 #### 3.1 (Optional) Configure Onvif Camera Credentials.
-   > **Note:** This step is only required if you have Onvif cameras. Currently, this example app is limited to supporting
+   > **Note**: This step is only required if you have Onvif cameras. Currently, this example app is limited to supporting
    > only 1 username/password combination for all Onvif cameras.
+
+   > **Note:** Please follow the instructions for the [Edgex Onvif Camera device service][device-onvif-camera] in order to connect your Onvif cameras to EdgeX.
 
    Option 1: Modify the [res/configuration.toml](res/configuration.toml) file
 
@@ -172,16 +174,91 @@ make build-app
 make run-app
 ```
 
-Open your browser to [http://localhost:59750](http://localhost:59750) to view the Web-UI.  
-The Web UI can be used to:
-- List USB and Onvif cameras
-- Control PTZ cameras
-- Select inference models and start inference pipelines
-- View inference results from MQTT
+## Using the App
 
-### Additional Development
+1. Visit https://localhost:59750 to access the app.
 
-> **Note:** The following steps are only useful for developers who wish to make modifications to the code
+![homepage](./images/homepage-demo-app-1.png)  
+<p align="left">
+<i>Figure 1: Homepage for the Camera Management app</i>
+</p>
+
+### Camera Position
+
+You can control the position of supported cameras using ptz commands.
+
+![camera-position](./images/camera-position.png)  
+
+1. Use the arrows to control the direction of the camera movement.
+1. Use the magnifying glass icons to control the camera zoom.
+
+### Start an Edge Video Analytics Pipeline
+
+This section outlines how to start an analytics pipeline for inferencing on a specific camera stream.
+
+![camera](./images/camera.png)  
+
+1. Select a camera out of the drop down list of connected cameras.  
+   ![select-camera](./images/select-camera.png)  
+
+1. Select a video stream out of the drop down list of connected cameras.  
+   ![select-profile](./images/select-profile.png)  
+
+1. Select a analytics pipeline out of the drop down list of connected cameras.  
+   ![select-pipeline](./images/select-pipeline.png)  
+
+1. Click the `Start Pipeline` button.
+
+
+### Running Pipelines
+
+Once the pipeline is running, you can view the pipeline and its status.
+
+![default pipelines state](./images/multiple-pipelines-default.png)  
+
+1. Expand a pipeline to see its status. This includes important information aush as elapsed time, latency, frames per second, and elapsed time.  
+   ![select-camera](./images/running-pipelines.png)  
+
+1. In the terminal where you started the app, once the pipeline is started, this log message will pop up.
+    ```bash
+    level=INFO ts=2022-07-11T22:26:11.581149638Z app=app-camera-management source=evam.go:115 msg="View inference results at 'rtsp://<SYSTEM_IP_ADDRESS>:8555/<device name>'"
+    ```
+
+1. Use the URI from the log to view the camera footage with analytics overlayed.
+    ```bash
+    ffplay 'rtsp://<SYSTEM_IP_ADDRESS>:8555/<device name>'
+    ```
+
+   Example Output:  
+   ![example analytics](./images/example-analytics.png)  
+
+1. Press the red square stop button to shut down the pipeline.
+
+
+### API Log
+
+The API log shows the status of the 5 most recent calls and commands that the management has made. This includes important information from the responses, including camera information or error messages.
+
+![API Logs](./images/api-log.png)  
+
+1. Expand a log item to see the response
+
+   Good response:
+   ![good api response](./images/good-response.png)  
+   Bad response:
+   ![bad api response](./images/bad-response.png)  
+
+### Inference Events
+
+![inference events default](./images/inference-events-default.png)  
+
+1. To view the inference events in a json format, click the `Stream Events` button.
+
+![inference events](./images/inference-events.png)  
+
+## Additional Development
+
+> **Warning**: The following steps are only useful for developers who wish to make modifications to the code
 > and the Web-UI.
 
 #### Development and Testing of UI
