@@ -10,7 +10,7 @@ metadata:
   name: {{.Values.edgex.app.device.bacnet}}
 spec:
   ports:
-  - name: "device-bacnet-http"
+  - name: "http"
     port: {{.Values.edgex.port.device.bacnet}}
   selector:
     org.edgexfoundry.service: {{.Values.edgex.app.device.bacnet}}

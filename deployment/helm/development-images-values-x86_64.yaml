@@ -1,0 +1,146 @@
+edgex:
+  image:
+    core:
+      common_config:
+        repository: nexus3.edgexfoundry.org:10004/core-common-config-bootstrapper
+        tag: latest
+        pullPolicy: Always
+      command:
+        repository: nexus3.edgexfoundry.org:10004/core-command
+        tag: latest
+        pullPolicy: Always
+      data:
+        repository: nexus3.edgexfoundry.org:10004/core-data
+        tag: latest
+        pullPolicy: Always
+      metadata:
+        repository: nexus3.edgexfoundry.org:10004/core-metadata
+        tag: latest
+        pullPolicy: Always
+    support:
+      notifications:
+        repository: nexus3.edgexfoundry.org:10004/support-notifications
+        tag: latest
+        pullPolicy: Always
+      scheduler:
+        repository: nexus3.edgexfoundry.org:10004/support-scheduler
+        tag: latest
+        pullPolicy: Always
+    appservice:
+      rules:
+        repository: nexus3.edgexfoundry.org:10004/app-service-configurable
+        tag: latest
+        pullPolicy: Always
+      appsample:
+        repository: nexus3.edgexfoundry.org:10004/app-service-configurable
+        tag: latest
+        pullPolicy: Always
+      metricsinfluxdb:
+        repository: nexus3.edgexfoundry.org:10004/app-service-configurable
+        tag: latest
+        pullPolicy: Always
+      rfidllrpinventory:
+        repository: nexus3.edgexfoundry.org:10004/app-rfid-llrp-inventory
+        tag: latest
+        pullPolicy: Always
+      mqttexport:
+        repository: nexus3.edgexfoundry.org:10004/app-service-configurable
+        tag: latest
+        pullPolicy: Always
+      httpexport:
+        repository: nexus3.edgexfoundry.org:10004/app-service-configurable
+        tag: latest
+        pullPolicy: Always
+      externalmqtttrigger:
+        repository: nexus3.edgexfoundry.org:10004/app-service-configurable
+        tag: latest
+        pullPolicy: Always
+    device:
+      virtual:
+        repository: nexus3.edgexfoundry.org:10004/device-virtual
+        tag: latest
+        pullPolicy: Always
+      rest:
+        repository: nexus3.edgexfoundry.org:10004/device-rest
+        tag: latest
+        pullPolicy: Always
+      onvifcamera:
+        repository: nexus3.edgexfoundry.org:10004/device-onvif-camera
+        tag: latest
+        pullPolicy: Always
+      usbcamera:
+        repository: nexus3.edgexfoundry.org:10004/device-usb-camera
+        tag: latest
+        pullPolicy: Always
+      mqtt:
+        repository: nexus3.edgexfoundry.org:10004/device-mqtt
+        tag: latest
+        pullPolicy: Always
+      modbus:
+        repository: nexus3.edgexfoundry.org:10004/device-modbus
+        tag: latest
+        pullPolicy: Always
+      bacnet:
+        repository: nexus3.edgexfoundry.org:10004/device-bacnet
+        tag: latest
+        pullPolicy: Always
+      coap:
+        repository: nexus3.edgexfoundry.org:10004/device-coap
+        tag: latest
+        pullPolicy: Always
+      snmp:
+        repository: nexus3.edgexfoundry.org:10004/device-snmp
+        tag: latest
+        pullPolicy: Always
+      rfidllrp:
+        repository: nexus3.edgexfoundry.org:10004/device-rfid-llrp
+        tag: latest
+        pullPolicy: Always
+      gpio:
+        repository: nexus3.edgexfoundry.org:10004/device-gpio
+        tag: latest
+        pullPolicy: Always
+    ui:
+      repository: nexus3.edgexfoundry.org:10004/edgex-ui
+      tag: latest
+      pullPolicy: Always
+    consul:
+      repository: hashicorp/consul
+      tag: "1.15"
+      pullPolicy: Always
+    redis:
+      repository: redis
+      tag: "7.0-alpine"
+      pullPolicy: Always
+    ekuiper:
+      repository: lfedge/ekuiper
+      tag: "1.7-alpine"
+      pullPolicy: Always
+    vault:
+      repository: hashicorp/vault
+      tag: "1.13"
+      pullPolicy: Always
+    bootstrapper:
+      repository: nexus3.edgexfoundry.org:10004/security-bootstrapper
+      tag: latest
+      pullPolicy: Always
+    proxysetup:
+      repository: nexus3.edgexfoundry.org:10004/security-proxy-setup
+      tag: "latest"
+      pullPolicy: Always
+    secretstoresetup:
+      repository: nexus3.edgexfoundry.org:10004/security-secretstore-setup
+      tag: latest
+      pullPolicy: Always
+    modbussimulator:
+      repository: nexus3.edgexfoundry.org:10003/edgex-devops/edgex-modbus-simulator
+      tag: "latest"
+      pullPolicy: Always
+    mqttbroker:
+      repository: eclipse-mosquitto
+      tag: "2.0"
+      pullPolicy: Always
+    natsserver:
+      repository: nats
+      tag: "2.9-alpine"
+      pullPolicy: Always

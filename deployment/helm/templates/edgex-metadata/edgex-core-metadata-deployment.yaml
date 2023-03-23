@@ -29,6 +29,12 @@ spec:
                   org.edgexfoundry.service: {{ .Values.edgex.app.secretstoresetup}}
               topologyKey: "kubernetes.io/hostname"
     {{- end}}
+    {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- range .Values.imagePullSecrets }}
+      - name: {{ . }}
+      {{- end }}
+    {{- end }}
       automountServiceAccountToken: false
       containers:
       - name: {{.Values.edgex.app.core.metadata}}
@@ -36,7 +42,7 @@ spec:
         imagePullPolicy: {{.Values.edgex.image.core.metadata.pullPolicy}}
       {{- if .Values.edgex.security.enabled }}
         command: ["/edgex-init/ready_to_run_wait_install.sh"]
-        args: ["/core-metadata", "-cp=consul.http://edgex-core-consul:8500", "--registry", "--confdir=/res"]
+        args: ["/core-metadata", "-cp=consul.http://edgex-core-consul:8500", "--registry"]
       {{- end}}
         ports:
         - containerPort: {{.Values.edgex.port.core.metadata}}
@@ -53,34 +59,18 @@ spec:
         env:
         - name: SERVICE_HOST
           value: {{.Values.edgex.app.core.metadata}}
-        - name: NOTIFICATIONS_SENDER
-          value: {{.Values.edgex.app.core.metadata}}
-        {{- if (eq .Values.edgex.features.messagebusbackend "nats") }}
-        - name: MESSAGEQUEUE_AUTHMODE
-          value: none
-        - name: MESSAGEQUEUE_HOST
-          value: edgex-nats-server
-        - name: MESSAGEQUEUE_OPTIONAL_CLIENTID
-          value: core-metadata
-        - name: MESSAGEQUEUE_PORT
-          value: '4222'
-        - name: MESSAGEQUEUE_PROTOCOL
-          value: tcp
-        - name: MESSAGEQUEUE_TYPE
-          value: nats-jetstream
-        {{end}}
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
         startupProbe:
           httpGet:
-            path: /api/v2/ping
+            path: /api/v3/ping
             port: {{.Values.edgex.port.core.metadata}}
           periodSeconds: 1
           failureThreshold: 120
         livenessProbe:
           httpGet:
-            path: /api/v2/ping
+            path: /api/v3/ping
             port: {{.Values.edgex.port.core.metadata}}
       {{- if .Values.edgex.security.enabled }}
         volumeMounts:

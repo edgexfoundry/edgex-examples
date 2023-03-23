@@ -13,8 +13,8 @@ openssl req -x509 -new -key server-ca.key -subj "/CN=ServerCA" -sha384 -out serv
 # server (leaf, needed for nginx)
 
 openssl ecparam -genkey -name secp384r1 -noout -out server.key
-openssl req -subj "/CN=edgex" -config openssl.conf -key server.key -sha384 -new -out server.req
-openssl x509 -sha384 -extfile openssl.conf -extensions server_ext -CA server-ca.pem -CAkey server-ca.key -CAcreateserial -req -in server.req -days 365 -out server.pem
+openssl req -subj "/CN=edgex" -addext "subjectAltName = DNS:edgex" -config openssl.conf -key server.key -sha384 -new -out server.req
+openssl x509 -sha384 -extfile openssl.conf -extensions server_ext -extensions edgex_san -CA server-ca.pem -CAkey server-ca.key -CAcreateserial -req -in server.req -days 365 -out server.pem
 
 # client (CA, needed for ngnix mutual auth)
 

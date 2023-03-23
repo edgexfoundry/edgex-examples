@@ -10,7 +10,7 @@ metadata:
   name: {{.Values.edgex.app.consul}}
 spec:
   ports:
-  - name: "consul-http"
+  - name: "http"
     port: {{.Values.edgex.port.consul}}
   {{- if .Values.edgex.security.enabled }}
   - name: "ready"
