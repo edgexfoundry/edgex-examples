@@ -29,6 +29,6 @@ services:
 
   mqtt-broker:
     volumes:
-    - /home/preethi/go/src/github.com/edgexfoundry/edgex-compose/compose-builder/evam-mqtt-edgex/mosquitto.conf:/mosquitto-no-auth.conf:ro
+    - <add-full-path-of-your-edgex-compose-builder-here>/evam-mqtt-edgex/mosquitto.conf:/mosquitto-no-auth.conf:ro
     ports:
     - "59001:9001"
