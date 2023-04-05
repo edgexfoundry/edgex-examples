@@ -1,0 +1,18 @@
+# Copyright (C) 2023 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+name: "edge-video-analytics-profile"
+manufacturer: "Intel"
+model: "EVAM"
+description: "Profile for EVAM (Edge Video Analytics Microservice) Inference Events"
+labels:
+  - "cv"
+  - "evam"
+  - "edge-video-analytics"
+deviceResources:
+  - name: "inference-event"
+    isHidden: true # resource is only async
+    description: "A json message containing the inference event"
+    properties:
+      valueType: "String"
+      readWrite: "R"

@@ -22,8 +22,8 @@ LogLevel = "INFO"
     [Writable.InsecureSecrets.CameraCredentials]
     path = "CameraCredentials"
       [Writable.InsecureSecrets.CameraCredentials.Secrets]
-      username = ""
-      password = ""
+      username = "admin007"
+      password = "admin007"
 
   [Writable.Telemetry]
   Interval = "30s"
@@ -109,5 +109,5 @@ Type="http"
 OnvifDeviceServiceName = "device-onvif-camera"
 USBDeviceServiceName = "device-usb-camera"
 EvamBaseUrl = "http://localhost:8080"
-MqttAddress = "broker:1883"
+MqttAddress = "edgex-mqtt-broker:1883"
 MqttTopic = "incoming/data/edge-video-analytics/inference-event"
