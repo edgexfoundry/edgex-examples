@@ -22,8 +22,8 @@ LogLevel = "INFO"
     [Writable.InsecureSecrets.CameraCredentials]
     path = "CameraCredentials"
       [Writable.InsecureSecrets.CameraCredentials.Secrets]
-      username = "admin007"
-      password = "admin007"
+      username = ""
+      password = ""
 
   [Writable.Telemetry]
   Interval = "30s"
