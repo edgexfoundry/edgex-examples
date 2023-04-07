@@ -1,8 +1,8 @@
 # Camera Management Example App Service
 Use the Camera Management Example application service to auto discover and connect to nearby ONVIF and USB based cameras. This application will also control cameras via commands, create inference pipelines for the camera video streams and publish inference results to MQTT broker.
 
-This app uses [EdgeX compose][edgex-compose], [Edgex Onvif Camera device service][device-onvif-camera], [Edgex USB Camera device service][device-usb-camera],
-[Edgex MQTT device service][device-mqtt] and [Edge Video Analytics Microservice][evam].
+This app uses [EdgeX compose][edgex-compose], [Edgex Onvif Camera device service][device-onvif-camera], 
+[Edgex USB Camera device service][device-usb-camera], [Edgex MQTT device service][device-mqtt] and [Edge Video Analytics Microservice][evam].
 
 A brief video demonstration of building and using the example app service can be found [here](https://www.youtube.com/watch?v=vZqd3j2Zn2Y).
 
@@ -108,7 +108,7 @@ sudo apt install build-essential
 
    b. Under the `ports` section, find the entry for port 8554 and change the host_ip from `127.0.0.1` to either `0.0.0.0` or the ip address you put in the previous step.
 
-6. Run the following `make` command to generate the edgex core services along with the MQTT, Onvif and Usb device services. 
+6. Run the following `make` command to generate the edgex core services along with MQTT, Onvif and Usb device services. 
 
   > **Note**: The `ds-onvif-camera` parameter can be omitted if no Onvif cameras are present, or the `ds-usb-camera` parameter can be omitted if no usb cameras are present.
 ```shell
