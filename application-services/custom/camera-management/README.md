@@ -120,8 +120,7 @@ sudo apt install build-essential
       a. Copy complete [evam-mqtt-edgex](edge-video-analytics/evam-mqtt-edgex) folder into edgex-compose/compose-builder directory.
 
       b. Copy and paste [docker-compose.override.yml](edge-video-analytics/evam-mqtt-edgex/docker-compose.override.yml) from the above copied folder into edgex-compose/compose-builder directory.
-
-      c. Insert full path of `edgex-compose/compose-builder` directory under volumes in `docker-compose.override.yml`.
+         Insert full path of `edgex-compose/compose-builder` directory under volumes in this `docker-compose.override.yml`.
 
 
 8. Run the following command to start all the Edgex services.
