@@ -1,7 +1,8 @@
 # Camera Management Example App Service
 Use the Camera Management Example application service to auto discover and connect to nearby ONVIF and USB based cameras. This application will also control cameras via commands, create inference pipelines for the camera video streams and publish inference results to MQTT broker.
 
-This app uses [EdgeX compose][edgex-compose], [Edgex Onvif Camera device service][device-onvif-camera], [Edgex USB Camera device service][device-usb-camera] and [Edge Video Analytics Microservice][evam].
+This app uses [EdgeX compose][edgex-compose], [Edgex Onvif Camera device service][device-onvif-camera], [Edgex USB Camera device service][device-usb-camera],
+[Edgex MQTT device service][device-mqtt] and [Edge Video Analytics Microservice][evam].
 
 A brief video demonstration of building and using the example app service can be found [here](https://www.youtube.com/watch?v=vZqd3j2Zn2Y).
 
@@ -107,13 +108,24 @@ sudo apt install build-essential
 
    b. Under the `ports` section, find the entry for port 8554 and change the host_ip from `127.0.0.1` to either `0.0.0.0` or the ip address you put in the previous step.
 
-6. Run the following `make` command to run the edgex core services along with the Onvif and Usb device services. 
+6. Run the following `make` command to generate the edgex core services along with the MQTT, Onvif and Usb device services. 
 
   > **Note**: The `ds-onvif-camera` parameter can be omitted if no Onvif cameras are present, or the `ds-usb-camera` parameter can be omitted if no usb cameras are present.
 ```shell
-   make run no-secty ds-onvif-camera ds-usb-camera 
+   make gen no-secty ds-mqtt mqtt-broker ds-onvif-camera ds-usb-camera 
 ```   
 
+7. Configure [device-mqtt] service to send [Edge Video Analytics Microservice][evam] inference results into Edgex via MQTT
+
+      a. Copy [evam-mqtt-edgex](edge-video-analytics/evam-mqtt-edgex) folder into edgex-compose/compose-builder.
+
+      b. Insert full path of `edgex-compose/compose-builder` under volumes in `docker-compose.override.yml` located in the folder.
+
+
+8. Run the following command to start all the Edgex services.
+```shell
+   docker compose -f docker-compose.yml -f docker-compose.override.yml up -d
+```  
 
 ### 2. Start [Edge Video Analytics Microservice][evam] running for inference.
 
@@ -256,6 +268,16 @@ The API log shows the status of the 5 most recent calls and commands that the ma
 
 ![inference events](./images/inference-events.png)  
 
+### Inference results in Edgex
+
+To view inference results in Edgex, open Edgex UI [http://localhost:4000](http://localhost:4000) and view data streaming
+under `Event Data Stream` located under `DataCenter` tab.
+
+![inference events](./images/inference-edgex.png)
+
+### Next steps
+A custom app service can be used to analyze this inference data and take action based on the analysis.
+
 ## Additional Development
 
 > **Warning**: The following steps are only useful for developers who wish to make modifications to the code
@@ -283,3 +305,4 @@ Open your browser to [http://localhost:4200](http://localhost:4200)
 [device-onvif-camera]: https://github.com/edgexfoundry/device-onvif-camera
 [device-usb-camera]: https://github.com/edgexfoundry/device-usb-camera
 [evam]: https://www.intel.com/content/www/us/en/developer/articles/technical/video-analytics-service.html
+[device-mqtt]: https://github.com/edgexfoundry/device-mqtt-go
