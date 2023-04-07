@@ -108,7 +108,7 @@ sudo apt install build-essential
 
    b. Under the `ports` section, find the entry for port 8554 and change the host_ip from `127.0.0.1` to either `0.0.0.0` or the ip address you put in the previous step.
 
-6. Run the following `make` command to generate the edgex core services along with MQTT, Onvif and Usb device services. 
+6. Run the following `make` command to generate the edgex core services along with MQTT, Onvif and Usb device services.
 
   > **Note**: The `ds-onvif-camera` parameter can be omitted if no Onvif cameras are present, or the `ds-usb-camera` parameter can be omitted if no usb cameras are present.
 ```shell
@@ -117,9 +117,11 @@ sudo apt install build-essential
 
 7. Configure [device-mqtt] service to send [Edge Video Analytics Microservice][evam] inference results into Edgex via MQTT
 
-      a. Copy [evam-mqtt-edgex](edge-video-analytics/evam-mqtt-edgex) folder into edgex-compose/compose-builder.
+      a. Copy complete [evam-mqtt-edgex](edge-video-analytics/evam-mqtt-edgex) folder into edgex-compose/compose-builder directory.
 
-      b. Insert full path of `edgex-compose/compose-builder` under volumes in `docker-compose.override.yml` located in the folder.
+      b. Copy and paste [docker-compose.override.yml](edge-video-analytics/evam-mqtt-edgex/docker-compose.override.yml) from the above copied folder into edgex-compose/compose-builder directory.
+
+      c. Insert full path of `edgex-compose/compose-builder` directory under volumes in `docker-compose.override.yml`.
 
 
 8. Run the following command to start all the Edgex services.
@@ -154,7 +156,7 @@ make run-edge-video-analytics
    > **Note**: This step is only required if you have Onvif cameras. Currently, this example app is limited to supporting
    > only 1 username/password combination for all Onvif cameras.
 
-   > **Note:** Please follow the instructions for the [Edgex Onvif Camera device service][device-onvif-camera] in order to connect your Onvif cameras to EdgeX.
+   > **Note:** Please follow the instructions for the [Edgex Onvif Camera device service][device-onvif-manage] in order to connect your Onvif cameras to EdgeX.
 
    Option 1: Modify the [res/configuration.toml](res/configuration.toml) file
 
@@ -303,6 +305,7 @@ Open your browser to [http://localhost:4200](http://localhost:4200)
 
 [edgex-compose]: https://github.com/edgexfoundry/edgex-compose
 [device-onvif-camera]: https://github.com/edgexfoundry/device-onvif-camera
+[device-onvif-manage]: https://github.com/edgexfoundry/device-onvif-camera/blob/main/doc/guides/SimpleStartupGuide.md#manage-devices
 [device-usb-camera]: https://github.com/edgexfoundry/device-usb-camera
 [evam]: https://www.intel.com/content/www/us/en/developer/articles/technical/video-analytics-service.html
 [device-mqtt]: https://github.com/edgexfoundry/device-mqtt-go
