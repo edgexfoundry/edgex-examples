@@ -29,6 +29,7 @@ services:
 
   mqtt-broker:
     volumes:
+      # example: - /home/github.com/edgexfoundry/edgex-compose/compose-builder/evam-mqtt-edgex:/evam-mqtt-edgex
     - <add-full-path-of-your-edgex-compose-builder-here>/evam-mqtt-edgex/mosquitto.conf:/mosquitto-no-auth.conf:ro
     ports:
     - "59001:9001"
