@@ -117,7 +117,7 @@ sudo apt install build-essential
 
 7. Configure [device-mqtt] service to send [Edge Video Analytics Microservice][evam] inference results into Edgex via MQTT
 
-      a. Copy complete [evam-mqtt-edgex](edge-video-analytics/evam-mqtt-edgex) folder into edgex-compose/compose-builder directory.
+      a. Copy the entire [evam-mqtt-edgex](edge-video-analytics/evam-mqtt-edgex) folder into `edgex-compose/compose-builder` directory.
 
       b. Copy and paste [docker-compose.override.yml](edge-video-analytics/evam-mqtt-edgex/docker-compose.override.yml) from the above copied folder into edgex-compose/compose-builder directory.
          Insert full path of `edgex-compose/compose-builder` directory under volumes in this `docker-compose.override.yml`.
@@ -155,7 +155,7 @@ make run-edge-video-analytics
    > **Note**: This step is only required if you have Onvif cameras. Currently, this example app is limited to supporting
    > only 1 username/password combination for all Onvif cameras.
 
-   > **Note:** Please follow the instructions for the [Edgex Onvif Camera device service][device-onvif-manage] in order to connect your Onvif cameras to EdgeX.
+   > **Note**: Please follow the instructions for the [Edgex Onvif Camera device service][device-onvif-manage] in order to connect your Onvif cameras to EdgeX.
 
    Option 1: Modify the [res/configuration.toml](res/configuration.toml) file
 
@@ -271,8 +271,8 @@ The API log shows the status of the 5 most recent calls and commands that the ma
 
 ### Inference results in Edgex
 
-To view inference results in Edgex, open Edgex UI [http://localhost:4000](http://localhost:4000) and view data streaming
-under `Event Data Stream` located under `DataCenter` tab.
+To view inference results in Edgex, open Edgex UI [http://localhost:4000](http://localhost:4000), click on the `DataCenter`
+tab and view data streaming under `Event Data Stream`by clicking on the `Start` button.
 
 ![inference events](./images/inference-edgex.png)
 
@@ -304,7 +304,7 @@ Open your browser to [http://localhost:4200](http://localhost:4200)
 
 [edgex-compose]: https://github.com/edgexfoundry/edgex-compose
 [device-onvif-camera]: https://github.com/edgexfoundry/device-onvif-camera
-[device-onvif-manage]: https://github.com/edgexfoundry/device-onvif-camera/blob/main/doc/guides/SimpleStartupGuide.md#manage-devices
+[device-onvif-manage]: https://github.com/edgexfoundry/device-onvif-camera/blob/levski/doc/guides/SimpleStartupGuide.md#manage-devices
 [device-usb-camera]: https://github.com/edgexfoundry/device-usb-camera
 [evam]: https://www.intel.com/content/www/us/en/developer/articles/technical/video-analytics-service.html
 [device-mqtt]: https://github.com/edgexfoundry/device-mqtt-go
