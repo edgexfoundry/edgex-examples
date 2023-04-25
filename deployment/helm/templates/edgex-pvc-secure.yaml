@@ -2,10 +2,27 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
+{{- if .Values.edgex.security.enabled }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: consul-config
+  name: edgex-init
+spec:
+  {{- if (eq .Values.edgex.storage.useHostPath true)}}
+  storageClassName: ""
+  {{- else }}
+  storageClassName: "{{.Values.edgex.storage.sharedVolumesClassName}}"
+  {{- end }}
+  accessModes:
+    - {{.Values.edgex.storage.sharedVolumesAccessMode}}
+  resources:
+    requests:
+      storage: 128Mi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vault-config
 spec:
   {{- if (eq .Values.edgex.storage.useHostPath true)}}
   storageClassName: ""
@@ -21,7 +38,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: consul-data
+  name: vault-file
 spec:
   {{- if (eq .Values.edgex.storage.useHostPath true)}}
   storageClassName: ""
@@ -37,23 +54,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: db-data
-spec:
-  {{- if (eq .Values.edgex.storage.useHostPath true)}}
-  storageClassName: ""
-  {{- else }}
-  storageClassName: "{{.Values.edgex.storage.nonSharedVolumesClassName}}"
-  {{- end }}
-  accessModes:
-    - {{.Values.edgex.storage.nonSharedVolumesAccessMode}}
-  resources:
-    requests:
-      storage: 512Mi
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: kuiper-data
+  name: vault-logs
 spec:
   {{- if (eq .Values.edgex.storage.useHostPath true)}}
   storageClassName: ""
@@ -69,7 +70,39 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: kuiper-etc
+  name: edgex-secrets
+spec:
+  {{- if (eq .Values.edgex.storage.useHostPath true)}}
+  storageClassName: ""
+  {{- else }}
+  storageClassName: "{{.Values.edgex.storage.sharedVolumesClassName}}"
+  {{- end }}
+  accessModes:
+    - {{.Values.edgex.storage.sharedVolumesAccessMode}}
+  resources:
+    requests:
+      storage: 8Mi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: consul-acl-token
+spec:
+  {{- if (eq .Values.edgex.storage.useHostPath true)}}
+  storageClassName: ""
+  {{- else }}
+  storageClassName: "{{.Values.edgex.storage.sharedVolumesClassName}}"
+  {{- end }}
+  accessModes:
+    - {{.Values.edgex.storage.sharedVolumesAccessMode}}
+  resources:
+    requests:
+      storage: 8Mi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: redis-config
 spec:
   {{- if (eq .Values.edgex.storage.useHostPath true)}}
   storageClassName: ""
@@ -85,40 +118,40 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: kuiper-log
+  name: kuiper-sources
 spec:
   {{- if (eq .Values.edgex.storage.useHostPath true)}}
   storageClassName: ""
   {{- else }}
-  storageClassName: "{{.Values.edgex.storage.nonSharedVolumesClassName}}"
+  storageClassName: "{{.Values.edgex.storage.sharedVolumesClassName}}"
   {{- end }}
   accessModes:
-    - {{.Values.edgex.storage.nonSharedVolumesAccessMode}}
+    - {{.Values.edgex.storage.sharedVolumesAccessMode}}
   resources:
     requests:
-      storage: 128Mi
+      storage: 8Mi
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: kuiper-plugins
+  name: kuiper-connections
 spec:
   {{- if (eq .Values.edgex.storage.useHostPath true)}}
   storageClassName: ""
   {{- else }}
-  storageClassName: "{{.Values.edgex.storage.nonSharedVolumesClassName}}"
+  storageClassName: "{{.Values.edgex.storage.sharedVolumesClassName}}"
   {{- end }}
   accessModes:
-    - {{.Values.edgex.storage.nonSharedVolumesAccessMode}}
+    - {{.Values.edgex.storage.sharedVolumesAccessMode}}
   resources:
     requests:
-      storage: 128Mi
-{{- if (gt (.Values.edgex.replicas.natsserver | int) 0) }}
+      storage: 8Mi
+{{- if (gt (.Values.edgex.replicas.mqttbroker | int) 0) }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: nats-data
+  name: mqtt
 spec:
   {{- if (eq .Values.edgex.storage.useHostPath true)}}
   storageClassName: ""
@@ -129,23 +162,6 @@ spec:
     - {{.Values.edgex.storage.nonSharedVolumesAccessMode}}
   resources:
     requests:
-      storage: 128Mi
+      storage: 8Mi
 {{- end }}
-{{- if (gt (.Values.edgex.replicas.appservice.rfidllrpinventory | int) 0) }}
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: llrp-inventory-data
-spec:
-  {{- if (eq .Values.edgex.storage.useHostPath true)}}
-  storageClassName: ""
-  {{- else }}
-  storageClassName: "{{.Values.edgex.storage.nonSharedVolumesClassName}}"
-  {{- end }}
-  accessModes:
-    - {{.Values.edgex.storage.nonSharedVolumesAccessMode}}
-  resources:
-    requests:
-      storage: 128Mi
 {{- end }}

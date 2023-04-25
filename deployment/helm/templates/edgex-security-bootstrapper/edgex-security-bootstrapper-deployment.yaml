@@ -21,6 +21,12 @@ spec:
       labels:
         org.edgexfoundry.service: {{.Values.edgex.app.bootstrapper}}
     spec:
+    {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- range .Values.imagePullSecrets }}
+      - name: {{ . }}
+      {{- end }}
+    {{- end }}
       automountServiceAccountToken: false
       containers:
       - name: {{.Values.edgex.app.bootstrapper}}

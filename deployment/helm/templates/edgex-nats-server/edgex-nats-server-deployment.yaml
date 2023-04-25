@@ -20,6 +20,12 @@ spec:
       labels:
         org.edgexfoundry.service: {{.Values.edgex.app.natsserver}}
     spec:
+    {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- range .Values.imagePullSecrets }}
+      - name: {{ . }}
+      {{- end }}
+    {{- end }}
       automountServiceAccountToken: false
       containers:
       - name: {{.Values.edgex.app.natsserver}}
@@ -45,6 +51,9 @@ spec:
         livenessProbe:
           tcpSocket:
             port: {{.Values.edgex.port.natsserver}}
+        volumeMounts:
+        - mountPath: /tmp/nats
+          name: nats-data
       {{- if .Values.edgex.resources.natsserver.enforceLimits }}
         resources:
           limits:
@@ -60,3 +69,7 @@ spec:
         runAsNonRoot: true
         runAsUser: {{ .Values.edgex.security.runAsUser }}
         runAsGroup: {{ .Values.edgex.security.runAsGroup }}
+      volumes:
+      - name: nats-data
+        persistentVolumeClaim:
+          claimName: nats-data

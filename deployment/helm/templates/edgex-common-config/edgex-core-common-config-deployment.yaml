@@ -1,0 +1,134 @@
+# Copyright (C) 2022 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    org.edgexfoundry.service: {{.Values.edgex.app.core.common_config}}
+  name: {{.Values.edgex.app.core.common_config}}
+spec:
+  replicas: {{.Values.edgex.replicas.core.common_config}}
+  selector:
+    matchLabels:
+      org.edgexfoundry.service: {{.Values.edgex.app.core.common_config}}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        org.edgexfoundry.service: {{.Values.edgex.app.core.common_config}}
+    spec:
+    {{- if and (eq .Values.edgex.security.enabled true) (or (eq .Values.edgex.storage.sharedVolumesAccessMode "ReadWriteOnce") (eq .Values.edgex.storage.useHostPath true))}}
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  org.edgexfoundry.service: {{ .Values.edgex.app.secretstoresetup}}
+              topologyKey: "kubernetes.io/hostname"
+    {{- end}}
+    {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- range .Values.imagePullSecrets }}
+      - name: {{ . }}
+      {{- end }}
+    {{- end }}
+      automountServiceAccountToken: false
+      containers:
+      - name: {{.Values.edgex.app.core.common_config}}
+        image: {{.Values.edgex.image.core.common_config.repository}}:{{.Values.edgex.image.core.common_config.tag}}
+        imagePullPolicy: {{.Values.edgex.image.core.common_config.pullPolicy}}
+      {{- if .Values.edgex.security.enabled }}
+        command: ["/edgex-init/ready_to_run_wait_install.sh"]
+        args: ["/entrypoint.sh", "/core-common-config-bootstrapper", "-cp=consul.http://edgex-core-consul:8500"]
+      {{- end}}
+        env:
+        - name: ALL_SERVICES_REGISTRY_HOST
+          value: edgex-core-consul
+        - name: ALL_SERVICES_DATABASE_HOST
+          value: edgex-redis
+        - name: APP_SERVICES_CLIENTS_CORE_METADATA_HOST
+          value: edgex-core-metadata
+        - name: DEVICE_SERVICES_CLIENTS_CORE_METADATA_HOST
+          value: edgex-core-metadata
+      {{- if (eq .Values.edgex.features.messagebusbackend "redis") }}
+        - name: ALL_SERVICES_MESSAGEBUS_HOST
+          value: edgex-redis
+      {{- end}}
+      {{- if (eq .Values.edgex.features.messagebusbackend "mqtt") }}
+        - name: ALL_SERVICES_MESSAGEBUS_TYPE
+          value: mqtt
+        - name: ALL_SERVICES_MESSAGEBUS_PROTOCOL
+          value: tcp
+        - name: ALL_SERVICES_MESSAGEBUS_HOST
+          value: edgex-mqtt-broker
+        - name: ALL_SERVICES_MESSAGEBUS_PORT
+          value: "1883"
+        {{- if .Values.edgex.security.enabled }}
+        - name: ALL_SERVICES_MESSAGEBUS_AUTHMODE
+          value: usernamepassword
+        - name: ALL_SERVICES_MESSAGEBUS_SECRETNAME
+          value: message-bus
+        {{- else }}
+        - name: ALL_SERVICES_MESSAGEBUS_AUTHMODE
+          value: none
+        {{- end }}
+      {{- end }}
+      {{- if (eq .Values.edgex.features.messagebusbackend "nats") }}
+        - name: ALL_SERVICES_MESSAGEBUS_TYPE
+          value: nats-jetstream
+        - name: ALL_SERVICES_MESSAGEBUS_PROTOCOL
+          value: tcp
+        - name: ALL_SERVICES_MESSAGEBUS_HOST
+          value: edgex-nats-server
+        - name: ALL_SERVICES_MESSAGEBUS_PORT
+          value: "4222"
+        {{- if .Values.edgex.security.enabled }}
+        - name: ALL_SERVICES_MESSAGEBUS_AUTHMODE
+          value: usernamepassword
+        - name: ALL_SERVICES_MESSAGEBUS_SECRETNAME
+          value: message-bus
+        {{- else }}
+        - name: ALL_SERVICES_MESSAGEBUS_AUTHMODE
+          value: none
+        {{- end }}
+      {{- end}}
+        envFrom:
+        - configMapRef:
+            name: edgex-common-variables
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+      {{- if .Values.edgex.security.enabled }}
+        volumeMounts:
+        - mountPath: /edgex-init
+          name: edgex-init
+        - mountPath: /tmp/edgex/secrets
+          name: edgex-secrets
+      {{- end }}
+      {{- if .Values.edgex.resources.core.common_config.enforceLimits }}
+        resources:
+          limits:
+            memory: {{ .Values.edgex.resources.core.common_config.limits.memory }}
+            cpu: {{ .Values.edgex.resources.core.common_config.limits.cpu }}
+          requests:
+            memory: {{ .Values.edgex.resources.core.common_config.requests.memory }}
+            cpu: {{ .Values.edgex.resources.core.common_config.requests.cpu }}
+      {{- end}}
+      hostname: {{.Values.edgex.app.core.common_config}}
+      restartPolicy: Always
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: {{ .Values.edgex.security.runAsUser }}
+        runAsGroup: {{ .Values.edgex.security.runAsGroup }}
+    {{- if .Values.edgex.security.enabled }}
+      volumes:
+      - name: edgex-init
+        persistentVolumeClaim:
+          claimName: edgex-init
+      - name: edgex-secrets
+        persistentVolumeClaim:
+          claimName: edgex-secrets
+    {{- end}}

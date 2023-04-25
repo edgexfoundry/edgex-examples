@@ -28,6 +28,12 @@ spec:
                   org.edgexfoundry.service: {{ .Values.edgex.app.secretstoresetup}}
               topologyKey: "kubernetes.io/hostname"
     {{- end}}
+    {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- range .Values.imagePullSecrets }}
+      - name: {{ . }}
+      {{- end }}
+    {{- end }}
       automountServiceAccountToken: false
       containers:
       - name: {{.Values.edgex.app.appservice.externalmqtttrigger}}
@@ -35,7 +41,7 @@ spec:
         imagePullPolicy: {{.Values.edgex.image.appservice.externalmqtttrigger.pullPolicy}}
       {{- if .Values.edgex.security.enabled }}
         command: ["/edgex-init/ready_to_run_wait_install.sh"]
-        args: ["/app-service-configurable", "-cp=consul.http://edgex-core-consul:8500", "--registry", "--confdir=/res"]
+        args: ["/app-service-configurable", "-cp=consul.http://edgex-core-consul:8500", "--registry"]
       {{- end}}
         ports:
         - containerPort: {{.Values.edgex.port.appservice.externalmqtttrigger}}
@@ -54,36 +60,26 @@ spec:
           value: "external-mqtt-trigger"
         - name: SERVICE_HOST
           value: {{.Values.edgex.app.appservice.externalmqtttrigger}}
+        - name: TRIGGER_EXTERNALMQTT_URL
+          value: "{{.Values.edgex.features.mqttBrokerAddress}}"
         - name: WRITABLE_LOGLEVEL
           value: INFO
-        {{- if (eq .Values.edgex.features.messagebusbackend "redis") }}
-        - name: TRIGGER_EDGEXMESSAGEBUS_PUBLISHHOST_HOST
-          value: {{.Values.edgex.app.redis}}
-        - name: TRIGGER_EDGEXMESSAGEBUS_SUBSCRIBEHOST_HOST
-          value: {{.Values.edgex.app.redis}}
-        {{- end}}
-        {{- if (eq .Values.edgex.features.messagebusbackend "mqtt") }}
         - name: WRITABLE_PIPELINE_FUNCTIONS_MQTTEXPORT_PARAMETERS_BROKERADDRESS
           value: "{{.Values.edgex.features.mqttBrokerAddress}}"
         - name: WRITABLE_PIPELINE_FUNCTIONS_MQTTEXPORT_PARAMETERS_TOPIC
           value: edgex-export
-        - name: TRIGGER_EXTERNALMQTT_URL
-          value: "{{.Values.edgex.features.mqttBrokerAddress}}"
-        {{- end}}
-
-
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
         startupProbe:
           httpGet:
-            path: /api/v2/ping
+            path: /api/v3/ping
             port: {{.Values.edgex.port.appservice.externalmqtttrigger}}
           periodSeconds: 1
           failureThreshold: 120
         livenessProbe:
           httpGet:
-            path: /api/v2/ping
+            path: /api/v3/ping
             port: {{.Values.edgex.port.appservice.externalmqtttrigger}}
       {{- if .Values.edgex.security.enabled }}
         volumeMounts:

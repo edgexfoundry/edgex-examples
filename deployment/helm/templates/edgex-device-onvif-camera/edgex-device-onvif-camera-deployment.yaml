@@ -29,6 +29,12 @@ spec:
                   org.edgexfoundry.service: {{ .Values.edgex.app.secretstoresetup}}
               topologyKey: "kubernetes.io/hostname"
     {{- end}}
+    {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- range .Values.imagePullSecrets }}
+      - name: {{ . }}
+      {{- end }}
+    {{- end }}
       automountServiceAccountToken: false
       containers:
       - name: {{.Values.edgex.app.device.onvifcamera}}
@@ -36,7 +42,7 @@ spec:
         imagePullPolicy: {{.Values.edgex.image.device.onvifcamera.pullPolicy}}
       {{- if .Values.edgex.security.enabled }}
         command: ["/edgex-init/ready_to_run_wait_install.sh"]
-        args: ["/device-onvif-camera", "-cp=consul.http://edgex-core-consul:8500", "--registry", "--confdir=/res"]
+        args: ["/device-onvif-camera", "-cp=consul.http://edgex-core-consul:8500", "--registry"]
       {{- end}}
         ports:
         - containerPort: {{.Values.edgex.port.device.onvifcamera}}
@@ -53,20 +59,18 @@ spec:
         envFrom:
         - configMapRef:
             name: edgex-common-variables
-        - configMapRef:
-            name: device-common-variables
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
         startupProbe:
           httpGet:
-            path: /api/v2/ping
+            path: /api/v3/ping
             port: {{.Values.edgex.port.device.onvifcamera}}
           periodSeconds: 1
           failureThreshold: 120
         livenessProbe:
           httpGet:
-            path: /api/v2/ping
+            path: /api/v3/ping
             port: {{.Values.edgex.port.device.onvifcamera}}
       {{- if .Values.edgex.security.enabled }}
         volumeMounts:
@@ -74,8 +78,6 @@ spec:
           name: edgex-init
         - mountPath: /tmp/edgex/secrets
           name: edgex-secrets
-        - mountPath: /mnt/edgex-device-onvif-camera
-          name: device-onvif-camera
       {{- end }}
       {{- if .Values.edgex.resources.device.onvifcamera.enforceLimits }}
         resources:
@@ -100,7 +102,4 @@ spec:
       - name: edgex-secrets
         persistentVolumeClaim:
           claimName: edgex-secrets
-      - name:  device-onvif-camera
-        persistentVolumeClaim:
-          claimName:  device-onvif-camera
     {{- end}}
