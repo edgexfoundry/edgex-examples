@@ -10,7 +10,7 @@ metadata:
   name: {{.Values.edgex.app.appservice.httpexport}}
 spec:
   ports:
-  - name: "app-http-export-http"
+  - name: "http"
     port: {{.Values.edgex.port.appservice.httpexport}}
   selector:
     org.edgexfoundry.service: {{.Values.edgex.app.appservice.httpexport}}

@@ -28,6 +28,12 @@ spec:
                   org.edgexfoundry.service: {{ .Values.edgex.app.secretstoresetup}}
               topologyKey: "kubernetes.io/hostname"
     {{- end}}
+    {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- range .Values.imagePullSecrets }}
+      - name: {{ . }}
+      {{- end }}
+    {{- end }}
       automountServiceAccountToken: false
       containers:
       - name: {{.Values.edgex.app.appservice.rules}}
@@ -35,7 +41,7 @@ spec:
         imagePullPolicy: {{.Values.edgex.image.appservice.rules.pullPolicy}}
       {{- if .Values.edgex.security.enabled }}
         command: ["/edgex-init/ready_to_run_wait_install.sh"]
-        args: ["/app-service-configurable", "-cp=consul.http://edgex-core-consul:8500", "--registry", "--confdir=/res"]
+        args: ["/app-service-configurable", "-cp=consul.http://edgex-core-consul:8500", "--registry"]
       {{- end}}
         ports:
         - containerPort: {{.Values.edgex.port.appservice.rules}}
@@ -54,45 +60,18 @@ spec:
           value: "rules-engine"
         - name: SERVICE_HOST
           value: {{.Values.edgex.app.appservice.rules}}
-        {{- if (eq .Values.edgex.features.messagebusbackend "redis") }}
-        - name: TRIGGER_EDGEXMESSAGEBUS_PUBLISHHOST_HOST
-          value: {{.Values.edgex.app.redis}}
-        - name: TRIGGER_EDGEXMESSAGEBUS_SUBSCRIBEHOST_HOST
-          value: {{.Values.edgex.app.redis}}
-        {{- end}}
-        {{- if (eq .Values.edgex.features.messagebusbackend "nats") }}
-        - name: TRIGGER_EDGEXMESSAGEBUS_OPTIONAL_AUTHMODE
-          value: none
-        - name: TRIGGER_EDGEXMESSAGEBUS_PUBLISHHOST_HOST
-          value: edgex-nats-server
-        - name: TRIGGER_EDGEXMESSAGEBUS_PUBLISHHOST_PORT
-          value: "4222"
-        - name: TRIGGER_EDGEXMESSAGEBUS_PUBLISHHOST_PROTOCOL
-          value: tcp
-        - name: TRIGGER_EDGEXMESSAGEBUS_PUBLISHHOST_PUBLISHTOPIC
-          value: edgex/rules-events
-        - name: TRIGGER_EDGEXMESSAGEBUS_SUBSCRIBEHOST_HOST
-          value: edgex-nats-server
-        - name: TRIGGER_EDGEXMESSAGEBUS_SUBSCRIBEHOST_PORT
-          value: "4222"
-        - name: TRIGGER_EDGEXMESSAGEBUS_SUBSCRIBEHOST_PROTOCOL
-          value: tcp
-        - name: TRIGGER_EDGEXMESSAGEBUS_TYPE
-          value: nats-jetstream
-        {{- end}}
-
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
         startupProbe:
           httpGet:
-            path: /api/v2/ping
+            path: /api/v3/ping
             port: {{.Values.edgex.port.appservice.rules}}
           periodSeconds: 1
           failureThreshold: 120
         livenessProbe:
           httpGet:
-            path: /api/v2/ping
+            path: /api/v3/ping
             port: {{.Values.edgex.port.appservice.rules}}
       {{- if .Values.edgex.security.enabled }}
         volumeMounts:
@@ -100,10 +79,6 @@ spec:
           name: edgex-init
         - mountPath: /tmp/edgex/secrets
           name: edgex-secrets
-        - mountPath: /kuiper/etc/sources
-          name: kuiper-sources
-        - mountPath: /kuiper/etc/connections
-          name: kuiper-connections
       {{- end }}
       {{- if .Values.edgex.resources.appservice.rules.enforceLimits }}
         resources:
@@ -128,10 +103,4 @@ spec:
       - name: edgex-secrets
         persistentVolumeClaim:
           claimName: edgex-secrets
-      - name: kuiper-sources
-        persistentVolumeClaim:
-          claimName: kuiper-sources
-      - name: kuiper-connections
-        persistentVolumeClaim:
-          claimName: kuiper-connections
     {{- end}}

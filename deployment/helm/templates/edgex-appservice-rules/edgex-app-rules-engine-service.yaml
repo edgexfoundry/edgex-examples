@@ -10,7 +10,7 @@ metadata:
   name: {{.Values.edgex.app.appservice.rules}}
 spec:
   ports:
-  - name: "app-rules-engine-http"
+  - name: "http"
     port: {{.Values.edgex.port.appservice.rules}}
   selector:
     org.edgexfoundry.service: {{.Values.edgex.app.appservice.rules}}

@@ -29,6 +29,12 @@ spec:
                   org.edgexfoundry.service: {{ .Values.edgex.app.secretstoresetup}}
               topologyKey: "kubernetes.io/hostname"
     {{- end}}
+    {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- range .Values.imagePullSecrets }}
+      - name: {{ . }}
+      {{- end }}
+    {{- end }}
       automountServiceAccountToken: false
       containers:
       - name: {{.Values.edgex.app.consul}}
@@ -51,14 +57,13 @@ spec:
           value: "{{ .Values.edgex.security.runAsUser }}"
         - name: EDGEX_GROUP
           value: "{{ .Values.edgex.security.runAsGroup }}"
-        # uncomment and modify the following "ADD_REGISTRY_ACL_ROLES" to add additional registry ACL roles on the fly
-        # the list is comma-separated service keys for these services
-        #ADD_REGISTRY_ACL_ROLES: app-sample,app-rules-engine-redis, app-rules-engine-mqtt, app-push-to-core
-        - name: STAGEGATE_REGISTRY_ACL_SENTINELFILEPATH
-          value: /consul/config/consul_acl_done
         - name: STAGEGATE_REGISTRY_ACL_BOOTSTRAPTOKENPATH
           value: /tmp/edgex/secrets/consul-acl-token/bootstrap_token.json
-        - name: ADD_REGISTRY_ACL_ROLES
+        - name: STAGEGATE_REGISTRY_ACL_MANAGEMENTTOKENPATH
+          value: /tmp/edgex/secrets/consul-acl-token/mgmt_token.json
+        - name: STAGEGATE_REGISTRY_ACL_SENTINELFILEPATH
+          value: /consul/config/consul_acl_done
+        - name: EDGEX_ADD_REGISTRY_ACL_ROLES
           value: {{.Values.edgex.security.addConsulRoles}}
       {{- end }}
         envFrom:
