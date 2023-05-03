@@ -114,7 +114,7 @@ func printXMLToConsole(ctx interfaces.AppFunctionContext, data interface{}) (boo
 
 var precision = 4
 
-//ConvertToReadableFloatValues is used to facilitate writing jsonlogic rules
+// ConvertToReadableFloatValues is used to facilitate writing jsonlogic rules
 func ConvertToReadableFloatValues(ctx interfaces.AppFunctionContext, param interface{}) (bool, interface{}) {
 
 	ctx.LoggingClient().Debug("Convert to Readable Float Values")
