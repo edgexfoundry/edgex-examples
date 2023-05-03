@@ -1,0 +1,23 @@
+Writable:
+  LogLevel: INFO
+
+Service:
+  Host: localhost
+  Port: 59780 # Adjust if running multiple examples at the same time to avoid duplicate port conflicts
+  StartupMsg: "This is a sample Filter/XML Transform Application Service"
+
+MessageBus:
+  Disabled: false  # Set to true if not using edgex-messagebus Trigger below and don't want Metrics
+  Optional:
+    ClientId: app-simple-filter-xml
+
+Trigger:
+  # Note that the MessageBus connection above is used by edgex-messagebus trigger which is the default set in common config
+  # Default value for SubscribeTopics is also set in common config
+  PublishTopic: "example"  # Base topic is prepended to this topic when using edgex-messagebus
+
+# App Service specific simple settings
+# Great for single string settings. For more complex structured custom configuration
+# See https://docs.edgexfoundry.org/latest/microservices/application/AdvancedTopics/#custom-configuration
+ApplicationSettings:
+  DeviceNames: "Random-Float-Device, Random-Integer-Device"
