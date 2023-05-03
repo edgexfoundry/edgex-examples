@@ -14,13 +14,13 @@ The end result from this application service is random float values in human rea
 Using the following setup, this example advanced **App Functions Service** can be used to demonstrate an EdgeX end to end proof point with **App Functions**.
 
 1. Start **EdgeX** stack
-
-   - [ ] download Ireland non-secure compose file from [here](https://github.com/edgexfoundry/edgex-compose/blob/ireland/docker-compose-no-secty.yml)
+TODO: Update link to `minnesota` branch
+   - [ ] download non-secure compose file from [here](https://github.com/edgexfoundry/edgex-compose/blob/main/docker-compose-no-secty.yml)
 
    - [ ] start edgex which includes Device Virtual
 
        ```
-       docker-compose -p edgex -f docker-no-secty.yml up -d
+       docker-compose -p edgex -f docker-compose-no-secty.yml up -d
        ```
 
 2. Build & run **Advanced App Functions** example
@@ -28,34 +28,27 @@ Using the following setup, this example advanced **App Functions Service** can b
     - [ ] Clone this **[Examples](https://github.com/edgexfoundry/edgex-examples)** repo
     - [ ] cd to **application-services/custom/advanced-filter-convert-publish** folder
     - [ ] run "**make build**"
-    - [ ] run "./**app-service**"
+    - [ ] run "./**app-service -cp -d -o **" (uses Config provider from common config, runs in dev mode for hybrid deployment and overwrite config in Config Provider)
 
 3. Configure and Run **Simple Filter XML**  example
 
    - [ ] cd **application-services/custom/simple-filter-xml** folder
 
-   - [ ] edit **res/configuration.toml** so the **Port** and **SubscribeTopics** sections are as follows:
+   - [ ] edit **res/configuration.yaml** so the **Port** and **SubscribeTopics** sections are as follows:
 
-     ```toml
-     [Service]
-     HealthCheckInterval = "10s"
-     Host = "localhost"
-     Port = 59781 <= Change to avoid conflict
+     ```yaml
+     Service:
+       Host: "localhost"
+       Port: 59781 <= Change to avoid conflict
      
-     [Trigger]
-     Type="edgex-messagebus"
-       [Trigger.EdgexMessageBus]
-       Type = "redis"
-         [Trigger.EdgexMessageBus.SubscribeHost]
-         Host = "localhost"
-         Port = 6379
-         Protocol = "redis"
-         SubscribeTopics="converted" <= Change so receives Events from this example
+     Trigger:
+       PublishTopic: ""  # Not publishing
+       SubscribeTopics: "converted" <= Change so receives Events from this example
      ```
      
    - [ ] run "**make build**"
 
-   - [ ] run "./**app-service**"
+   - [ ] run "./**app-service -cp -d -o**"
 
 4. Now data will be flowing due to the auto-events configured in Device Virtual.
 
@@ -68,5 +61,5 @@ Using the following setup, this example advanced **App Functions Service** can b
 
    - In the terminal that you ran **simple-filter-xml** you will see the xml representation of the events printed. Note the human readable float values in the event XML.
         ```xml
-        <Event><ApiVersion>v2</ApiVersion><Id>8dc2ee9e-7824-4e57-a4a9-6ceb21229126</Id><DeviceName>Random-Float-Device</DeviceName><ProfileName>MyProfile</ProfileName><SourceName>MySource</SourceName><Origin>1626300284231075300</Origin><Readings><Id>1c1f399b-7cdd-47e8-9bbc-22efe0798ad0</Id><Origin>1626300284231075300</Origin><DeviceName>Random-Float-Device</DeviceName><ResourceName>Float64</ResourceName><ProfileName>Random-Float-Device</ProfileName><ValueType>Float64</ValueType><BinaryValue></BinaryValue><MediaType></MediaType><Value>2.1742</Value></Readings></Event>
+        <Event><ApiVersion>v3</ApiVersion><Id>8dc2ee9e-7824-4e57-a4a9-6ceb21229126</Id><DeviceName>Random-Float-Device</DeviceName><ProfileName>MyProfile</ProfileName><SourceName>MySource</SourceName><Origin>1626300284231075300</Origin><Readings><Id>1c1f399b-7cdd-47e8-9bbc-22efe0798ad0</Id><Origin>1626300284231075300</Origin><DeviceName>Random-Float-Device</DeviceName><ResourceName>Float64</ResourceName><ProfileName>Random-Float-Device</ProfileName><ValueType>Float64</ValueType><BinaryValue></BinaryValue><MediaType></MediaType><Value>2.1742</Value></Readings></Event>
         ```

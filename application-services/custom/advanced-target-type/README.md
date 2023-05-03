@@ -4,13 +4,23 @@ This **advanced-target-type** Application Service demonstrates how to create an 
 
 To run this example:
 
+1. Start **EdgeX** stack
+   TODO: Update link to `minnesota` branch
+    - [ ] download non-secure compose file from [here](https://github.com/edgexfoundry/edgex-compose/blob/main/docker-compose-no-secty.yml)
+
+    - [ ] start edgex which includes Device Virtual
+
+        ```
+        docker-compose -p edgex -f docker-compose-no-secty.yml up -d
+        ```
+
 1.  Clone **[edgex-examples](https://github.com/edgexfoundry/edgex-examples)** repo
 
 2. cd `edgex-examples/application-services/custom/advanced-target-type`
 
 3. run `make build`
 
-4. run `./app-service`
+4. run `./app-service -cp -d -o`
 
 5. Start PostMan
 
