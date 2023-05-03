@@ -12,8 +12,8 @@ The end result from this application service is that it shows that the Applicati
 #### Follow these steps to run the end to end CBOR demonstration
 
 1. Start **EdgeX** stack
-
-   - [ ] down load compose file from [here](https://github.com/edgexfoundry/edgex-compose/blob/main/docker-compose-no-secty.yml)
+TODO: replace 'main' with 'minnesota'
+   - [ ] download compose file from [here](https://github.com/edgexfoundry/edgex-compose/blob/main/docker-compose-no-secty.yml)
 
    - [ ] start edgex 
      
@@ -26,7 +26,7 @@ The end result from this application service is that it shows that the Applicati
    - [ ] Clone this **[Examples](https://github.com/edgexfoundry/edgex-examples)** repo
    - [ ] cd to **application-services/custom/simple-cbor-filter** folder
    - [ ] run "**make build**"
-   - [ ] run "**./app-service**"
+   - [ ] run "**./app-service -cp -d -o**" (uses Config provider from common config, runs in dev mode for hybrid deployment and overwrite config in Config Provider)
 
 3. Run **device-simple** device service
 
@@ -36,7 +36,7 @@ The end result from this application service is that it shows that the Applicati
 
    - [ ] cd to **example/cmd/device-simple** folder
 
-   - [ ] run "./**device-simple**"
+   - [ ] run "./**device-simple -cp -d**" (uses Config provider from common config and runs in dev mode for hybrid deployment)
 
      This sample device service will send a `png` (light bulb on) or `jpeg` (light bulb off) image every 30 seconds. The image it sends depends on the value of its `switch` resource, which is `off` (false) by default.
      
