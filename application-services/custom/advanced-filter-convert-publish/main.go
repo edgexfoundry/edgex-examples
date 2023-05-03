@@ -20,27 +20,27 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg"
-	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/transforms"
+	"github.com/edgexfoundry/app-functions-sdk-go/v3/pkg"
+	"github.com/edgexfoundry/app-functions-sdk-go/v3/pkg/transforms"
 
 	"advanced-filter-convert-publish/functions"
 )
 
 const (
-	serviceKey = "advancedFilterConvertPublish"
+	serviceKey = "app-advanced-filter-convert-publish"
 )
 
 func main() {
 	// turn off secure mode for examples. Not recommended for production
 	_ = os.Setenv("EDGEX_SECURITY_SECRET_STORE", "false")
 
-	// 1) First thing to do is to create an new instance of an EdgeX Application Service.
+	// 1) First thing to do is to create a new instance of an EdgeX Application Service.
 	service, ok := pkg.NewAppService(serviceKey)
 	if !ok {
 		os.Exit(-1)
 	}
 
-	// Leverage the built in logging service in EdgeX
+	// Leverage the built-in logging service in EdgeX
 	lc := service.LoggingClient()
 
 	// 2) shows how to access the application's specific configuration settings.
@@ -53,7 +53,7 @@ func main() {
 
 	// 3) This is our functions pipeline configuration, the collection of functions to
 	// execute every time an event is triggered.
-	if err := service.SetFunctionsPipeline(
+	if err := service.SetDefaultFunctionsPipeline(
 		transforms.NewFilterFor(resourceNames).FilterByResourceName,
 		functions.ConvertToReadableFloatValues,
 		functions.PrintFloatValuesToConsole,
