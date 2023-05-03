@@ -1,0 +1,23 @@
+Writable:
+  LogLevel: INFO
+
+Service:
+  Host: localhost
+  Port: 59780 # Adjust if running multiple examples at the same time to avoid duplicate port conflicts
+  StartupMsg: "This is a sample Application Service which filters, custom converts, prints and publishes back to message bus"
+
+MessageBus:
+  Disabled: false  # Set to true if not using edgex-messagebus Trigger below and don't want Metrics
+  Optional:
+    ClientId: app-advanced-filter-convert-publish
+
+Trigger:
+  # Note that the MessageBus connection above is used by edgex-messagebus trigger which is the default set in common config
+  # Default value for SubscribeTopics is also set in common config
+  PublishTopic: "converted"  # Base topic is prepended to this topic when using edgex-messagebus
+
+# App Service specific simple settings
+# Great for single string settings. For more complex structured custom configuration
+# See https://docs.edgexfoundry.org/latest/microservices/application/AdvancedTopics/#custom-configuration
+ApplicationSettings:
+  ResourceNames: "Float32, Float64"

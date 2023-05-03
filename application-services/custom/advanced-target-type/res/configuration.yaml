@@ -1,0 +1,15 @@
+Writable:
+  LogLevel: INFO
+
+Service:
+  Host: localhost
+  Port: 59780 # Adjust if running multiple examples at the same time to avoid duplicate port conflicts
+  StartupMsg: "This is a sample Application Service which explains use of TargetType"
+
+MessageBus:
+  Disabled: false  # Set to true if not using edgex-messagebus Trigger below and don't want Metrics
+  Optional:
+    ClientId: app-target-type
+
+Trigger:
+  Type: "http"
