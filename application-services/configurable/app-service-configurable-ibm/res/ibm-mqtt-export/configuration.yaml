@@ -1,0 +1,64 @@
+Writable:
+  LogLevel: INFO
+
+  Pipeline:
+    ExecutionOrder: "Transform, MQTTExport"
+    Functions:
+      Transform:
+        Parameters:
+          Type: json
+      FilterByProfileName:
+        Parameters:
+          ProfileNames: ""
+          FilterOut: "false"
+      FilterByDeviceName:
+        Parameters:
+          DeviceNames: ""
+          FilterOut: "false"
+      FilterBySourceName:
+        Parameters:
+          SourceNames: ""
+          FilterOut: "false"
+      FilterByResourceName:
+        Parameters:
+          ResourceNames: ""
+          FilterOut: "false"
+      MQTTExport:
+        Parameters:
+          # TODO - Change <orgid> placeholder
+          BrokerAddress: "tcps://<orgid>.messaging.internetofthings.ibmcloud.com:1883"
+          Topic: iot-2/evt/status/fmt/json
+          # TODO - Change <orgid>, <devicetype> and <deviceid> placeholders
+          ClientId: "d:<orgid>:<devicetype>:<deviceid>"
+          QOS: "0"
+          AutoReconnect: "false"
+          KeepAlive: ""
+          ConnectionTimeout: ""
+          Retain: "false"
+          SkipVerify: "false"
+          PersistOnError: "false"
+          AuthMode: usernamepassword
+          SecretName: mqtt
+
+  InsecureSecrets:
+    mqtt:
+      path: mqtt
+      Secrets:
+        username: use-token-auth
+        # TODO - Change <Authentication-Token> placeholder
+        password: <Authentication-Token>
+        cacert: ""
+        clientcert: ""
+        clientkey: ""
+
+Service:
+  Host: localhost
+  Port: 59780
+  StartupMsg: "app-ibm-mqtt-export has started"
+
+MessageBus:
+  Disabled: false  # Set to true if not using edgex-messagebus Trigger below and don't want Metrics
+  Optional:
+    ClientId: "app-ibm-mqtt-export"
+
+# Using default Trigger config from common config
