@@ -226,27 +226,21 @@ func (app *CameraManagementApp) getPipelineStatus(deviceName string) (interface{
 // processEdgeXDeviceSystemEvent is the function that is called when an EdgeX Device System Event is received
 func (app *CameraManagementApp) processEdgeXDeviceSystemEvent(_ interfaces.AppFunctionContext, data interface{}) (bool, interface{}) {
 	if data == nil {
-		app.lc.Errorf("processEdgeXEvent: was called without any data")
-		return false, fmt.Errorf("processEdgeXEvent: was called without any data")
+		return false, fmt.Errorf("processEdgeXDeviceSystemEvent: was called without any data")
 	}
 
 	systemEvent, ok := data.(dtos.SystemEvent)
 	if !ok {
-		app.lc.Errorf("type received is not a SystemEvent")
 		return false, fmt.Errorf("type received %T is not a SystemEvent", data)
 	}
 
-	app.lc.Debugf("Received system event: %v", systemEvent)
-
 	if systemEvent.Type != common.DeviceSystemEventType {
-		app.lc.Error("System event type is not " + common.DeviceSystemEventType)
 		return false, fmt.Errorf("system event type is not " + common.DeviceSystemEventType)
 	}
 
 	device := dtos.Device{}
 	err := systemEvent.DecodeDetails(&device)
 	if err != nil {
-		app.lc.Errorf("failed to decode device details: %v", err)
 		return false, fmt.Errorf("failed to decode device details: %v", err)
 	}
 
@@ -275,9 +269,9 @@ func (app *CameraManagementApp) startDefaultPipeline(device dtos.Device) error {
 	if pipelineRunning {
 		app.lc.Debugf("pipeline is already running for device %s", device.Name)
 		return nil
-	} else {
-		app.lc.Debugf("pipeline is not running for device %s", device.Name)
 	}
+
+	app.lc.Debugf("pipeline is not running for device %s", device.Name)
 
 	if app.config.AppCustom.DefaultPipelineName == "" || app.config.AppCustom.DefaultPipelineVersion == "" {
 		app.lc.Warnf("no default pipeline name/version specified, skip starting pipeline for device %s", device.Name)
@@ -294,8 +288,8 @@ func (app *CameraManagementApp) startDefaultPipeline(device dtos.Device) error {
 		app.lc.Debugf("Onvif protocol information found for device: %s message: %v", device.Name, protocol)
 		profileResponse, err := app.getProfiles(device.Name)
 		if err != nil {
-			app.lc.Errorf("failed to get profiles for device %s, message: %v", device.Name, err)
-			return err
+			return fmt.Errorf("failed to get profiles for device %s, message: %v", device.Name, err)
+
 		}
 
 		app.lc.Debugf("Onvif profile information found for device: %s message: %v", device.Name, profileResponse)
@@ -309,8 +303,8 @@ func (app *CameraManagementApp) startDefaultPipeline(device dtos.Device) error {
 
 	app.lc.Debugf("Starting default pipeline for device %s", device.Name)
 	if err := app.startPipeline(device.Name, startPipelineRequest); err != nil {
-		app.lc.Errorf("Pipeline failed to start for device %s, message: %v", device.Name, err)
-		return err
+		return fmt.Errorf("pipeline failed to start for device %s, message: %v", device.Name, err)
+
 	}
 
 	return nil
