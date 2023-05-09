@@ -58,9 +58,9 @@ func main() {
 
 	// 3) Lastly, we'll go ahead and tell the service to "start" and begin listening for Persons
 	// to trigger the pipeline.
-	err = appService.MakeItRun()
+	err = appService.Run()
 	if err != nil {
-		appService.LoggingClient().Errorf("MakeItRun returned error: %s", err.Error())
+		appService.LoggingClient().Errorf("Run returned error: %s", err.Error())
 		os.Exit(-1)
 	}
 
