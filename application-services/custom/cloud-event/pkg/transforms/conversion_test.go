@@ -20,7 +20,6 @@ package transforms
 import (
 	"encoding/base64"
 	"encoding/json"
-	"reflect"
 	"strings"
 	"testing"
 
@@ -189,14 +188,12 @@ func TestTransformToCloudEventMultipleEvents(t *testing.T) {
 		resultBytes, err := json.Marshal(cloudEvent)
 		require.NoError(t, err)
 		wantMap := map[string]string{}
-		err = json.Unmarshal([]byte(want[i]),&wantMap)
+		err = json.Unmarshal([]byte(want[i]), &wantMap)
 		require.NoError(t, err)
 		actualMap := map[string]string{}
-		err = json.Unmarshal(resultBytes,&actualMap)
+		err = json.Unmarshal(resultBytes, &actualMap)
 		require.NoError(t, err)
-		if !reflect.DeepEqual(wantMap,actualMap) {
-			t.Fatalf("Return value doesn't match expected.\nExpected: %v\nActual: %v\n", want[i], string(resultBytes))
-		}
+		assert.Equal(t, wantMap, actualMap)
 	}
 }
 

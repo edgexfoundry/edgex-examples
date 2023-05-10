@@ -2,29 +2,13 @@ Writable:
   LogLevel: "DEBUG"
   StoreAndForward:
     Enabled: false
-    RetryInterval: "5m"
-    MaxRetryCount: 10
   Telemetry:
-    Interval: "0s" # Disabled since require MessageBus Trigger to be in use.
+    Interval: "0s" # Disabled since not using metrics
 
 Service:
   Host: "localhost"
   Port: 59780 # Adjust if running multiples examples at the same time to avoid duplicate port conflicts
   StartupMsg: "Cloud Event Transforms"
-  RequestTimeout: "30s"
-  MaxResultCount: 0
-
-SecretStore:
-  Type: "vault"
-  Protocol: "http"
-  Host: "localhost"
-  Port: 8200
-  Path: "app-cloud-event/"
-  TokenFile: "/tmp/edgex/secrets/app-cloud-event/secrets-token.json"
-  RootCaCertPath: ""
-  ServerName: ""
-  Authentication:
-    AuthType: "X-Vault-Token"
 
 # This example expect custom type via HTTP Trigger
 Trigger:
