@@ -23,13 +23,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/interfaces"
-	"github.com/edgexfoundry/go-mod-core-contracts/v2/models"
+	"github.com/edgexfoundry/app-functions-sdk-go/v3/pkg/interfaces"
+	"github.com/edgexfoundry/go-mod-core-contracts/v3/models"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 
-	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg"
-	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/transforms"
+	"github.com/edgexfoundry/app-functions-sdk-go/v3/pkg"
+	"github.com/edgexfoundry/app-functions-sdk-go/v3/pkg/transforms"
 
 	localtransforms "cloud-event/pkg/transforms"
 )
@@ -68,7 +68,7 @@ func main() {
 	// will be transformed to a cloudevent and sent on the next function.  The next function, sendCloudEvent
 	// will send the event.  Then the next function will transform the event back to an EdgeX event.  The last
 	// function will simply print the original event to the console
-	appService.SetFunctionsPipeline(
+	appService.SetDefaultFunctionsPipeline(
 		localtransforms.NewConversion().TransformToCloudEvent,
 		transforms.NewResponseData().SetResponseData,
 		sendCloudEvents,
@@ -77,7 +77,7 @@ func main() {
 	)
 
 	// Lastly, we'll go ahead and tell the SDK to "start" and begin listening for events
-	err = appService.MakeItRun()
+	err = appService.Run()
 	if err != nil {
 		appService.LoggingClient().Errorf("MakeItRun returned error: %s", err.Error())
 		os.Exit(-1)
