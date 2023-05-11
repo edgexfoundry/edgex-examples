@@ -1,0 +1,38 @@
+Writable:
+  LogLevel: "INFO"
+  InsecureSecrets:
+    mqtt:
+      path: "mqtt"
+      Secrets:
+        username: "edgex"
+        password: "password"
+        cacert: ""
+        clientcert: ""
+        clientkey: ""
+  Writable.Telemetry:
+    Interval: "30s"
+    PublishTopicPrefix : "edgex/telemetry" # /<service-name>/<metric-name> will be added to this Publish Topic prefix
+
+Service:
+  Host: "localhost"
+  Port: 59780 # Adjust if running multiple examples at the same time to avoid duplicate port conflicts
+  StartupMsg: "App service export to InfluxDB has Started"
+
+Trigger:
+  Type: "edgex-messagebus"
+  EdgexMessageBus:
+    Type: "redis"
+    SubscribeHost:
+      Host: "localhost"
+      Port: 6379
+      Protocol: "redis"
+      SubscribeTopics: "edgex/events/#"
+
+# App Service custom configuration
+MqttConfig:
+  BrokerAddress: "tcp://localhost:1883"
+  ClientId: "InfluxDBExport"
+  AutoReconnect: true
+  Topic: "edgex/EdgeXEvents"
+  AuthMode: "usernamepassword"
+  SecretName: "mqtt"
