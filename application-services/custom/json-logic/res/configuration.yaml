@@ -1,0 +1,36 @@
+Writable:
+  LogLevel: 'INFO'
+  Writable.Telemetry:
+    Interval: "30s"
+    PublishTopicPrefix : "edgex/telemetry" # /<service-name>/<metric-name> will be added to this Publish Topic prefix
+
+
+Service:
+  Host: 'localhost'
+  Port: 59780 # Adjust if running multiple examples at the same time to avoid duplicate port conflicts
+  StartupMsg: 'This is a sample application service using the JSON logic transform'
+
+# Choose either an HTTP trigger or edgex-messagebus trigger
+
+#Trigger:
+#Type:"http"
+
+Trigger:
+  Type: "edgex-messagebus"
+  Trigger.EdgexMessageBus:
+    Type: "redis"
+    Trigger.EdgexMessageBus.SubscribeHost:
+      Host: "localhost"
+      Port: 6379
+      Protocol: "redis"
+      SubscribeTopics: "edgex/events/#"
+    Trigger.EdgexMessageBus.PublishHost:
+      Host: "localhost"
+      Port: 6379
+      Protocol: "redis"
+      PublishTopic: "example"
+
+# App Service specifc simple settings
+# Great for single string settings
+ApplicationSettings:
+  DeviceNames: "Random-Float-Device, Random-Integer-Device"
