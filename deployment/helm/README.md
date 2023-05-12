@@ -164,6 +164,8 @@ and has been compatibility tested with Rook-Ceph, OpenEBS, and the Rancher Local
 
 The default value of `edgex.security.enabled` is `false`.  This may change in the future.
 
+To enable the security, add the command flag in the helm install: `--set edgex.security.enabled=true`
+
 Setting `edgex.security.enabled` to `true` during installation (recommended)
 will enable microservice-level authentication
 for EdgeX peer-to-peer communcation
@@ -172,6 +174,9 @@ as well authentication to Redis, Consul, and the MQTT broker, if used.
 In lieu of a standalone API gateway used by the snap- and docker-based EdgeX deployments,
 the security-enabled helm chart is coded against a standard Kubernetes NGINX-based ingress controller,
 and ingress routes are configured to require client-side TLS authentication.
+
+The device USB camera by default is not enabled to run in the deployment, to start it in a pod, 
+add the following command flag in the helm install: `--set edgex.replicas.device.usbcamera=1`.
 
 #### Configuring Ingress TLS
 
