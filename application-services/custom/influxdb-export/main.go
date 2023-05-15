@@ -11,8 +11,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg"
-	sdkTransforms "github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/transforms"
+	"github.com/edgexfoundry/app-functions-sdk-go/v3/pkg"
+	sdkTransforms "github.com/edgexfoundry/app-functions-sdk-go/v3/pkg/transforms"
 
 	influxTransforms "app-service-influx/pkg/transforms"
 )
@@ -46,17 +46,17 @@ func main() {
 
 	// 4) This is our pipeline configuration, the collection of functions to
 	// execute every time an event is triggered.
-	if err := service.SetFunctionsPipeline(
+	if err := service.SetDefaultFunctionsPipeline(
 		influxTransforms.NewConversion().TransformToInflux,
 		sdkTransforms.NewMQTTSecretSender(config.MqttConfig, false).MQTTSend,
 	); err != nil {
-		lc.Errorf("SetFunctionsPipeline failed: %s", err.Error())
+		lc.Errorf("SetDefaultFunctionsPipeline failed: %s", err.Error())
 		os.Exit(-1)
 	}
 
 	// 5) Lastly, we'll go ahead and tell the SDK to "start" and begin listening for events to trigger the pipeline.
-	if err := service.MakeItRun(); err != nil {
-		lc.Errorf("MakeItRun returned error: %s", err.Error())
+	if err := service.Run(); err != nil {
+		lc.Errorf("Run returned error: %s", err.Error())
 		os.Exit(-1)
 	}
 
@@ -99,8 +99,8 @@ func (c *ServiceConfig) Validate() error {
 		return errors.New("configuration missing value for MqttSecretConfig.AuthMode")
 	}
 
-	if len(strings.TrimSpace(c.MqttConfig.SecretPath)) == 0 {
-		return errors.New("configuration missing value for MqttSecretConfig.SecretPath")
+	if len(strings.TrimSpace(c.MqttConfig.SecretName)) == 0 {
+		return errors.New("configuration missing value for MqttSecretConfig.SecretName")
 	}
 
 	return nil
