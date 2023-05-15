@@ -2,27 +2,18 @@ Writable:
   LogLevel: "INFO"
   Telemetry:
     Interval: "30s"
-    PublishTopicPrefix : "edgex/telemetry" # /<service-name>/<metric-name> will be added to this Publish Topic prefix
 
 Service:
   Host: "localhost"
   Port: 59780 # Adjust if running multiple examples at the same time to avoid duplicate port conflicts
   StartupMsg: "LF Edge Fledge Export Service"
 
-Trigger:
-  Type: "edgex-messagebus"
-  EdgexMessageBus:
-    Type: "redis"
-    SubscribeHost:
-      Host: "localhost"
-      Port: 6379
-      Protocol: "redis"
-      SubscribeTopics: "edgex/events/#"
-    PublishHost:
-      Host: "localhost"
-      Port: 6379
-      Protocol: "redis"
-      PublishTopic: "example"
+MessageBus:
+  Disabled: false  # Set to true if not using edgex-messagebus Trigger below and Metrics are not enabled
+  Optional:
+    ClientId: "app-fledge-export"
+
+# Using default Trigger config from common config
 
 ApplicationSettings:
   FledgeSouthHTTPEndpoint: "http://192.168.0.10:6683/sensor-reading"
