@@ -1,0 +1,16 @@
+Writable:
+  LogLevel: "DEBUG"
+  StoreAndForward:
+    Enabled: false
+  Telemetry:
+    Interval: "0s" # Disabled since require MessageBus Trigger to be in use.
+
+Service:
+  Host: "localhost"
+  Port: 59780 # Adjust if running multiple examples at the same time to avoid duplicate port conflicts
+  StartupMsg: "This is a sample Application Service to receive HTTP request as trigger"
+
+# Using default Trigger config from common config
+
+ApplicationSettings: {}
+

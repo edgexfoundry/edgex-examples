@@ -21,7 +21,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/interfaces"
+	"github.com/edgexfoundry/app-functions-sdk-go/v3/pkg/interfaces"
 )
 
 type ActionRequest struct {
@@ -48,7 +48,7 @@ func (s *SendCommand) SendCommand(funcCtx interfaces.AppFunctionContext, data in
 		return false, errors.New("SendCommand: No data received")
 	}
 
-	if funcCtx.CommandClient == nil {
+	if funcCtx.CommandClient() == nil {
 		return false, errors.New("SendCommand: Command client is not available")
 	}
 
@@ -78,7 +78,7 @@ func (s *SendCommand) SendCommand(funcCtx interfaces.AppFunctionContext, data in
 	case "get":
 		lc.Infof("executing %s action", action)
 		lc.Infof("Sending command '%s' for device '%s'", command, device)
-		response, err = funcCtx.CommandClient().IssueGetCommandByName(context.Background(), device, command, "no", "yes")
+		response, err = funcCtx.CommandClient().IssueGetCommandByName(context.Background(), device, command, false, true)
 		if err != nil {
 			return false, fmt.Errorf("failed to send '%s' get command to '%s' device: %s", command, device, err.Error())
 		}
