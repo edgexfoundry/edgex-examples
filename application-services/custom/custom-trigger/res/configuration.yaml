@@ -1,0 +1,17 @@
+Writable:
+  LogLevel: "INFO"
+  Telemetry:
+    Interval: "0s"
+
+Service:
+  Host: "localhost"
+  Port: 59780 # Adjust if running multiple examples at the same time to avoid duplicate port conflicts
+  StartupMsg: "Custom Trigger Example"
+
+MessageBus:
+  Disabled: false  # Set to true if not using edgex-messagebus Trigger below and Metrics are not enabled
+  Optional:
+    ClientId: "app-custom-trigger"
+
+Trigger:
+  Type: "custom-stdin"
