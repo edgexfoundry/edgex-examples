@@ -19,8 +19,8 @@ package main
 import (
 	"os"
 
-	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg"
-	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/transforms"
+	"github.com/edgexfoundry/app-functions-sdk-go/v3/pkg"
+	"github.com/edgexfoundry/app-functions-sdk-go/v3/pkg/transforms"
 
 	"send-command/functions"
 )
@@ -44,19 +44,19 @@ func main() {
 
 	// 2) This is our functions pipeline configuration, the collection of functions to
 	// execute every time an event is triggered.
-	if err := service.SetFunctionsPipeline(
+	if err := service.SetDefaultFunctionsPipeline(
 		functions.NewSendCommand().SendCommand,
 		functions.PrintToConsole,
 		transforms.NewResponseData().SetResponseData,
 	); err != nil {
-		lc.Errorf("SetFunctionsPipeline returned error: %s", err.Error())
+		lc.Errorf("SetDefaultFunctionsPipeline returned error: %s", err.Error())
 		os.Exit(-1)
 	}
 
 	// 3) Lastly, we'll go ahead and tell the SDK to "start" and begin listening for Persons
 	// to trigger the pipeline.
-	if err := service.MakeItRun(); err != nil {
-		lc.Error("MakeItRun returned error: ", err.Error())
+	if err := service.Run(); err != nil {
+		lc.Error("Run returned error: ", err.Error())
 		os.Exit(-1)
 	}
 
