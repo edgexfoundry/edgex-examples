@@ -18,8 +18,8 @@
 package functions
 
 import (
-	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/interfaces"
-	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/util"
+	"github.com/edgexfoundry/app-functions-sdk-go/v3/pkg/interfaces"
+	"github.com/edgexfoundry/app-functions-sdk-go/v3/pkg/util"
 )
 
 type secretsInfo struct {
@@ -51,7 +51,7 @@ func GetSecretsToConsole(ctx interfaces.AppFunctionContext, data interface{}) (b
 		// this is just an example. NEVER log your secrets to console
 		ctx.LoggingClient().Infof("--- Get secrets at location %v, keys: %v  ---", secretInfo.path, secretInfo.keys)
 
-		secrets, err := ctx.GetSecret(secretInfo.path, secretInfo.keys...)
+		secrets, err := ctx.SecretProvider().GetSecret(secretInfo.path, secretInfo.keys...)
 		if err != nil {
 			return false, err
 		}
