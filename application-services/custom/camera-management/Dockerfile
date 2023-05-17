@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2022 Intel Corporation
+# Copyright (c) 2022-2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 #
 
 #build stage
-ARG BASE=golang:1.17-alpine3.15
+ARG BASE=golang:1.18-alpine3.16
 FROM ${BASE} AS builder
 
 ARG ALPINE_PKG_BASE="make git gcc libc-dev libsodium-dev zeromq-dev"
@@ -37,7 +37,7 @@ ARG MAKE="make build-app"
 RUN $MAKE
 
 #final stage
-FROM alpine:3.15
+FROM alpine:3.16
 LABEL license='SPDX-License-Identifier: Apache-2.0' \
   copyright='Copyright (c) 2022: Intel'
 LABEL Name=app-camera-management Version=${VERSION}

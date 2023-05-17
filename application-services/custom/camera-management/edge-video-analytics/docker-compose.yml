@@ -17,21 +17,11 @@
 version: "3"
 
 networks:
-  evam_network:
+  edgex_edgex-network:
+    external: true
     driver: "bridge"
 
 services:
-  broker:
-    image: eclipse-mosquitto
-    hostname: mqtt
-    volumes:
-      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
-    ports:
-      - "1883:1883"
-      - "59001:9001"
-    networks:
-      - evam_network
-
   edge_video_analytics_microservice:
     image: intel/edge_video_analytics_microservice:0.7.2
     hostname: edge_video_analytics_microservice
@@ -41,7 +31,7 @@ services:
       - '8080:8080'
       - '8555:8555'
     networks:
-      - evam_network
+      - edgex_edgex-network
     environment:
       ENABLE_RTSP: "true"
       RTSP_PORT: 8555
