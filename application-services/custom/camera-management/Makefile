@@ -26,7 +26,7 @@ tidy:
 	go mod tidy
 
 run-app:
-	EDGEX_SECURITY_SECRET_STORE=false ./$(MICROSERVICE)
+	EDGEX_SECURITY_SECRET_STORE=false ./$(MICROSERVICE) -cp -d
 
 # TODO: Change the registries (edgexfoundry, nexus3.edgexfoundry.org:10004) below as needed.
 #       Leave them as is if service is to be upstreamed to EdgeX Foundry
