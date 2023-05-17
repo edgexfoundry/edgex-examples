@@ -36,7 +36,7 @@ Trigger:
 AppCustom:
   OnvifDeviceServiceName: device-onvif-camera
   USBDeviceServiceName: device-usb-camera
-  EvamBaseUrl: http://localhost:8080/
+  EvamBaseUrl: http://localhost:8080
   MqttAddress: edgex-mqtt-broker:1883
   MqttTopic: incoming/data/edge-video-analytics/inference-event
   DefaultPipelineName: object_detection # Name of the default pipeline used when a new device is added to the system; can be left blank to disable feature

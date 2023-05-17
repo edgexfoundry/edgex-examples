@@ -133,7 +133,7 @@ func (app *CameraManagementApp) startPipeline(deviceName string, sr StartPipelin
 	if err != nil {
 		return err
 	}
-	reqPath := path.Join("pipelines", info.Name, info.Version)
+	reqPath := path.Join("/pipelines", info.Name, info.Version)
 
 	if err = issuePostRequest(context.Background(), &res, baseUrl.String(), reqPath, body); err != nil {
 		err = errors.Wrap(err, "POST request to start EVAM pipeline failed")
