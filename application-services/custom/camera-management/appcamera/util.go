@@ -10,14 +10,15 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/edgexfoundry/go-mod-core-contracts/v2/clients/http/utils"
-	"github.com/edgexfoundry/go-mod-core-contracts/v2/clients/logger"
-	"github.com/edgexfoundry/go-mod-core-contracts/v2/common"
-	"github.com/edgexfoundry/go-mod-core-contracts/v2/dtos"
-	"github.com/edgexfoundry/go-mod-core-contracts/v2/dtos/responses"
-	"github.com/pkg/errors"
 	"io"
 	"net/http"
+
+	"github.com/edgexfoundry/go-mod-core-contracts/v3/clients/http/utils"
+	"github.com/edgexfoundry/go-mod-core-contracts/v3/clients/logger"
+	"github.com/edgexfoundry/go-mod-core-contracts/v3/common"
+	"github.com/edgexfoundry/go-mod-core-contracts/v3/dtos"
+	"github.com/edgexfoundry/go-mod-core-contracts/v3/dtos/responses"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -60,7 +61,7 @@ func (app *CameraManagementApp) issueGetCommandWithJsonForResponse(ctx context.C
 }
 
 func (app *CameraManagementApp) issueGetCommand(ctx context.Context, deviceName string, commandName string) (*responses.EventResponse, error) {
-	return app.service.CommandClient().IssueGetCommandByName(ctx, deviceName, commandName, "no", "yes")
+	return app.service.CommandClient().IssueGetCommandByName(ctx, deviceName, commandName, false, true)
 }
 
 func (app *CameraManagementApp) issueGetCommandForResponse(ctx context.Context, deviceName string, commandName string,
@@ -74,15 +75,15 @@ func (app *CameraManagementApp) issueGetCommandForResponse(ctx context.Context, 
 }
 
 func issuePostRequest(ctx context.Context, res interface{}, baseUrl string, reqPath string, jsonValue []byte) (err error) {
-	return utils.PostRequest(ctx, &res, baseUrl, reqPath, jsonValue, common.ContentTypeJSON)
+	return utils.PostRequest(ctx, &res, baseUrl, reqPath, jsonValue, common.ContentTypeJSON, nil)
 }
 
 func issueGetRequest(ctx context.Context, res interface{}, baseUrl string, requestPath string) (err error) {
-	return utils.GetRequest(ctx, &res, baseUrl, requestPath, nil)
+	return utils.GetRequest(ctx, &res, baseUrl, requestPath, nil, nil)
 }
 
 func issueDeleteRequest(ctx context.Context, res interface{}, baseUrl string, requestPath string) (err error) {
-	return utils.DeleteRequest(ctx, &res, baseUrl, requestPath)
+	return utils.DeleteRequest(ctx, &res, baseUrl, requestPath, nil)
 }
 
 func respondError(lc logger.LoggingClient, w http.ResponseWriter, statusCode int, errStr string) {

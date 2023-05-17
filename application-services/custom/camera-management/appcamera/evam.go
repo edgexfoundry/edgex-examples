@@ -12,11 +12,11 @@ import (
 	"net/url"
 	"path"
 
-	"github.com/edgexfoundry/go-mod-core-contracts/v2/common"
+	"github.com/edgexfoundry/go-mod-core-contracts/v3/common"
 
 	"github.com/IOTechSystems/onvif/media"
-	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/interfaces"
-	"github.com/edgexfoundry/go-mod-core-contracts/v2/dtos"
+	"github.com/edgexfoundry/app-functions-sdk-go/v3/pkg/interfaces"
+	"github.com/edgexfoundry/go-mod-core-contracts/v3/dtos"
 	"github.com/pkg/errors"
 )
 
@@ -245,11 +245,11 @@ func (app *CameraManagementApp) processEdgeXDeviceSystemEvent(_ interfaces.AppFu
 	}
 
 	switch systemEvent.Action {
-	case common.DeviceSystemEventActionAdd:
+	case common.SystemEventActionAdd:
 		if err = app.startDefaultPipeline(device); err != nil {
 			return false, err
 		}
-	case common.DeviceSystemEventActionDelete:
+	case common.SystemEventActionDelete:
 		// stop any running pipelines for the deleted device
 		if info, found := app.getPipelineInfo(device.Name); found {
 			if err = app.stopPipeline(device.Name, info.Id); err != nil {

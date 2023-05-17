@@ -8,12 +8,13 @@ package appcamera
 import (
 	"context"
 	"fmt"
+
 	"github.com/IOTechSystems/onvif/device"
 	"github.com/IOTechSystems/onvif/media"
 	"github.com/IOTechSystems/onvif/ptz"
 	"github.com/IOTechSystems/onvif/xsd/onvif"
-	"github.com/edgexfoundry/go-mod-core-contracts/v2/dtos"
-	dtosCommon "github.com/edgexfoundry/go-mod-core-contracts/v2/dtos/common"
+	"github.com/edgexfoundry/go-mod-core-contracts/v3/dtos"
+	dtosCommon "github.com/edgexfoundry/go-mod-core-contracts/v3/dtos/common"
 	"github.com/pkg/errors"
 )
 

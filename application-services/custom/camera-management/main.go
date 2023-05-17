@@ -20,9 +20,9 @@ import (
 	"fmt"
 	"os"
 
-	appsdk "github.com/edgexfoundry/app-functions-sdk-go/v2/pkg"
+	appsdk "github.com/edgexfoundry/app-functions-sdk-go/v3/pkg"
 	"github.com/edgexfoundry/edgex-examples/application-services/custom/camera-management/appcamera"
-	"github.com/edgexfoundry/go-mod-core-contracts/v2/dtos"
+	"github.com/edgexfoundry/go-mod-core-contracts/v3/dtos"
 )
 
 const (

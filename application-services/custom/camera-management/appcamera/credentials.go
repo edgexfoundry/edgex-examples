@@ -6,8 +6,8 @@
 package appcamera
 
 import (
-	"github.com/edgexfoundry/go-mod-bootstrap/v2/config"
-	"github.com/edgexfoundry/go-mod-core-contracts/v2/errors"
+	"github.com/edgexfoundry/go-mod-bootstrap/v3/config"
+	"github.com/edgexfoundry/go-mod-core-contracts/v3/errors"
 )
 
 const (
@@ -19,7 +19,7 @@ const (
 // tryGetCredentials will attempt one time to get the camera credentials from the
 // secret provider and return them, otherwise return an error.
 func (app *CameraManagementApp) tryGetCredentials() (config.Credentials, errors.EdgeX) {
-	secretData, err := app.service.GetSecret(CameraCredentials, UsernameKey, PasswordKey)
+	secretData, err := app.service.SecretProvider().GetSecret(CameraCredentials, UsernameKey, PasswordKey)
 	if err != nil {
 		return config.Credentials{}, errors.NewCommonEdgeXWrapper(err)
 	}
