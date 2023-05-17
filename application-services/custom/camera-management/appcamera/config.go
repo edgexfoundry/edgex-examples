@@ -12,6 +12,8 @@ type CustomConfig struct {
 	EvamBaseUrl            string
 	MqttAddress            string
 	MqttTopic              string
+	DefaultPipelineName    string
+	DefaultPipelineVersion string
 }
 
 // ServiceConfig a struct that wraps CustomConfig which holds the values for driver configuration

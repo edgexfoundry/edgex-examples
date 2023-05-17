@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2022 Intel Corporation
+// Copyright (c) 2022-2023 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,9 +18,11 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	appsdk "github.com/edgexfoundry/app-functions-sdk-go/v2/pkg"
 	"github.com/edgexfoundry/edgex-examples/application-services/custom/camera-management/appcamera"
-	"os"
+	"github.com/edgexfoundry/go-mod-core-contracts/v2/dtos"
 )
 
 const (
@@ -28,7 +30,7 @@ const (
 )
 
 func main() {
-	service, ok := appsdk.NewAppService(serviceKey)
+	service, ok := appsdk.NewAppServiceWithTargetType(serviceKey, &dtos.SystemEvent{})
 	if !ok {
 		fmt.Printf("error: unable to create new app service %s!\n", serviceKey)
 		os.Exit(-1)
