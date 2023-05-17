@@ -7,7 +7,7 @@
 
 export const environment = {
   production: false,
-  appServiceBaseUrl: 'http://localhost:59750/api/v2',
+  appServiceBaseUrl: 'http://localhost:59750/api/v3',
   defaultPipelineId: 'object_detection/person_vehicle_bike',
 
   mqtt: {

@@ -3,7 +3,7 @@
 
 export const environment = {
   production: true,
-  appServiceBaseUrl: '/api/v2',
+  appServiceBaseUrl: '/api/v3',
   defaultPipelineId: 'object_detection/person_vehicle_bike',
 
   mqtt: {
