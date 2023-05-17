@@ -9,10 +9,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/IOTechSystems/onvif/media"
-	"github.com/pkg/errors"
 	"net/url"
 	"path"
+
+	"github.com/edgexfoundry/go-mod-core-contracts/v2/common"
+
+	"github.com/IOTechSystems/onvif/media"
+	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/interfaces"
+	"github.com/edgexfoundry/go-mod-core-contracts/v2/dtos"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -216,6 +221,93 @@ func (app *CameraManagementApp) getPipelineStatus(deviceName string) (interface{
 	}
 
 	return nil, nil
+}
+
+// processEdgeXDeviceSystemEvent is the function that is called when an EdgeX Device System Event is received
+func (app *CameraManagementApp) processEdgeXDeviceSystemEvent(_ interfaces.AppFunctionContext, data interface{}) (bool, interface{}) {
+	if data == nil {
+		return false, fmt.Errorf("processEdgeXDeviceSystemEvent: was called without any data")
+	}
+
+	systemEvent, ok := data.(dtos.SystemEvent)
+	if !ok {
+		return false, fmt.Errorf("type received %T is not a SystemEvent", data)
+	}
+
+	if systemEvent.Type != common.DeviceSystemEventType {
+		return false, fmt.Errorf("system event type is not " + common.DeviceSystemEventType)
+	}
+
+	device := dtos.Device{}
+	err := systemEvent.DecodeDetails(&device)
+	if err != nil {
+		return false, fmt.Errorf("failed to decode device details: %v", err)
+	}
+
+	switch systemEvent.Action {
+	case common.DeviceSystemEventActionAdd:
+		if err = app.startDefaultPipeline(device); err != nil {
+			return false, err
+		}
+	case common.DeviceSystemEventActionDelete:
+		// stop any running pipelines for the deleted device
+		if info, found := app.getPipelineInfo(device.Name); found {
+			if err = app.stopPipeline(device.Name, info.Id); err != nil {
+				return false, fmt.Errorf("error stopping pipleline for device %s, %v", device.Name, err)
+			}
+		}
+	default:
+		app.lc.Debugf("System event action %s is not handled", systemEvent.Action)
+	}
+
+	return false, nil
+}
+
+func (app *CameraManagementApp) startDefaultPipeline(device dtos.Device) error {
+	pipelineRunning := app.isPipelineRunning(device.Name)
+
+	if pipelineRunning {
+		app.lc.Debugf("pipeline is already running for device %s", device.Name)
+		return nil
+	}
+
+	app.lc.Debugf("pipeline is not running for device %s", device.Name)
+
+	if app.config.AppCustom.DefaultPipelineName == "" || app.config.AppCustom.DefaultPipelineVersion == "" {
+		app.lc.Warnf("no default pipeline name/version specified, skip starting pipeline for device %s", device.Name)
+		return nil
+	}
+
+	startPipelineRequest := StartPipelineRequest{
+		PipelineName:    app.config.AppCustom.DefaultPipelineName,
+		PipelineVersion: app.config.AppCustom.DefaultPipelineVersion,
+	}
+
+	protocol, ok := device.Protocols["Onvif"]
+	if ok {
+		app.lc.Debugf("Onvif protocol information found for device: %s message: %v", device.Name, protocol)
+		profileResponse, err := app.getProfiles(device.Name)
+		if err != nil {
+			return fmt.Errorf("failed to get profiles for device %s, message: %v", device.Name, err)
+
+		}
+
+		app.lc.Debugf("Onvif profile information found for device: %s message: %v", device.Name, profileResponse)
+		startPipelineRequest.Onvif = &OnvifPipelineConfig{
+			ProfileToken: string(profileResponse.Profiles[0].Token),
+		}
+	} else if _, ok := device.Protocols["USB"]; ok {
+		app.lc.Debugf("Usb protocol found for device: %s", device.Name)
+		startPipelineRequest.USB = &USBStartStreamingRequest{}
+	}
+
+	app.lc.Debugf("Starting default pipeline for device %s", device.Name)
+	if err := app.startPipeline(device.Name, startPipelineRequest); err != nil {
+		return fmt.Errorf("pipeline failed to start for device %s, message: %v", device.Name, err)
+
+	}
+
+	return nil
 }
 
 // queryAllPipelineStatuses queries EVAM for all pipeline statuses, attempts to link them to devices, and then

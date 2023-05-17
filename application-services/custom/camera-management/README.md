@@ -1,7 +1,8 @@
 # Camera Management Example App Service
 Use the Camera Management Example application service to auto discover and connect to nearby ONVIF and USB based cameras. This application will also control cameras via commands, create inference pipelines for the camera video streams and publish inference results to MQTT broker.
 
-This app uses [EdgeX compose][edgex-compose], [Edgex Onvif Camera device service][device-onvif-camera], [Edgex USB Camera device service][device-usb-camera] and [Edge Video Analytics Microservice][evam].
+This app uses [EdgeX compose][edgex-compose], [Edgex Onvif Camera device service][device-onvif-camera], 
+[Edgex USB Camera device service][device-usb-camera], [Edgex MQTT device service][device-mqtt] and [Edge Video Analytics Microservice][evam].
 
 A brief video demonstration of building and using the example app service can be found [here](https://www.youtube.com/watch?v=vZqd3j2Zn2Y).
 
@@ -107,13 +108,25 @@ sudo apt install build-essential
 
    b. Under the `ports` section, find the entry for port 8554 and change the host_ip from `127.0.0.1` to either `0.0.0.0` or the ip address you put in the previous step.
 
-6. Run the following `make` command to run the edgex core services along with the Onvif and Usb device services. 
+6. Run the following `make` command to generate the edgex core services along with MQTT, Onvif and Usb device services.
 
   > **Note**: The `ds-onvif-camera` parameter can be omitted if no Onvif cameras are present, or the `ds-usb-camera` parameter can be omitted if no usb cameras are present.
 ```shell
-   make run no-secty ds-onvif-camera ds-usb-camera 
+   make gen no-secty ds-mqtt mqtt-broker ds-onvif-camera ds-usb-camera 
 ```   
 
+7. Configure [device-mqtt] service to send [Edge Video Analytics Microservice][evam] inference results into Edgex via MQTT
+
+      a. Copy the entire [evam-mqtt-edgex](edge-video-analytics/evam-mqtt-edgex) folder into `edgex-compose/compose-builder` directory.
+
+      b. Copy and paste [docker-compose.override.yml](edge-video-analytics/evam-mqtt-edgex/docker-compose.override.yml) from the above copied folder into edgex-compose/compose-builder directory.
+         Insert full path of `edgex-compose/compose-builder` directory under volumes in this `docker-compose.override.yml`.
+   > **Note**: Please note that both the services in this file need the full path to be inserted for their volumes.
+   
+8. Run the following command to start all the Edgex services.
+```shell
+   docker compose -f docker-compose.yml -f docker-compose.override.yml up -d
+```  
 
 ### 2. Start [Edge Video Analytics Microservice][evam] running for inference.
 
@@ -142,7 +155,7 @@ make run-edge-video-analytics
    > **Note**: This step is only required if you have Onvif cameras. Currently, this example app is limited to supporting
    > only 1 username/password combination for all Onvif cameras.
 
-   > **Note:** Please follow the instructions for the [Edgex Onvif Camera device service][device-onvif-camera] in order to connect your Onvif cameras to EdgeX.
+   > **Note**: Please follow the instructions for the [Edgex Onvif Camera device service][device-onvif-manage] in order to connect your Onvif cameras to EdgeX.
 
    Option 1: Modify the [res/configuration.toml](res/configuration.toml) file
 
@@ -160,7 +173,19 @@ make run-edge-video-analytics
    export WRITABLE_INSECURESECRETS_CAMERACREDENTIALS_SECRETS_PASSWORD="<password>"
    ```  
 
-#### 3.2 Build and run
+#### 3.2 Configure Default Pipeline
+Initially, all new cameras added to the system will start the default analytics pipeline as defined in the configuration file below. The desired pipeline can be changed afterward or the feature can be disabled by setting the `DefaultPipelineName` and `DefaultPipelineVersion` to empty strings.   
+
+Modify the [res/configuration.toml](res/configuration.toml) file with the name and version of the default pipeline to use when a new device is added to the system.
+
+Note: These values can be left empty to disable the feature.
+   ```toml
+[AppCustom]
+DefaultPipelineName = "object_detection" # Name of the default pipeline used when a new device is added to the system
+DefaultPipelineVersion = "person" # Version of the default pipeline used when a new device is added to the system
+   ```
+
+#### 3.3 Build and run
 ```shell
 # First make sure you are at the root of this example app
 cd edgex-examples/application-services/custom/camera-management
@@ -256,6 +281,16 @@ The API log shows the status of the 5 most recent calls and commands that the ma
 
 ![inference events](./images/inference-events.png)  
 
+### Inference results in Edgex
+
+To view inference results in Edgex, open Edgex UI [http://localhost:4000](http://localhost:4000), click on the `DataCenter`
+tab and view data streaming under `Event Data Stream`by clicking on the `Start` button.
+
+![inference events](./images/inference-edgex.png)
+
+### Next steps
+A custom app service can be used to analyze this inference data and take action based on the analysis.
+
 ## Additional Development
 
 > **Warning**: The following steps are only useful for developers who wish to make modifications to the code
@@ -281,5 +316,7 @@ Open your browser to [http://localhost:4200](http://localhost:4200)
 
 [edgex-compose]: https://github.com/edgexfoundry/edgex-compose
 [device-onvif-camera]: https://github.com/edgexfoundry/device-onvif-camera
+[device-onvif-manage]: https://github.com/edgexfoundry/device-onvif-camera/blob/levski/doc/guides/SimpleStartupGuide.md#manage-devices
 [device-usb-camera]: https://github.com/edgexfoundry/device-usb-camera
 [evam]: https://www.intel.com/content/www/us/en/developer/articles/technical/video-analytics-service.html
+[device-mqtt]: https://github.com/edgexfoundry/device-mqtt-go
