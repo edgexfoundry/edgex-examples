@@ -42,8 +42,8 @@ Writable:
 
   InsecureSecrets:
     mqtt:
-      path: mqtt
-      Secrets:
+      SecretName: mqtt
+      SecretData:
         username: use-token-auth
         # TODO - Change <Authentication-Token> placeholder
         password: <Authentication-Token>
