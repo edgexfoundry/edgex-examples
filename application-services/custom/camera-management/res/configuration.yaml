@@ -7,8 +7,8 @@ Writable:
     #       for ALL cameras. In the future when then device-onvif-camera service is able to provide
     #       us with pre-authenticated uris, this can be removed.
     CameraCredentials:
-      path: CameraCredentials
-      Secrets:
+      SecretName: CameraCredentials
+      SecretData:
         username: ""
         password: ""
         

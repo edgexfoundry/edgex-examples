@@ -83,9 +83,9 @@ sudo apt install build-essential
    ```
 
 3. Checkout the latest compatible release branch
-   > **Note**: The `levski` branch is the latest stable branch at the time of this writing.
+   > **Note**: The `minnesota` branch is the latest stable branch at the time of this writing.
    ```shell
-   git checkout levski
+   git checkout minnesota
    ```
 
 4. Navigate to the `compose-builder` subdirectory:
@@ -157,32 +157,33 @@ make run-edge-video-analytics
 
    > **Note**: Please follow the instructions for the [Edgex Onvif Camera device service][device-onvif-manage] in order to connect your Onvif cameras to EdgeX.
 
-   Option 1: Modify the [res/configuration.toml](res/configuration.toml) file
+   Option 1: Modify the [res/configuration.yaml](res/configuration.yaml) file
 
-   ```toml
-   [Writable.InsecureSecrets.CameraCredentials]
-   path = "CameraCredentials"
-     [Writable.InsecureSecrets.CameraCredentials.Secrets]
-     username = "<username>"
-     password = "<password>"
+   ```yaml
+  InsecureSecrets:
+     CameraCredentials:
+        SecretName: CameraCredentials
+        SecretData:
+           username: "<username>"
+           password: "<password>"
    ```
 
    Option 2: Export environment variable overrides
    ```shell
-   export WRITABLE_INSECURESECRETS_CAMERACREDENTIALS_SECRETS_USERNAME="<username>"
-   export WRITABLE_INSECURESECRETS_CAMERACREDENTIALS_SECRETS_PASSWORD="<password>"
+   export WRITABLE_INSECURESECRETS_CAMERACREDENTIALS_SECRETDATA_USERNAME="<username>"
+   export WRITABLE_INSECURESECRETS_CAMERACREDENTIALS_SECRETDATA_PASSWORD="<password>"
    ```  
 
 #### 3.2 Configure Default Pipeline
 Initially, all new cameras added to the system will start the default analytics pipeline as defined in the configuration file below. The desired pipeline can be changed afterward or the feature can be disabled by setting the `DefaultPipelineName` and `DefaultPipelineVersion` to empty strings.   
 
-Modify the [res/configuration.toml](res/configuration.toml) file with the name and version of the default pipeline to use when a new device is added to the system.
+Modify the [res/configuration.yaml](res/configuration.yaml) file with the name and version of the default pipeline to use when a new device is added to the system.
 
 Note: These values can be left empty to disable the feature.
-   ```toml
-[AppCustom]
-DefaultPipelineName = "object_detection" # Name of the default pipeline used when a new device is added to the system
-DefaultPipelineVersion = "person" # Version of the default pipeline used when a new device is added to the system
+   ```yaml
+   AppCustom:
+     DefaultPipelineName: object_detection # Name of the default pipeline used when a new device is added to the system; can be left blank to disable feature
+     DefaultPipelineVersion: person # Version of the default pipeline used when a new device is added to the system; can be left blank to disable feature
    ```
 
 #### 3.3 Build and run
@@ -316,7 +317,7 @@ Open your browser to [http://localhost:4200](http://localhost:4200)
 
 [edgex-compose]: https://github.com/edgexfoundry/edgex-compose
 [device-onvif-camera]: https://github.com/edgexfoundry/device-onvif-camera
-[device-onvif-manage]: https://github.com/edgexfoundry/device-onvif-camera/blob/levski/doc/guides/SimpleStartupGuide.md#manage-devices
+[device-onvif-manage]: https://docs.edgexfoundry.org/latest/microservices/device/supported/device-onvif-camera/Walkthrough/deployment/#manage-devices
 [device-usb-camera]: https://github.com/edgexfoundry/device-usb-camera
 [evam]: https://www.intel.com/content/www/us/en/developer/articles/technical/video-analytics-service.html
 [device-mqtt]: https://github.com/edgexfoundry/device-mqtt-go
