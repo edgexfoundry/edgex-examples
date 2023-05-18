@@ -8,7 +8,7 @@ module github.com/edgexfoundry/edgex-examples/application-services/custom/camera
 go 1.18
 
 require (
-	github.com/IOTechSystems/onvif v0.0.2-0.20220301065030-7cf2dd734897
+	github.com/IOTechSystems/onvif v0.1.6
 	github.com/edgexfoundry/app-functions-sdk-go/v3 v3.0.0-dev.66
 	github.com/edgexfoundry/go-mod-bootstrap/v3 v3.0.0-dev.90
 	github.com/edgexfoundry/go-mod-core-contracts/v3 v3.0.0-dev.41

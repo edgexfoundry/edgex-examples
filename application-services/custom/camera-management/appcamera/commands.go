@@ -19,13 +19,13 @@ import (
 )
 
 const (
-	relativeMoveCommand       = "RelativeMove"
-	gotoPresetCommand         = "GotoPreset"
+	relativeMoveCommand       = "PTZRelativeMove"
+	gotoPresetCommand         = "PTZGotoPreset"
 	streamUriCommand          = "StreamUri"
-	profilesCommand           = "Profiles"
-	getPresetsCommand         = "GetPresets"
+	profilesCommand           = "MediaProfiles"
+	getPresetsCommand         = "PTZPresets"
 	getCapabilitiesCommand    = "Capabilities"
-	getConfigurationsCommand  = "GetConfigurations"
+	getConfigurationsCommand  = "PTZConfigurations"
 	startStreamingCommand     = "StartStreaming"
 	stopStreamingCommand      = "StopStreaming"
 	usbStreamUriCommand       = "StreamURI"
@@ -102,7 +102,7 @@ func (app *CameraManagementApp) getCameraFeatures(deviceName string) (CameraFeat
 
 func (app *CameraManagementApp) getCapabilities(deviceName string) (device.GetCapabilitiesResponse, error) {
 	cmd := &device.GetCapabilities{
-		Category: onvif.CapabilityCategory("All"),
+		Category: []onvif.CapabilityCategory{onvif.CapabilityCategory("All")},
 	}
 
 	resp := device.GetCapabilitiesResponse{}
