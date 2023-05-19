@@ -20,7 +20,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:59780/api/v2/trigger",
+					"raw": "http://localhost:59780/api/v3/trigger",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -50,7 +50,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:59780/api/v2/trigger",
+					"raw": "http://localhost:59780/api/v3/trigger",
 					"protocol": "http",
 					"host": [
 						"localhost"
