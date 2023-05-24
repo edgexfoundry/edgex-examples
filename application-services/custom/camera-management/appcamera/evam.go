@@ -111,15 +111,19 @@ func (app *CameraManagementApp) startPipeline(deviceName string, sr StartPipelin
 	}
 	app.lc.Infof("Received stream uri for the device %s: %s", deviceName, streamUri)
 
+	// set the secret name to be the onvif credentials by default
+	secretName := CameraCredentials
 	// if device is usb camera, start streaming first
 	if sr.USB != nil {
 		_, err := app.startStreaming(deviceName, *sr.USB)
 		if err != nil {
 			return errors.Wrapf(err, "failed to start streaming usb camera %s", deviceName)
 		}
+		// for usb cameras, use the rtspauth credentials instead
+		secretName = rtspauth
 	}
 
-	body, err := app.createPipelineRequestBody(streamUri, deviceName)
+	body, err := app.createPipelineRequestBody(streamUri, deviceName, secretName)
 	if err != nil {
 		return errors.Wrapf(err, "failed to create DLStreamer pipeline request body")
 	}
@@ -173,14 +177,14 @@ func (app *CameraManagementApp) stopPipeline(deviceName string, id string) error
 	return nil
 }
 
-func (app *CameraManagementApp) createPipelineRequestBody(streamUri string, deviceName string) ([]byte, error) {
+func (app *CameraManagementApp) createPipelineRequestBody(streamUri string, deviceName string, secretName string) ([]byte, error) {
 	uri, err := url.Parse(streamUri)
 	if err != nil {
 		return nil, err
 	}
 
-	if creds, err := app.tryGetCredentials(); err != nil {
-		app.lc.Warnf("Error retrieving %s secret from the SecretStore: %s", CameraCredentials, err.Error())
+	if creds, err := app.tryGetCredentials(secretName); err != nil {
+		app.lc.Warnf("Error retrieving %s secret from the SecretStore: %s", secretName, err.Error())
 	} else {
 		uri.User = url.UserPassword(creds.Username, creds.Password)
 	}

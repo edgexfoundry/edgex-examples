@@ -25,7 +25,7 @@ build-app: tidy
 tidy:
 	go mod tidy
 
-run-app:
+run-app: build-app
 	EDGEX_SECURITY_SECRET_STORE=false ./$(MICROSERVICE) -cp -d
 
 # TODO: Change the registries (edgexfoundry, nexus3.edgexfoundry.org:10004) below as needed.

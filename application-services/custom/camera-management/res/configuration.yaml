@@ -11,7 +11,14 @@ Writable:
       SecretData:
         username: ""
         password: ""
-        
+
+    # TODO: Enter your device-usb-camera RTSP server credentials here.
+    rtspauth:
+      SecretName: rtspauth
+      SecretData:
+        username: ""
+        password: ""
+
   Telemetry:
     Interval: 0s  # Disables reporting of metrics
     
