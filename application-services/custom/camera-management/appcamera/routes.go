@@ -10,10 +10,10 @@ import (
 	"net/http"
 	"path"
 
-	dtosCommon "github.com/edgexfoundry/go-mod-core-contracts/v2/dtos/common"
+	dtosCommon "github.com/edgexfoundry/go-mod-core-contracts/v3/dtos/common"
 	"github.com/gorilla/mux"
 
-	"github.com/edgexfoundry/go-mod-core-contracts/v2/common"
+	"github.com/edgexfoundry/go-mod-core-contracts/v3/common"
 	"github.com/pkg/errors"
 )
 

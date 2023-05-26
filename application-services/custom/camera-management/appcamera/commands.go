@@ -8,23 +8,24 @@ package appcamera
 import (
 	"context"
 	"fmt"
+
 	"github.com/IOTechSystems/onvif/device"
 	"github.com/IOTechSystems/onvif/media"
 	"github.com/IOTechSystems/onvif/ptz"
 	"github.com/IOTechSystems/onvif/xsd/onvif"
-	"github.com/edgexfoundry/go-mod-core-contracts/v2/dtos"
-	dtosCommon "github.com/edgexfoundry/go-mod-core-contracts/v2/dtos/common"
+	"github.com/edgexfoundry/go-mod-core-contracts/v3/dtos"
+	dtosCommon "github.com/edgexfoundry/go-mod-core-contracts/v3/dtos/common"
 	"github.com/pkg/errors"
 )
 
 const (
-	relativeMoveCommand       = "RelativeMove"
-	gotoPresetCommand         = "GotoPreset"
+	relativeMoveCommand       = "PTZRelativeMove"
+	gotoPresetCommand         = "PTZGotoPreset"
 	streamUriCommand          = "StreamUri"
-	profilesCommand           = "Profiles"
-	getPresetsCommand         = "GetPresets"
+	profilesCommand           = "MediaProfiles"
+	getPresetsCommand         = "PTZPresets"
 	getCapabilitiesCommand    = "Capabilities"
-	getConfigurationsCommand  = "GetConfigurations"
+	getConfigurationsCommand  = "PTZConfigurations"
 	startStreamingCommand     = "StartStreaming"
 	stopStreamingCommand      = "StopStreaming"
 	usbStreamUriCommand       = "StreamURI"
@@ -101,7 +102,7 @@ func (app *CameraManagementApp) getCameraFeatures(deviceName string) (CameraFeat
 
 func (app *CameraManagementApp) getCapabilities(deviceName string) (device.GetCapabilitiesResponse, error) {
 	cmd := &device.GetCapabilities{
-		Category: onvif.CapabilityCategory("All"),
+		Category: []onvif.CapabilityCategory{onvif.CapabilityCategory("All")},
 	}
 
 	resp := device.GetCapabilitiesResponse{}
