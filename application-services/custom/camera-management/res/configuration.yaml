@@ -2,22 +2,24 @@ Writable:
   LogLevel: INFO
   
   InsecureSecrets:
-    # TODO: Enter your camera's credentials here.
+    # TODO: Enter your device-onvif-camera credentials here.
     # NOTE: currently this solution is limited to supporting only 1 username/password combination
     #       for ALL cameras. In the future when then device-onvif-camera service is able to provide
     #       us with pre-authenticated uris, this can be removed.
-    CameraCredentials:
-      SecretName: CameraCredentials
+    onvifCredentials:
+      # Do not modify the SecretName, only add the username and password
+      SecretName: onvifAuth
       SecretData:
-        username: ""
-        password: ""
+        username: "admin007"
+        password: "admin007"
 
     # TODO: Enter your device-usb-camera RTSP server credentials here.
-    rtspauth:
-      SecretName: rtspauth
+    usbCredentials:
+      # Do not modify the SecretName, only add the username and password
+      SecretName: rtspAuth
       SecretData:
-        username: ""
-        password: ""
+        username: "admin007"
+        password: "admin007"
 
   Telemetry:
     Interval: 0s  # Disables reporting of metrics

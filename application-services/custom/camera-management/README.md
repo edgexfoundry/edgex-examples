@@ -161,8 +161,8 @@ make run-edge-video-analytics
 
    ```yaml
   InsecureSecrets:
-     CameraCredentials:
-        SecretName: CameraCredentials
+     onvifCredentials:
+        SecretName: onvifAuth
         SecretData:
            username: "<username>"
            password: "<password>"
@@ -170,8 +170,8 @@ make run-edge-video-analytics
 
    Option 2: Export environment variable overrides
    ```shell
-   export WRITABLE_INSECURESECRETS_CAMERACREDENTIALS_SECRETDATA_USERNAME="<username>"
-   export WRITABLE_INSECURESECRETS_CAMERACREDENTIALS_SECRETDATA_PASSWORD="<password>"
+   export WRITABLE_INSECURESECRETS_ONVIFAUTH_SECRETDATA_USERNAME="<username>"
+   export WRITABLE_INSECURESECRETS_ONVIFAUTH_SECRETDATA_PASSWORD="<password>"
    ```  
 
 #### 3.2 (Optional) Configure USB Camera RTSP Credentials.
@@ -183,8 +183,8 @@ Option 1: Modify the [res/configuration.yaml](res/configuration.yaml) file
 
    ```yaml
   InsecureSecrets:
-     rtspauth:
-        SecretName: rtspauth
+     usbCredentials:
+        SecretName: rtspAuth
         SecretData:
            username: "<username>"
            password: "<password>"
