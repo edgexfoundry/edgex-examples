@@ -10,16 +10,16 @@ Writable:
       # Do not modify the SecretName, only add the username and password
       SecretName: onvifAuth
       SecretData:
-        username: "admin007"
-        password: "admin007"
+        username: ""
+        password: ""
 
     # TODO: Enter your device-usb-camera RTSP server credentials here.
     usbCredentials:
       # Do not modify the SecretName, only add the username and password
       SecretName: rtspAuth
       SecretData:
-        username: "admin007"
-        password: "admin007"
+        username: ""
+        password: ""
 
   Telemetry:
     Interval: 0s  # Disables reporting of metrics
