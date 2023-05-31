@@ -340,9 +340,9 @@ edgex:
     runAsUser: 2002
     runAsGroup: 2001
     tlsHost: edgex
-    addConsulRoles: "app-external-mqtt-trigger,app-http-export,app-metrics-influxdb,app-mqtt-export,app-rfid-llrp-inventory,app-sample,device-bacnet,device-coap,device-gpio,device-modbus,device-mqtt,device-onvif-camera,device-rfid-llrp,device-snmp,device-usb-camera"
-    addServiceTokens: "app-external-mqtt-trigger,app-http-export,app-metrics-influxdb,app-mqtt-export,app-rfid-llrp-inventory,app-sample,device-bacnet,device-coap,device-gpio,device-modbus,device-mqtt,device-onvif-camera,device-rest,device-rfid-llrp,device-snmp,device-usb-camera,device-virtual"
-    addKnownSecrets: "redisdb[app-external-mqtt-trigger;app-http-export;app-metrics-influxdb;app-mqtt-export;app-rfid-llrp-inventory;app-sample;device-bacnet;device-coap;device-gpio;device-modbus;device-mqtt;device-onvif-camera;device-rest;device-rfid-llrp;device-snmp;device-usb-camera;device-virtual],message-bus[app-external-mqtt-trigger;app-http-export;app-metrics-influxdb;app-mqtt-export;app-rfid-llrp-inventory;app-sample;device-bacnet;device-coap;device-gpio;device-modbus;device-mqtt;device-onvif-camera;device-rest;device-rfid-llrp;device-snmp;device-usb-camera;device-virtual]"
+    addConsulRoles: "app-external-mqtt-trigger,app-http-export,app-metrics-influxdb,app-mqtt-export,app-rfid-llrp-inventory,app-sample,device-bacnet-ip,device-coap,device-gpio,device-modbus,device-mqtt,device-onvif-camera,device-rfid-llrp,device-snmp,device-usb-camera"
+    addServiceTokens: "app-external-mqtt-trigger,app-http-export,app-metrics-influxdb,app-mqtt-export,app-rfid-llrp-inventory,app-sample,device-bacnet-ip,device-coap,device-gpio,device-modbus,device-mqtt,device-onvif-camera,device-rest,device-rfid-llrp,device-snmp,device-usb-camera,device-virtual"
+    addKnownSecrets: "redisdb[app-external-mqtt-trigger;app-http-export;app-metrics-influxdb;app-mqtt-export;app-rfid-llrp-inventory;app-sample;device-bacnet-ip;device-coap;device-gpio;device-modbus;device-mqtt;device-onvif-camera;device-rest;device-rfid-llrp;device-snmp;device-usb-camera;device-virtual],message-bus[app-external-mqtt-trigger;app-http-export;app-metrics-influxdb;app-mqtt-export;app-rfid-llrp-inventory;app-sample;device-bacnet-ip;device-coap;device-gpio;device-modbus;device-mqtt;device-onvif-camera;device-rest;device-rfid-llrp;device-snmp;device-usb-camera;device-virtual]"
 
   # resources defines the cpu and memory limits and requests for the respective application
   resources:

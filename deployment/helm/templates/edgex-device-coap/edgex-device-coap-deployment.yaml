@@ -46,7 +46,6 @@ spec:
           - "/device-coap"
           - "-cp=consul://edgex-core-consul:8500"
           - "--registry"
-          - "--confdir=/res"
       {{- end}}
         ports:
         - containerPort: {{.Values.edgex.port.device.coap}}
@@ -63,6 +62,8 @@ spec:
         envFrom:
         - configMapRef:
             name: edgex-common-variables
+        - configMapRef:
+            name: edgex-device-c-sdk-environment
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
