@@ -207,15 +207,15 @@ edgex:
       pullPolicy: IfNotPresent
     redis:
       repository: redis
-      tag: "7.0.5-alpine"
+      tag: "7.0.11-alpine"
       pullPolicy: IfNotPresent
     ekuiper:
       repository: lfedge/ekuiper
-      tag: "1.7.1-alpine"
+      tag: "1.9.2-alpine"
       pullPolicy: IfNotPresent
     vault:
       repository: hashicorp/vault
-      tag: "1.13.1"
+      tag: "1.13.2"
       pullPolicy: IfNotPresent
     bootstrapper:
       repository: edgexfoundry/security-bootstrapper
@@ -235,11 +235,11 @@ edgex:
       pullPolicy: IfNotPresent
     mqttbroker:
       repository: eclipse-mosquitto
-      tag: "2.0"
+      tag: "2.0.15"
       pullPolicy: IfNotPresent
     natsserver:
       repository: nats
-      tag: "2.9.3-alpine"
+      tag: "2.9.16-alpine"
       pullPolicy: IfNotPresent
 
   # port defines configuration properties for container, target and host ports
