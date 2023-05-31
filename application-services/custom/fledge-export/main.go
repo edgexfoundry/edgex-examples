@@ -3,8 +3,8 @@ package main
 import (
 	"os"
 
-	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg"
-	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/transforms"
+	"github.com/edgexfoundry/app-functions-sdk-go/v3/pkg"
+	"github.com/edgexfoundry/app-functions-sdk-go/v3/pkg/transforms"
 
 	fledgeTransforms "fledge-export/pkg/transforms"
 )
@@ -33,18 +33,18 @@ func main() {
 
 	// 3) This is our pipeline configuration, the collection of functions to
 	// execute every time an event is triggered.
-	if err := service.SetFunctionsPipeline(
+	if err := service.SetDefaultFunctionsPipeline(
 		fledgeTransforms.NewConversion().TransformToFledge,
 		transforms.NewHTTPSender(fledgeEndpoint, "application/json", false).HTTPPost,
 	); err != nil {
-		lc.Errorf("SDK SetPipeline failed: %s\n", err.Error())
+		lc.Errorf("SDK SetDefaultFunctionsPipeline failed: %s\n", err.Error())
 		os.Exit(-1)
 	}
 
 	// 4) Lastly, we'll go ahead and tell the SDK to "start" and begin listening for events to trigger the pipeline.
-	err = service.MakeItRun()
+	err = service.Run()
 	if err != nil {
-		lc.Errorf("MakeItRun returned error: %s", err.Error())
+		lc.Errorf("Run returned error: %s", err.Error())
 		os.Exit(-1)
 	}
 

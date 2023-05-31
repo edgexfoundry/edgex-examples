@@ -1,7 +1,7 @@
 # app-service-configurable-ibm
 EdgeX **app-service-configurable** Profile for IBM Watson IoT Platform
 
-The [configuration.toml](/res/ibm-mqtt-export/configuration.toml) provided in this repository defines the [EdgeX app-service-configurable](https://github.com/edgexfoundry/app-service-configurable) **profile** required to send MQTT data to [IBM Watson IoT Platform](https://cloud.ibm.com/catalog/services/internet-of-things-platform#about)
+The [configuration.yaml](/res/ibm-mqtt-export/configuration.yaml) provided in this repository defines the [EdgeX app-service-configurable](https://github.com/edgexfoundry/app-service-configurable/tree/minnesota) **profile** required to send MQTT data to [IBM Watson IoT Platform](https://cloud.ibm.com/catalog/services/internet-of-things-platform#about)
 
 ## Prerequisites
 
@@ -19,7 +19,7 @@ You can build the EdgeX Foundry services using the open source code on [GitHub](
 
 If you have an Edge device generating MQTT data, you might want to send the IoT data to the cloud for real-time alerts, time series database storage, analytics and modeling. IBM Cloud provides an IoT ingestion service, Watson AI services, Cloud Object Storage and  Watson Studio data science portal that can help developers manage their IoT data and find insights.
 
-EdgeX provides an [App-Service-Configurable](https://github.com/edgexfoundry/app-service-configurable/blob/master/README.md) service as an easy way to get started with processing data flowing through EdgeX. This service leverages the App Functions SDK and provides a way for developers to use configuration instead of having to compile standalone services to utilize built in functions in the SDK. For a full list of supported/built-in functions view the README located in the App Functions SDK repository.
+EdgeX provides an [App-Service-Configurable](https://github.com/edgexfoundry/app-service-configurable/blob/minnesota/README.md) service as an easy way to get started with processing data flowing through EdgeX. This service leverages the App Functions SDK and provides a way for developers to use configuration instead of having to compile standalone services to utilize built in functions in the SDK. For a full list of supported/built-in functions view the README located in the App Functions SDK repository.
 
 ### Watson IoT Configuration Example:
 
@@ -27,40 +27,40 @@ EdgeX provides an [App-Service-Configurable](https://github.com/edgexfoundry/app
 * Create a Devicetype, Device ID and a secure Authentication token.
 * In this example, we use token authentication instead of TLS.
   * Settings \> Security \> Connection Security \> Default Connection Security Level \> TLS Optional
-* Download this [configuration.toml](./res/ibm-mqtt-export/configuration.toml) and edit the **[Writable.Pipeline.Functions.MQTTExport]** and **[Writable.InsecureSecrets.mqtt]** sections.
-* Enter your Watson IoT Organization (6 character \<orgid\>), \<DeviceType\>, \<Device ID\> and \<Authentication token\>.
-    ```yaml
-        [Writable.Pipeline.Functions.MQTTExport]
-          [Writable.Pipeline.Functions.MQTTExport.Parameters]
-          # TODO - Change <orgid> placeholder
-          BrokerAddress = "tcps://<orgid>.messaging.internetofthings.ibmcloud.com:1883"
-          Topic = "iot-2/evt/status/fmt/json"
-          # TODO - Change <orgid>, <devicetype> and <deviceid> placeholders
-          ClientId = "d:<orgid>:<devicetype>:<deviceid>"
-          QOS="0"
-          AutoReconnect="false"
-          KeepAlive = "" # Empty value means use default setting
-          ConnectionTimeout = "" # Empty value means use default setting
-          Retain="false"
-          SkipVerify = "false"
-          PersistOnError = "false"
-          AuthMode = "usernamepassword"
-          SecretPath = "/mqtt"
-      ...
-    
-        [Writable.InsecureSecrets.mqtt]
-        path = "mqtt"
-          [Writable.InsecureSecrets.mqtt.Secrets]
-          username = "use-token-auth"
-          # TODO - Change <Authentication-Token> placeholder
-          password = "<Authentication-Token>"
-          cacert = ""
-          clientcert = ""
-          clientkey = ""
-    ```
+* Download this [configuration.yaml](./res/ibm-mqtt-export/configuration.yaml) and edit the **[Writable.Pipeline.Functions.MQTTExport]** and **[Writable.InsecureSecrets.mqtt]** sections.
+  * Enter your Watson IoT Organization (6 character \<orgid\>), \<DeviceType\>, \<Device ID\> and \<Authentication token\>.
+      ```yaml
+        MQTTExport:
+          Parameters:
+            # TODO - Change <orgid> placeholder
+            BrokerAddress: "tcps://<orgid>.messaging.internetofthings.ibmcloud.com:1883"
+            # TODO - Change <orgid>, <devicetype> and <deviceid> placeholders
+            Topic: iot-2/evt/status/fmt/json
+            ClientId: "d:<orgid>:<devicetype>:<deviceid>"
+            QOS: "0"
+            AutoReconnect: "false"
+            KeepAlive: ""
+            ConnectionTimeout: ""
+            Retain: "false"
+            SkipVerify: "false"
+            PersistOnError: "false"
+            AuthMode: usernamepassword
+            SecretPath: mqtt
+       
+        InsecureSecrets:
+          mqtt:
+            path: mqtt
+            Secrets:
+              username: use-token-auth
+              # TODO - Change <Authentication-Token> placeholder
+              password: <Authentication-Token>
+              cacert: ""
+              clientcert: ""
+              clientkey: ""
+      ```
 
 * After you have made the appropriate modifications for your Watson IoT account settings, save this file. Make sure the file is saved somewhere that can be easily volume mounted into your container. i.e. next to the compose file in the next step.
-* Download the [no security compose file](https://github.com/edgexfoundry/edgex-compose/blob/ireland/docker-compose-no-secty.yml) and rename it to `docker-compose.yml`.
+* Download the [no security compose file](https://github.com/edgexfoundry/edgex-compose/blob/minnesota/docker-compose-no-secty.yml) and rename it to `docker-compose.yml`.
 * Add the following snippet to the compose file:
     ```yaml
       app-ibm-mqtt-export:
@@ -70,20 +70,10 @@ EdgeX provides an [App-Service-Configurable](https://github.com/edgexfoundry/app
           - data
         environment:
           EDGEX_PROFILE: ibm-mqtt-export
-          SERVICE_HOST: edgex-app-ibm-mqtt-export
-          CLIENTS_CORE_COMMAND_HOST: edgex-core-command
-          CLIENTS_CORE_DATA_HOST: edgex-core-data
-          CLIENTS_CORE_METADATA_HOST: edgex-core-metadata
-          CLIENTS_SUPPORT_NOTIFICATIONS_HOST: edgex-support-notifications
-          CLIENTS_SUPPORT_SCHEDULER_HOST: edgex-support-scheduler
-          DATABASES_PRIMARY_HOST: edgex-redis
           EDGEX_SECURITY_SECRET_STORE: "false"
-          MESSAGEQUEUE_HOST: edgex-redis
-          REGISTRY_HOST: edgex-core-consul
-          TRIGGER_EDGEXMESSAGEBUS_PUBLISHHOST_HOST: edgex-redis
-          TRIGGER_EDGEXMESSAGEBUS_SUBSCRIBEHOST_HOST: edgex-redis
+          SERVICE_HOST: edgex-app-ibm-mqtt-export
         hostname: edgex-app-ibm-mqtt-export
-        image: edgexfoundry/app-service-configurable:2.0.0
+        image: edgexfoundry/app-service-configurable:3.0.0
         networks:
           edgex-network: { }
         ports:
@@ -123,7 +113,6 @@ EdgeX provides an [App-Service-Configurable](https://github.com/edgexfoundry/app
   edgex-redis                   docker-entrypoint.sh redis ...   Up      127.0.0.1:6379->6379/tcp
   edgex-support-notifications   /support-notifications -cp ...   Up      127.0.0.1:59860->59860/tcp
   edgex-support-scheduler       /support-scheduler -cp=con ...   Up      127.0.0.1:59861->59861/tcp
-  edgex-sys-mgmt-agent          /sys-mgmt-agent -cp=consul ...   Up      127.0.0.1:58890->58890/tcp
   ```
 
 - Check the logs for `app-ibm-mqtt-export`
@@ -133,33 +122,35 @@ EdgeX provides an [App-Service-Configurable](https://github.com/edgexfoundry/app
   ```
 
   ```bash
-  Attaching to edgex-app-ibm-mqtt-export
-  edgex-app-ibm-mqtt-export | level=INFO ts=2021-07-16T21:18:11.5387139Z app=app-<profile> source=service.go:385 msg="Starting app-ibm-mqtt-export 2.0.0 "
-  edgex-app-ibm-mqtt-export | level=INFO ts=2021-07-16T21:18:11.5388474Z app=app-ibm-mqtt-export source=variables.go:352 msg="Variables override of '-p/-profile' by environment variable: EDGEX_PROFILE=ibm-mqtt-export"
-  edgex-app-ibm-mqtt-export | level=INFO ts=2021-07-16T21:18:11.5523933Z app=app-ibm-mqtt-export source=config.go:359 msg="Loaded service configuration from /res/ibm-mqtt-export/configuration.toml"
-  edgex-app-ibm-mqtt-export | level=INFO ts=2021-07-16T21:18:11.5541507Z app=app-ibm-mqtt-export source=variables.go:352 msg="Variables override of 'Registry.Host' by environment variable: REGISTRY_HOST=edgex-core-consul"
-  edgex-app-ibm-mqtt-export | level=INFO ts=2021-07-16T21:18:11.5542439Z app=app-ibm-mqtt-export source=variables.go:352 msg="Variables override of 'Clients.core-metadata.Host' by environment variable: CLIENTS_CORE_METADATA_HOST=edgex-core-metadata"
-  edgex-app-ibm-mqtt-export | level=INFO ts=2021-07-16T21:18:11.5542698Z app=app-ibm-mqtt-export source=variables.go:352 msg="Variables override of 'Service.Host' by environment variable: SERVICE_HOST=edgex-app-ibm-mqtt-export"
-  edgex-app-ibm-mqtt-export | level=INFO ts=2021-07-16T21:18:11.5542852Z app=app-ibm-mqtt-export source=variables.go:352 msg="Variables override of 'Trigger.EdgexMessageBus.PublishHost.Host' by environment variable: TRIGGER_EDGEXMESSAGEBUS_PUBLISHHOST_HOST=edgex-redis"
-  edgex-app-ibm-mqtt-export | level=INFO ts=2021-07-16T21:18:11.5542994Z app=app-ibm-mqtt-export source=variables.go:352 msg="Variables override of 'Trigger.EdgexMessageBus.SubscribeHost.Host' by environment variable: TRIGGER_EDGEXMESSAGEBUS_SUBSCRIBEHOST_HOST=edgex-redis"
-  edgex-app-ibm-mqtt-export | level=INFO ts=2021-07-16T21:18:11.554616Z app=app-ibm-mqtt-export source=config.go:156 msg="Using Config Provider access token of length 0"
-  edgex-app-ibm-mqtt-export | level=INFO ts=2021-07-16T21:18:11.5546915Z app=app-ibm-mqtt-export source=config.go:334 msg="Using Configuration provider (consul) from: http://edgex-core-consul:8500 with base path of edgex/appservices/2.0/app-ibm-mqtt-export"
-  edgex-app-ibm-mqtt-export | level=INFO ts=2021-07-16T21:18:11.7250966Z app=app-ibm-mqtt-export source=config.go:494 msg="Configuration has been pushed to into Configuration Provider (5 envVars overrides applied)"
-  edgex-app-ibm-mqtt-export | level=INFO ts=2021-07-16T21:18:11.7252173Z app=app-ibm-mqtt-export source=registry.go:57 msg="Using Registry access token of length 0"
-  edgex-app-ibm-mqtt-export | level=INFO ts=2021-07-16T21:18:11.7252479Z app=app-ibm-mqtt-export source=registry.go:73 msg="Using Registry (consul) from http://edgex-core-consul:8500"
-  edgex-app-ibm-mqtt-export | level=INFO ts=2021-07-16T21:18:11.743961Z app=app-ibm-mqtt-export source=telemetry.go:78 msg="Starting CPU Usage Average loop"
-  edgex-app-ibm-mqtt-export | level=INFO ts=2021-07-16T21:18:11.7464146Z app=app-ibm-mqtt-export source=server.go:78 msg="Registering standard routes..."
-  edgex-app-ibm-mqtt-export | level=INFO ts=2021-07-16T21:18:11.7465365Z app=app-ibm-mqtt-export source=configupdates.go:55 msg="Waiting for App Service configuration updates..."
-  edgex-app-ibm-mqtt-export | level=INFO ts=2021-07-16T21:18:11.7467022Z app=app-ibm-mqtt-export source=service.go:437 msg="Service started in: 208.0569ms"
-  edgex-app-ibm-mqtt-export | level=INFO ts=2021-07-16T21:18:11.7467583Z app=app-ibm-mqtt-export source=main.go:38 msg="Loading Configurable Pipeline..."
-  edgex-app-ibm-mqtt-export | level=INFO ts=2021-07-16T21:18:11.7469221Z app=app-ibm-mqtt-export source=triggerfactory.go:104 msg="EdgeX MessageBus trigger selected"
-  edgex-app-ibm-mqtt-export | level=INFO ts=2021-07-16T21:18:11.7469808Z app=app-ibm-mqtt-export source=messaging.go:64 msg="Initializing Message Bus Trigger for 'redis'"
-  edgex-app-ibm-mqtt-export | level=INFO ts=2021-07-16T21:18:11.7471749Z app=app-ibm-mqtt-export source=messaging.go:96 msg="Subscribing to topic(s): 'edgex/events/#' @ redis://edgex-redis:6379"
-  edgex-app-ibm-mqtt-export | level=INFO ts=2021-07-16T21:18:11.7472306Z app=app-ibm-mqtt-export source=messaging.go:105 msg="Publishing to topic: '' @ ://edgex-redis:0"
-  edgex-app-ibm-mqtt-export | level=INFO ts=2021-07-16T21:18:11.7472606Z app=app-ibm-mqtt-export source=service.go:190 msg="StoreAndForward disabled. Not running retry loop."
-  edgex-app-ibm-mqtt-export | level=INFO ts=2021-07-16T21:18:11.74728Z app=app-ibm-mqtt-export source=service.go:193 msg="app-mqtt-export has started"
-  edgex-app-ibm-mqtt-export | level=INFO ts=2021-07-16T21:18:11.7473174Z app=app-ibm-mqtt-export source=server.go:147 msg="Starting HTTP Web Server on address edgex-app-ibm-mqtt-export:59780"
-  edgex-app-ibm-mqtt-export | level=INFO ts=2021-07-16T21:18:11.7473287Z app=app-ibm-mqtt-export source=messaging.go:117 msg="Waiting for messages from the MessageBus on the 'edgex/events/#' topic"
+  level=INFO ts=2023-05-03T21:05:24.789823262Z app=app-<profile> source=service.go:490 msg="Starting app-ibm-mqtt-export 3.0.0 "
+  level=INFO ts=2023-05-03T21:05:24.789949262Z app=app-ibm-mqtt-export source=config.go:629 msg="Using Configuration provider (consul) from: http://localhost:8500 with base path of edgex/v3/core-common-config-
+  level=INFO ts=2023-05-03T21:05:24.930048273Z app=app-ibm-mqtt-export source=config.go:240 msg="listening for private config changes"
+  level=INFO ts=2023-05-03T21:05:24.930073473Z app=app-ibm-mqtt-export source=config.go:242 msg="listening for all services common config changes"
+  level=INFO ts=2023-05-03T21:05:24.930104873Z app=app-ibm-mqtt-export source=config.go:245 msg="listening for application service common config changes"
+  level=INFO ts=2023-05-03T21:05:24.930142273Z app=app-ibm-mqtt-export source=messaging.go:66 msg="Setting options for secure MessageBus with AuthMode='usernamepassword' and SecretName='redisdb"
+  level=INFO ts=2023-05-03T21:05:24.930227273Z app=app-ibm-mqtt-export source=messaging.go:104 msg="Connected to redis Message Bus @ redis://localhost:6379 with AuthMode='usernamepassword'"
+  level=INFO ts=2023-05-03T21:05:24.930260473Z app=app-ibm-mqtt-export source=clients.go:164 msg="Using REST for 'core-metadata' clients @ http://localhost:59881"
+  level=INFO ts=2023-05-03T21:05:24.931320578Z app=app-ibm-mqtt-export source=manager.go:127 msg="Metrics Manager started with a report interval of 30s"
+  level=INFO ts=2023-05-03T21:05:24.931377278Z app=app-ibm-mqtt-export source=bootstrap.go:251 msg="SecuritySecretsRequested metric registered and will be reported (if enabled)"
+  level=INFO ts=2023-05-03T21:05:24.931390678Z app=app-ibm-mqtt-export source=bootstrap.go:251 msg="SecuritySecretsStored metric registered and will be reported (if enabled)"
+  level=INFO ts=2023-05-03T21:05:24.931544879Z app=app-ibm-mqtt-export source=configupdates.go:48 msg="Waiting for App Service configuration updates..."
+  level=INFO ts=2023-05-03T21:05:24.931535079Z app=app-ibm-mqtt-export source=server.go:88 msg="Registering standard routes..."
+  level=INFO ts=2023-05-03T21:05:24.932444283Z app=app-ibm-mqtt-export source=service.go:554 msg="Service started in: 142.663921ms"
+  level=INFO ts=2023-05-03T21:05:24.932493583Z app=app-ibm-mqtt-export source=main.go:38 msg="Loading Configurable Pipeline..."
+  level=INFO ts=2023-05-03T21:05:24.932617584Z app=app-ibm-mqtt-export source=runtime.go:197 msg="PipelineMessagesProcessed-default-pipeline metric has been registered and will be reported (if enabled)"       
+  level=INFO ts=2023-05-03T21:05:24.932660284Z app=app-ibm-mqtt-export source=runtime.go:197 msg="PipelineMessageProcessingTime-default-pipeline metric has been registered and will be reported (if enabled)"   
+  level=INFO ts=2023-05-03T21:05:24.932677484Z app=app-ibm-mqtt-export source=runtime.go:197 msg="PipelineProcessingErrors-default-pipeline metric has been registered and will be reported (if enabled)"        
+  level=INFO ts=2023-05-03T21:05:24.932690384Z app=app-ibm-mqtt-export source=runtime.go:122 msg="Transforms set for `default-pipeline` pipeline"
+  level=INFO ts=2023-05-03T21:05:24.932711384Z app=app-ibm-mqtt-export source=triggermessageprocessor.go:90 msg="MessagesReceived metric has been registered and will be reported"
+  level=INFO ts=2023-05-03T21:05:24.932738584Z app=app-ibm-mqtt-export source=triggermessageprocessor.go:96 msg="InvalidMessagesReceived metric has been registered and will be reported (if enabled)"
+  level=INFO ts=2023-05-03T21:05:24.932765384Z app=app-ibm-mqtt-export source=triggerfactory.go:51 msg="EdgeX MessageBus trigger selected"
+  level=INFO ts=2023-05-03T21:05:24.932795485Z app=app-ibm-mqtt-export source=messaging.go:66 msg="Initializing EdgeX Message Bus Trigger for 'redis'"
+  level=INFO ts=2023-05-03T21:05:24.932808785Z app=app-ibm-mqtt-export source=messaging.go:83 msg="Subscribing to topic: edgex/events/#"
+  level=INFO ts=2023-05-03T21:05:24.932817885Z app=app-ibm-mqtt-export source=messaging.go:98 msg="Publish topic not set for Trigger. Response data, if set, will not be published"
+  level=INFO ts=2023-05-03T21:05:24.932962685Z app=app-ibm-mqtt-export source=messaging.go:106 msg="Waiting for messages from the MessageBus on the 'edgex/events/#' topic"
+  level=INFO ts=2023-05-03T21:05:24.932803285Z app=app-ibm-mqtt-export source=server.go:181 msg="Starting HTTP Web Server on address localhost:59780"
+  level=INFO ts=2023-05-03T21:05:24.933519288Z app=app-ibm-mqtt-export source=service.go:208 msg="StoreAndForward disabled. Not running retry loop."
+  level=INFO ts=2023-05-03T21:05:24.933559088Z app=app-ibm-mqtt-export source=service.go:211 msg="app-ibm-mqtt-export has started"
   ```
 
   

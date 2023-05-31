@@ -21,9 +21,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg"
-	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/interfaces"
-	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/transforms"
+	"github.com/edgexfoundry/app-functions-sdk-go/v3/pkg"
+	"github.com/edgexfoundry/app-functions-sdk-go/v3/pkg/interfaces"
+	"github.com/edgexfoundry/app-functions-sdk-go/v3/pkg/transforms"
 )
 
 const (
@@ -53,7 +53,7 @@ func main() {
 
 	// 3) This is our pipeline configuration, the collection of functions to
 	// execute every time an event is triggered.
-	if err := service.SetFunctionsPipeline(
+	if err := service.SetDefaultFunctionsPipeline(
 		transforms.NewFilterFor(deviceNames).FilterByDeviceName,
 		transforms.NewConversion().TransformToXML,
 		printXMLToConsole,
@@ -64,9 +64,9 @@ func main() {
 
 	// 4) Lastly, we'll go ahead and tell the SDK to "start" and begin listening for events
 	// to trigger the pipeline.
-	err = service.MakeItRun()
+	err = service.Run()
 	if err != nil {
-		lc.Errorf("MakeItRun returned error: %s", err.Error())
+		lc.Errorf("Run returned error: %s", err.Error())
 		os.Exit(-1)
 	}
 

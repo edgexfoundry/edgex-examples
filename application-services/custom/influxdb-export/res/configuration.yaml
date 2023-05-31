@@ -1,0 +1,34 @@
+Writable:
+  LogLevel: "INFO"
+  InsecureSecrets:
+    mqtt:
+      path: "mqtt"
+      Secrets:
+        username: "edgex"
+        password: "password"
+        cacert: ""
+        clientcert: ""
+        clientkey: ""
+  Writable.Telemetry:
+    Interval: "30s"
+
+Service:
+  Host: "localhost"
+  Port: 59780 # Adjust if running multiple examples at the same time to avoid duplicate port conflicts
+  StartupMsg: "App service export to InfluxDB has Started"
+
+MessageBus:
+  Disabled: false  # Set to true if not using edgex-messagebus Trigger below and Metrics are not enabled
+  Optional:
+    ClientId: "app-influxdb-export"
+
+# Using default Trigger config from common config
+
+# App Service custom configuration
+MqttConfig:
+  BrokerAddress: "tcp://localhost:1883"
+  ClientId: "InfluxDBExport"
+  AutoReconnect: true
+  Topic: "edgex/EdgeXEvents"
+  AuthMode: "usernamepassword"
+  SecretName: "mqtt"

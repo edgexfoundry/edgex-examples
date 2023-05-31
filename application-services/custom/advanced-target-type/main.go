@@ -18,9 +18,10 @@
 package main
 
 import (
-	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg"
-	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/transforms"
 	"os"
+
+	"github.com/edgexfoundry/app-functions-sdk-go/v3/pkg"
+	"github.com/edgexfoundry/app-functions-sdk-go/v3/pkg/transforms"
 
 	"advanced-target-type/functions"
 )
@@ -31,7 +32,8 @@ const (
 
 func main() {
 	// turn off secure mode for examples. Not recommended for production
-	os.Setenv("EDGEX_SECURITY_SECRET_STORE", "false")
+	_ = os.Setenv("EDGEX_SECURITY_SECRET_STORE", "false")
+
 	// 1) First thing to do is to create an instance of an edgex service with your TargetType set
 	//    and initialize it. Note that the TargetType is a pointer to an instance of the type.
 	appService, ok := pkg.NewAppServiceWithTargetType(serviceKey, &functions.Person{})
@@ -42,7 +44,7 @@ func main() {
 
 	// 2) This is our functions pipeline configuration, the collection of functions to
 	// execute every time an event is triggered.
-	err := appService.SetFunctionsPipeline(
+	err := appService.SetDefaultFunctionsPipeline(
 		functions.FormatPhoneDisplay,                 // Expects a Person as set by TargetType
 		functions.ConvertToXML,                       // Expects a Person
 		functions.PrintXmlToConsole,                  // Expects XML string
@@ -56,9 +58,9 @@ func main() {
 
 	// 3) Lastly, we'll go ahead and tell the service to "start" and begin listening for Persons
 	// to trigger the pipeline.
-	err = appService.MakeItRun()
+	err = appService.Run()
 	if err != nil {
-		appService.LoggingClient().Errorf("MakeItRun returned error: %s", err.Error())
+		appService.LoggingClient().Errorf("Run returned error: %s", err.Error())
 		os.Exit(-1)
 	}
 

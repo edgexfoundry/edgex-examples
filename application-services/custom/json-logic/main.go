@@ -23,10 +23,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg"
-	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/interfaces"
-	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/transforms"
-	"github.com/edgexfoundry/go-mod-core-contracts/v2/models"
+	"github.com/edgexfoundry/app-functions-sdk-go/v3/pkg"
+	"github.com/edgexfoundry/app-functions-sdk-go/v3/pkg/interfaces"
+	"github.com/edgexfoundry/app-functions-sdk-go/v3/pkg/transforms"
+	"github.com/edgexfoundry/go-mod-core-contracts/v3/models"
 )
 
 const (
@@ -66,7 +66,7 @@ func main() {
 
 	// 3) This is our pipeline configuration, the collection of functions to
 	// execute every time an event is triggered.
-	err = appService.SetFunctionsPipeline(
+	err = appService.SetDefaultFunctionsPipeline(
 		// ConvertToReadableFloatValues, // Used for when looking at float values
 		transforms.NewJSONLogic(jsonlogicrule).Evaluate,
 		transforms.NewConversion().TransformToXML,
@@ -74,15 +74,15 @@ func main() {
 	)
 
 	if err != nil {
-		appService.LoggingClient().Errorf("SetFunctionsPipeline returned error: %s", err.Error())
+		appService.LoggingClient().Errorf("SetDefaultFunctionsPipeline returned error: %s", err.Error())
 		os.Exit(-1)
 	}
 
 	// 4) Lastly, we'll go ahead and tell the SDK to "start" and begin listening for events
 	// to trigger the pipeline.
-	err = appService.MakeItRun()
+	err = appService.Run()
 	if err != nil {
-		appService.LoggingClient().Errorf("MakeItRun returned error: %s", err.Error())
+		appService.LoggingClient().Errorf("Run returned error: %s", err.Error())
 		os.Exit(-1)
 	}
 
@@ -114,7 +114,7 @@ func printXMLToConsole(ctx interfaces.AppFunctionContext, data interface{}) (boo
 
 var precision = 4
 
-//ConvertToReadableFloatValues is used to facilitate writing jsonlogic rules
+// ConvertToReadableFloatValues is used to facilitate writing jsonlogic rules
 func ConvertToReadableFloatValues(ctx interfaces.AppFunctionContext, param interface{}) (bool, interface{}) {
 
 	ctx.LoggingClient().Debug("Convert to Readable Float Values")

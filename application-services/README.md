@@ -28,7 +28,7 @@ The following commands will run the `simple-filter-xml` example
 
 ```
 cd custom/simple-filter-xml
-./app-service
+./app-service -cp -d -o
 ```
 
 ## Building App Service Docker Image

@@ -1,0 +1,52 @@
+Writable:
+  LogLevel: INFO
+  
+  InsecureSecrets:
+    # TODO: Enter your device-onvif-camera credentials here.
+    # NOTE: currently this solution is limited to supporting only 1 username/password combination
+    #       for ALL cameras. In the future when then device-onvif-camera service is able to provide
+    #       us with pre-authenticated uris, this can be removed.
+    onvifCredentials:
+      # Do not modify the SecretName, only add the username and password
+      SecretName: onvifAuth
+      SecretData:
+        username: ""
+        password: ""
+
+    # TODO: Enter your device-usb-camera RTSP server credentials here.
+    usbCredentials:
+      # Do not modify the SecretName, only add the username and password
+      SecretName: rtspAuth
+      SecretData:
+        username: ""
+        password: ""
+
+  Telemetry:
+    Interval: 0s  # Disables reporting of metrics
+    
+Service:
+  Host: localhost
+  Port: 59750
+  StartupMsg: Camera Management Application Service has started
+  
+Clients:
+  core-command:
+    Protocol: http
+    Host: localhost
+    Port: 59882
+    
+MessageBus:
+  Optional:
+    ClientId: app-camera-management
+
+Trigger:
+  SubscribeTopics: "edgex/system-events/#/device/#"
+
+AppCustom:
+  OnvifDeviceServiceName: device-onvif-camera
+  USBDeviceServiceName: device-usb-camera
+  EvamBaseUrl: http://localhost:8080
+  MqttAddress: edgex-mqtt-broker:1883
+  MqttTopic: incoming/data/edge-video-analytics/inference-event
+  DefaultPipelineName: object_detection # Name of the default pipeline used when a new device is added to the system; can be left blank to disable feature
+  DefaultPipelineVersion: person # Version of the default pipeline used when a new device is added to the system; can be left blank to disable feature

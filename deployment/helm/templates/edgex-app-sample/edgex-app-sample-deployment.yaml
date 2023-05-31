@@ -28,6 +28,12 @@ spec:
                   org.edgexfoundry.service: {{ .Values.edgex.app.secretstoresetup}}
               topologyKey: "kubernetes.io/hostname"
     {{- end}}
+    {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- range .Values.imagePullSecrets }}
+      - name: {{ . }}
+      {{- end }}
+    {{- end }}
       automountServiceAccountToken: false
       containers:
       - name: {{.Values.edgex.app.appservice.appsample}}
@@ -35,7 +41,7 @@ spec:
         imagePullPolicy: {{.Values.edgex.image.appservice.appsample.pullPolicy}}
       {{- if .Values.edgex.security.enabled }}
         command: ["/edgex-init/ready_to_run_wait_install.sh"]
-        args: ["/app-service-configurable", "-cp=consul.http://edgex-core-consul:8500", "--registry", "--confdir=/res"]
+        args: ["/app-service-configurable", "-cp=consul.http://edgex-core-consul:8500", "--registry"]
       {{- end}}
         ports:
         - containerPort: {{.Values.edgex.port.appservice.appsample}}
@@ -49,31 +55,29 @@ spec:
         envFrom:
         - configMapRef:
             name: edgex-common-variables
-        - configMapRef:
-            name: as-common-variables
         env:
         - name: EDGEX_PROFILE
           value: "sample"
         - name: SERVICE_HOST
           value: {{.Values.edgex.app.appservice.appsample}}
-      {{- if (eq .Values.edgex.features.messagebusbackend "redis") }}
-        - name: TRIGGER_EDGEXMESSAGEBUS_PUBLISHHOST_HOST
-          value: {{.Values.edgex.app.redis}}
-        - name: TRIGGER_EDGEXMESSAGEBUS_SUBSCRIBEHOST_HOST
-          value: {{.Values.edgex.app.redis}}
-      {{end}}
+        - name: CLIENTS_CORE_DATA_HOST
+          value: edgex-core-data
+        - name: CLIENTS_CORE_COMMAND_HOST
+          value: edgex-core-command
+        - name: CLIENTS_SUPPORT-NOTIFICATIONS_HOST
+          value: edgex-support-notifications          
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
         startupProbe:
           httpGet:
-            path: /api/v2/ping
+            path: /api/v3/ping
             port: {{.Values.edgex.port.appservice.appsample}}
           periodSeconds: 1
           failureThreshold: 120
         livenessProbe:
           httpGet:
-            path: /api/v2/ping
+            path: /api/v3/ping
             port: {{.Values.edgex.port.appservice.appsample}}
       {{- if .Values.edgex.security.enabled }}
         volumeMounts:

@@ -1,0 +1,30 @@
+Writable:
+  LogLevel: 'INFO'
+  Writable.Telemetry:
+    Interval: "30s"
+
+
+Service:
+  Host: 'localhost'
+  Port: 59780 # Adjust if running multiple examples at the same time to avoid duplicate port conflicts
+  StartupMsg: 'This is a sample application service using the JSON logic transform'
+
+MessageBus:
+  Disabled: false  # Set to true if not using edgex-messagebus Trigger below and Metrics are not enabled
+  Optional:
+    ClientId: "app-json-logic"
+
+# Choose either an HTTP trigger or edgex-messagebus trigger
+
+#Trigger:
+#Type:"http"
+
+Trigger:
+  # Note that the MessageBus connection above is used by edgex-messagebus trigger which is the default set in common config
+  # Default value for SubscribeTopics is aslo set in common config
+  PublishTopic: "example"  # Base topic is prepened to this topic when using edgex-messagebus
+
+# App Service specifc simple settings
+# Great for single string settings
+ApplicationSettings:
+  DeviceNames: "Random-Float-Device, Random-Integer-Device"

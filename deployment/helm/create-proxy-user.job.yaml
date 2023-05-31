@@ -1,0 +1,51 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: security-proxy-setup
+spec:
+  template:
+    spec:
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  org.edgexfoundry.service: edgex-security-secretstore-setup
+              topologyKey: "kubernetes.io/hostname"
+      imagePullSecrets:
+      - name: dockerhub
+      automountServiceAccountToken: false
+      containers:
+      - name: security-proxy-setup
+        image: nexus3.edgexfoundry.org:10004/security-proxy-setup:latest
+        imagePullPolicy: Always
+        command: ["/edgex-init/ready_to_run_wait_install.sh"]
+        args: ["/edgex/secrets-config", "proxy", "adduser", "--user", "edgexuser", "--useRootToken"]
+        envFrom:
+        - configMapRef:
+            name: edgex-common-variables
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+        volumeMounts:
+          - mountPath: /edgex-init
+            name: edgex-init
+          - mountPath: /vault/config
+            name: vault-config
+          - mountPath: /tmp/edgex/secrets
+            name: edgex-secrets
+      restartPolicy: Never
+      securityContext:
+        runAsNonRoot: false
+        runAsUser: 0
+        runAsGroup: 0
+      volumes:
+        - name: edgex-init
+          persistentVolumeClaim:
+            claimName: edgex-init
+        - name: vault-config
+          persistentVolumeClaim:
+            claimName: vault-config
+        - name: edgex-secrets
+          persistentVolumeClaim:
+            claimName: edgex-secrets

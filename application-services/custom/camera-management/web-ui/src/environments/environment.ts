@@ -1,4 +1,4 @@
-// Copyright (C) 2022 Intel Corporation
+// Copyright (C) 2022-2023 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
 // This file can be replaced during build by using the `fileReplacements` array.
@@ -7,7 +7,7 @@
 
 export const environment = {
   production: false,
-  appServiceBaseUrl: 'http://localhost:59750/api/v2',
+  appServiceBaseUrl: 'http://localhost:59750/api/v3',
   defaultPipelineId: 'object_detection/person_vehicle_bike',
 
   mqtt: {

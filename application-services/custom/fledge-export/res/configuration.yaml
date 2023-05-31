@@ -1,0 +1,19 @@
+Writable:
+  LogLevel: "INFO"
+  Telemetry:
+    Interval: "30s"
+
+Service:
+  Host: "localhost"
+  Port: 59780 # Adjust if running multiple examples at the same time to avoid duplicate port conflicts
+  StartupMsg: "LF Edge Fledge Export Service"
+
+MessageBus:
+  Disabled: false  # Set to true if not using edgex-messagebus Trigger below and Metrics are not enabled
+  Optional:
+    ClientId: "app-fledge-export"
+
+# Using default Trigger config from common config
+
+ApplicationSettings:
+  FledgeSouthHTTPEndpoint: "http://192.168.0.10:6683/sensor-reading"

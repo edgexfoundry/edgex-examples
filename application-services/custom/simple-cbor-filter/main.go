@@ -25,10 +25,10 @@ import (
 	_ "image/png"
 	"os"
 
-	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg"
-	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/interfaces"
-	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/transforms"
-	"github.com/edgexfoundry/go-mod-core-contracts/v2/dtos"
+	"github.com/edgexfoundry/app-functions-sdk-go/v3/pkg"
+	"github.com/edgexfoundry/app-functions-sdk-go/v3/pkg/interfaces"
+	"github.com/edgexfoundry/app-functions-sdk-go/v3/pkg/transforms"
+	"github.com/edgexfoundry/go-mod-core-contracts/v3/dtos"
 )
 
 const (
@@ -58,7 +58,7 @@ func main() {
 
 	// 3) This is our pipeline configuration, the collection of functions to
 	// execute every time an event is triggered.
-	if err := service.SetFunctionsPipeline(
+	if err := service.SetDefaultFunctionsPipeline(
 		transforms.NewFilterFor(resourceNames).FilterByResourceName,
 		processImages,
 	); err != nil {
@@ -68,9 +68,9 @@ func main() {
 
 	// 4) Lastly, we'll go ahead and tell the SDK to "start" and begin listening for events
 	// to trigger the pipeline.
-	err = service.MakeItRun()
+	err = service.Run()
 	if err != nil {
-		lc.Error("MakeItRun returned error: ", err.Error())
+		lc.Error("Run returned error: ", err.Error())
 		os.Exit(-1)
 	}
 

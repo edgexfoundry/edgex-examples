@@ -1,10 +1,13 @@
-# Copyright (C) 2022 Intel Corporation
+# Copyright (C) 2023 Intel Corporation
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 # Default values for Edgex.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
+
+imagePullSecrets: []
+# supply a list of secret names (in the current namespace) of type docker-registry
 
 expose:
   type:
@@ -32,6 +35,7 @@ expose:
       mqtt: ClusterIP
       modbus: ClusterIP
       bacnet: ClusterIP
+      coap: ClusterIP
       snmp: ClusterIP
       rfidllrp: ClusterIP
       gpio: ClusterIP
@@ -53,6 +57,7 @@ edgex:
   # define its label name, resource name or base of the resource name, and service name.
   app:
     core:
+      common_config: edgex-core-common-config-bootstrapper
       command: edgex-core-command
       data: edgex-core-data
       metadata: edgex-core-metadata
@@ -75,6 +80,7 @@ edgex:
       mqtt: edgex-device-mqtt
       modbus: edgex-device-modbus
       bacnet: edgex-device-bacnet
+      coap: edgex-device-coap
       snmp: edgex-device-snmp
       rfidllrp: edgex-device-rfid-llrp
       gpio: edgex-device-gpio
@@ -92,104 +98,112 @@ edgex:
   # image defines configuration properties for docker-image-level concerns
   image:
     core:
+      common_config:
+        repository: edgexfoundry/core-common-config-bootstrapper
+        tag: "3.0.0"
+        pullPolicy: IfNotPresent
       command:
         repository: edgexfoundry/core-command
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
       data:
         repository: edgexfoundry/core-data
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
       metadata:
         repository: edgexfoundry/core-metadata
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
     support:
       notifications:
         repository: edgexfoundry/support-notifications
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
       scheduler:
         repository: edgexfoundry/support-scheduler
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
     appservice:
       rules:
         repository: edgexfoundry/app-service-configurable
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
       appsample:
         repository: edgexfoundry/app-service-configurable
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
       metricsinfluxdb:
         repository: edgexfoundry/app-service-configurable
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
       rfidllrpinventory:
         repository: edgexfoundry/app-rfid-llrp-inventory
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
       mqttexport:
         repository: edgexfoundry/app-service-configurable
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
       httpexport:
         repository: edgexfoundry/app-service-configurable
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
       externalmqtttrigger:
         repository: edgexfoundry/app-service-configurable
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
     device:
       virtual:
         repository: edgexfoundry/device-virtual
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
       rest:
         repository: edgexfoundry/device-rest
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
       onvifcamera:
         repository: edgexfoundry/device-onvif-camera
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
       usbcamera:
-        repository: nexus3.edgexfoundry.org:10004/device-usb-camera
-        tag: "latest"
+        repository: edgexfoundry/device-usb-camera
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
       mqtt:
         repository: edgexfoundry/device-mqtt
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
       modbus:
         repository: edgexfoundry/device-modbus
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
       bacnet:
         repository: edgexfoundry/device-bacnet
-        tag: "2.3.0"
+        tag: "3.0.0"
+        pullPolicy: IfNotPresent
+      coap:
+        repository: edgexfoundry/device-coap
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
       snmp:
         repository: edgexfoundry/device-snmp
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
       rfidllrp:
         repository: edgexfoundry/device-rfid-llrp
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
       gpio:
         repository: edgexfoundry/device-gpio
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
     ui:
       repository: edgexfoundry/edgex-ui
-      tag: "2.3.0"
+      tag: "3.0.0"
       pullPolicy: IfNotPresent
     consul:
-      repository: consul
-      tag: "1.13.2"
+      repository: hashicorp/consul
+      tag: "1.15.2"
       pullPolicy: IfNotPresent
     redis:
       repository: redis
@@ -200,16 +214,20 @@ edgex:
       tag: "1.7.1-alpine"
       pullPolicy: IfNotPresent
     vault:
-      repository: vault
-      tag: "1.11.4"
+      repository: hashicorp/vault
+      tag: "1.13.1"
       pullPolicy: IfNotPresent
     bootstrapper:
       repository: edgexfoundry/security-bootstrapper
-      tag: "2.3.0"
+      tag: "3.0.0"
+      pullPolicy: IfNotPresent
+    proxysetup:
+      repository: edgexfoundry/security-proxy-setup
+      tag: "3.0.0"
       pullPolicy: IfNotPresent
     secretstoresetup:
       repository: edgexfoundry/security-secretstore-setup
-      tag: "2.3.0"
+      tag: "3.0.0"
       pullPolicy: IfNotPresent
     modbussimulator:
       repository: nexus3.edgexfoundry.org:10003/edgex-devops/edgex-modbus-simulator
@@ -223,6 +241,7 @@ edgex:
       repository: nats
       tag: "2.9.3-alpine"
       pullPolicy: IfNotPresent
+
   # port defines configuration properties for container, target and host ports
   port:
     core:
@@ -246,6 +265,7 @@ edgex:
       usbcamera: 59983
       onvifcamera: 59984
       bacnet: 59980
+      coap: 59988
       mqtt: 59982
       modbus: 59901
       snmp: 59993
@@ -278,6 +298,7 @@ edgex:
   # replicas defines the number of replicas in a Deployment for the respective application
   replicas:
     core:
+      common_config: 1
       command: 1
       data: 1
       metadata: 1
@@ -300,6 +321,7 @@ edgex:
       mqtt: 0
       modbus: 0
       bacnet: 0
+      coap: 0
       snmp: 0
       rfidllrp: 0
       gpio: 0
@@ -318,13 +340,21 @@ edgex:
     runAsUser: 2002
     runAsGroup: 2001
     tlsHost: edgex
-    addConsulRoles: "app-external-mqtt-trigger,app-http-export,app-metrics-influxdb,app-mqtt-export,app-rfid-llrp-inventory,app-sample,device-bacnet,device-gpio,device-modbus,device-mqtt,device-onvif-camera,device-rfid-llrp,device-snmp,device-usb-camera"
-    addServiceTokens: "app-external-mqtt-trigger, app-http-export, app-metrics-influxdb, app-mqtt-export, app-rfid-llrp-inventory, app-sample, device-bacnet, device-gpio, device-modbus, device-mqtt, device-onvif-camera, device-rest, device-rfid-llrp, device-snmp, device-usb-camera, device-virtual"
-    addKnownSecrets: "message-bus[app-mqtt-export],message-bus[app-http-export],redisdb[app-external-mqtt-trigger],redisdb[app-http-export],redisdb[app-metrics-influxdb], redisdb[app-metrics-influxdb],redisdb[app-mqtt-export],redisdb[app-rfid-llrp-inventory],redisdb[app-sample],redisdb[device-bacnet],redisdb[device-gpio],redisdb[device-modbus],redisdb[device-mqtt],redisdb[device-onvif-camera],redisdb[device-rest],redisdb[device-rfid-llrp],redisdb[device-snmp], redisdb[device-usb-camera],redisdb[device-virtual]"
+    addConsulRoles: "app-external-mqtt-trigger,app-http-export,app-metrics-influxdb,app-mqtt-export,app-rfid-llrp-inventory,app-sample,device-bacnet,device-coap,device-gpio,device-modbus,device-mqtt,device-onvif-camera,device-rfid-llrp,device-snmp,device-usb-camera"
+    addServiceTokens: "app-external-mqtt-trigger,app-http-export,app-metrics-influxdb,app-mqtt-export,app-rfid-llrp-inventory,app-sample,device-bacnet,device-coap,device-gpio,device-modbus,device-mqtt,device-onvif-camera,device-rest,device-rfid-llrp,device-snmp,device-usb-camera,device-virtual"
+    addKnownSecrets: "redisdb[app-external-mqtt-trigger;app-http-export;app-metrics-influxdb;app-mqtt-export;app-rfid-llrp-inventory;app-sample;device-bacnet;device-coap;device-gpio;device-modbus;device-mqtt;device-onvif-camera;device-rest;device-rfid-llrp;device-snmp;device-usb-camera;device-virtual],message-bus[app-external-mqtt-trigger;app-http-export;app-metrics-influxdb;app-mqtt-export;app-rfid-llrp-inventory;app-sample;device-bacnet;device-coap;device-gpio;device-modbus;device-mqtt;device-onvif-camera;device-rest;device-rfid-llrp;device-snmp;device-usb-camera;device-virtual]"
 
   # resources defines the cpu and memory limits and requests for the respective application
   resources:
     core:
+      common_config:
+        enforceLimits: false
+        limits:
+          cpu: 1
+          memory: 512Mi
+        requests:
+          cpu: 0.5
+          memory: 256Mi
       command:
         enforceLimits: false
         limits:
@@ -473,6 +503,14 @@ edgex:
           cpu: 0.5
           memory: 256Mi
       bacnet:
+        enforceLimits: false
+        limits:
+          cpu: 1
+          memory: 512Mi
+        requests:
+          cpu: 0.5
+          memory: 256Mi
+      coap:
         enforceLimits: false
         limits:
           cpu: 1
