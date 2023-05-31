@@ -20,15 +20,39 @@ spec:
       labels:
         org.edgexfoundry.service: {{.Values.edgex.app.mqttbroker}}
     spec:
+    {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- range .Values.imagePullSecrets }}
+      - name: {{ . }}
+      {{- end }}
+    {{- end }}
       automountServiceAccountToken: false
+    {{- if .Values.edgex.security.enabled }}
+      initContainers:
+      - name: prep-volumes
+        image: {{.Values.edgex.image.mqttbroker.repository}}:{{.Values.edgex.image.mqttbroker.tag}}
+        imagePullPolicy: {{.Values.edgex.image.mqttbroker.pullPolicy}}
+        command: [ "sh", "-c", "cp -rpd /mosquitto/* /mnt/tmp-mosquitto/; exit 0" ]
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsUser: 0
+          runAsGroup: 0
+        volumeMounts:
+          - mountPath: /mnt/tmp-mosquitto
+            name: mqtt
+    {{- end }}
       containers:
       - name: {{.Values.edgex.app.mqttbroker}}
         image: {{.Values.edgex.image.mqttbroker.repository}}:{{.Values.edgex.image.mqttbroker.tag}}
         imagePullPolicy: {{.Values.edgex.image.mqttbroker.pullPolicy}}
       {{- if .Values.edgex.security.enabled }}
+        command: ["/edgex-init/messagebus_wait_install.sh"]
+        args: [ "/usr/sbin/mosquitto", "-c", "/mosquitto/config/mosquitto.conf" ]
+      {{- else }}
         command: ["/usr/sbin/mosquitto", "-c", "/mosquitto-no-auth.conf"]
         args: []
-      {{- end}}
+      {{- end }}
         ports:
         - containerPort: {{.Values.edgex.port.mqttbroker}}
           name: "mqtt"
@@ -36,8 +60,20 @@ spec:
         {{- if .Values.edgex.features.enableHostPort}}
           hostPort: {{.Values.edgex.port.mqttbroker}}
           hostIP: {{.Values.edgex.hostPortInternalBind}}
-        {{- end}}
-      {{- end}}
+        {{- end }}
+      {{- end }}
+        envFrom:
+        - configMapRef:
+            name: edgex-common-variables
+      {{- if .Values.edgex.security.enabled }}
+        env:
+          - name: BROKER_TYPE
+            value: mosquitto
+          - name: CONF_DIR
+            value: /edgex-init/bootstrap-mosquitto/res
+          - name: ENTRYPOINT
+            value: /docker-entrypoint.sh /usr/sbin/mosquitto -c /mosquitto/config/mosquitto.conf
+      {{- end }}
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
@@ -49,6 +85,15 @@ spec:
         livenessProbe:
           tcpSocket:
             port: {{.Values.edgex.port.mqttbroker}}
+      {{- if .Values.edgex.security.enabled }}
+        volumeMounts:
+        - mountPath: /edgex-init
+          name: edgex-init
+        - mountPath: /tmp/edgex/secrets
+          name: edgex-secrets
+        - mountPath: /mosquitto
+          name: mqtt
+      {{- end }}
       {{- if .Values.edgex.resources.mqttbroker.enforceLimits }}
         resources:
           limits:
@@ -61,6 +106,23 @@ spec:
       hostname: {{.Values.edgex.app.mqttbroker}}
       restartPolicy: Always
       securityContext:
-        runAsNonRoot: true
+        runAsNonRoot: false
+      {{- if .Values.edgex.security.enabled }}
+        runAsUser: 0
+        runAsGroup: 0
+      {{- else }}
         runAsUser: {{ .Values.edgex.security.runAsUser }}
         runAsGroup: {{ .Values.edgex.security.runAsGroup }}
+      {{- end }}
+    {{- if .Values.edgex.security.enabled }}
+      volumes:
+      - name: edgex-init
+        persistentVolumeClaim:
+          claimName: edgex-init
+      - name: edgex-secrets
+        persistentVolumeClaim:
+          claimName: edgex-secrets
+      - name: mqtt
+        persistentVolumeClaim:
+          claimName: mqtt
+    {{- end }}

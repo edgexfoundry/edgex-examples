@@ -9,8 +9,8 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/interfaces"
-	"github.com/edgexfoundry/go-mod-core-contracts/v2/clients/logger"
+	"github.com/edgexfoundry/app-functions-sdk-go/v3/pkg/interfaces"
+	"github.com/edgexfoundry/go-mod-core-contracts/v3/clients/logger"
 	"github.com/pkg/errors"
 )
 
@@ -67,7 +67,7 @@ func (app *CameraManagementApp) Run() error {
 		}
 	}
 
-	if err = app.service.MakeItRun(); err != nil {
+	if err = app.service.Run(); err != nil {
 		return errors.Wrap(err, "failed to run pipeline")
 	}
 

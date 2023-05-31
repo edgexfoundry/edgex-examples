@@ -20,17 +20,18 @@ package transforms
 import (
 	"encoding/base64"
 	"encoding/json"
-	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg"
-	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/interfaces"
-	"github.com/edgexfoundry/go-mod-core-contracts/v2/models"
-	"github.com/google/uuid"
-	"github.com/stretchr/testify/require"
 	"strings"
 	"testing"
 
+	"github.com/edgexfoundry/app-functions-sdk-go/v3/pkg"
+	"github.com/edgexfoundry/app-functions-sdk-go/v3/pkg/interfaces"
+	"github.com/edgexfoundry/go-mod-core-contracts/v3/models"
+	"github.com/google/uuid"
+	"github.com/stretchr/testify/require"
+
 	cloudevents "github.com/cloudevents/sdk-go/v2"
-	"github.com/edgexfoundry/go-mod-core-contracts/v2/clients/logger"
-	"github.com/edgexfoundry/go-mod-core-contracts/v2/common"
+	"github.com/edgexfoundry/go-mod-core-contracts/v3/clients/logger"
+	"github.com/edgexfoundry/go-mod-core-contracts/v3/common"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -186,7 +187,13 @@ func TestTransformToCloudEventMultipleEvents(t *testing.T) {
 	for i, cloudEvent := range cloudEvents {
 		resultBytes, err := json.Marshal(cloudEvent)
 		require.NoError(t, err)
-		assert.Equal(t, want[i], string(resultBytes))
+		wantMap := map[string]string{}
+		err = json.Unmarshal([]byte(want[i]), &wantMap)
+		require.NoError(t, err)
+		actualMap := map[string]string{}
+		err = json.Unmarshal(resultBytes, &actualMap)
+		require.NoError(t, err)
+		assert.Equal(t, wantMap, actualMap)
 	}
 }
 

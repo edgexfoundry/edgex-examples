@@ -1,0 +1,35 @@
+Writable:
+  LogLevel: "INFO"
+  StoreAndForward:
+    Enabled: false
+  InsecureSecrets:
+    mqtt:
+      path: "mqtt"
+      Secrets:
+        username: "user-name"
+        password: "p@ssword"
+  Telemetry:
+    Interval: "30s"
+    
+Service:
+  Host: "localhost"
+  Port: 59780 # Adjust if running multiple examples at the same time to avoid duplicate port conflicts
+  StartupMsg: "This is a sample cloud export to AWS"
+
+MessageBus:
+  Disabled: false  # Set to true if not using edgex-messagebus Trigger below and Metrics are not enabled
+  Optional:
+    ClientId: "app-cloud-export-mqtt"
+
+# Using default Trigger config from common config
+
+# Example of App Service specific structured custom configuration.
+# This map into the transforms.MQTTSecretConfig structure
+# See https://docs.edgexfoundry.org/latest/microservices/application/AdvancedTopics/#custom-configuration
+MqttExportConfig:
+  BrokerAddress: "tcps://***.iot.us-west-2.amazonaws.com:8883"
+  ClientId: "testThing"
+  AutoReconnect: true
+  Topic: "$aws/things/testThing/shadow/update" # iot device name MUST match client ID
+  AuthMode: "none"  # Change if auth required. See https://docs.edgexfoundry.org/latest/microservices/application/BuiltIn/#mqtt-export for details
+  SecretName: "mqtt"

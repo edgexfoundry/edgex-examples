@@ -29,6 +29,12 @@ spec:
                   org.edgexfoundry.service: {{ .Values.edgex.app.secretstoresetup}}
               topologyKey: "kubernetes.io/hostname"
     {{- end}}
+    {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- range .Values.imagePullSecrets }}
+      - name: {{ . }}
+      {{- end }}
+    {{- end }}
       automountServiceAccountToken: false
       containers:
       - name: {{.Values.edgex.app.device.bacnet}}
@@ -36,7 +42,11 @@ spec:
         imagePullPolicy: {{.Values.edgex.image.device.bacnet.pullPolicy}}
       {{- if .Values.edgex.security.enabled }}
         command: [ "/bin/sh", "/edgex-init/ready_to_run_wait_install.sh"]
-        args: ["/startup.sh"]
+        args:
+          - "/device-bacnet-ip/device-bacnet-c"
+          - "-cp=consul://edgex-core-consul:8500"
+          - "--registry"
+          - "--confdir=/res"
       {{- end}}
         ports:
         - containerPort: {{.Values.edgex.port.device.bacnet}}
@@ -53,20 +63,18 @@ spec:
         envFrom:
         - configMapRef:
             name: edgex-common-variables
-        - configMapRef:
-            name: device-common-variables
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
         startupProbe:
           httpGet:
-            path: /api/v2/ping
+            path: /api/v3/ping
             port: {{.Values.edgex.port.device.bacnet}}
           periodSeconds: 1
           failureThreshold: 120
         livenessProbe:
           httpGet:
-            path: /api/v2/ping
+            path: /api/v3/ping
             port: {{.Values.edgex.port.device.bacnet}}
       {{- if .Values.edgex.security.enabled }}
         volumeMounts:

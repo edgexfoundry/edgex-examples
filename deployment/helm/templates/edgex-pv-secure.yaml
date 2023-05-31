@@ -1,0 +1,179 @@
+# Copyright (C) 2023 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+{{- if .Values.edgex.security.enabled }}
+{{- if .Values.edgex.storage.useHostPath }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: edgex-init-volume
+spec:
+  storageClassName: ""
+  claimRef:
+    name: edgex-init
+    namespace: {{ .Release.Namespace }}
+  capacity:
+    storage: 128Mi
+  accessModes:
+    - {{.Values.edgex.storage.sharedVolumesAccessMode}}
+  hostPath:
+    path: "/mnt/edgex-init-volume"
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: edgex-vault-config-volume
+spec:
+  storageClassName: ""
+  claimRef:
+    name: vault-config
+    namespace: {{ .Release.Namespace }}
+  capacity:
+    storage: 8Mi
+  accessModes:
+    - {{.Values.edgex.storage.nonSharedVolumesAccessMode}}
+  hostPath:
+    path: "/mnt/edgex-vault-config"
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: edgex-vault-data-volume
+spec:
+  storageClassName: ""
+  claimRef:
+    name: vault-file
+    namespace: {{ .Release.Namespace }}
+  capacity:
+    storage: 128Mi
+  accessModes:
+    - {{.Values.edgex.storage.nonSharedVolumesAccessMode}}
+  hostPath:
+    path: "/mnt/edgex-vault-data"
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: edgex-vault-logs-volume
+spec:
+  storageClassName: ""
+  claimRef:
+    name: vault-logs
+    namespace: {{ .Release.Namespace }}
+  capacity:
+    storage: 128Mi
+  accessModes:
+    - {{.Values.edgex.storage.nonSharedVolumesAccessMode}}
+  hostPath:
+    path: "/mnt/edgex-vault-logs"
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: edgex-secrets-volume
+spec:
+  storageClassName: ""
+  claimRef:
+    name: edgex-secrets
+    namespace: {{ .Release.Namespace }}
+  capacity:
+    storage: 8Mi
+  accessModes:
+    - {{.Values.edgex.storage.sharedVolumesAccessMode}}
+  hostPath:
+    path: "/tmp/edgex/secrets"
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: edgex-consul-acl-token-volume
+spec:
+  storageClassName: ""
+  claimRef:
+    name: consul-acl-token
+    namespace: {{ .Release.Namespace }}
+  capacity:
+    storage: 8Mi
+  accessModes:
+    - {{.Values.edgex.storage.sharedVolumesAccessMode}}
+  hostPath:
+    path: "/mnt/edgex-consul-acl-token"
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: edgex-redis-config-volume
+spec:
+  storageClassName: ""
+  claimRef:
+    name: redis-config
+    namespace: {{ .Release.Namespace }}
+  capacity:
+    storage: 8Mi
+  accessModes:
+    - {{.Values.edgex.storage.nonSharedVolumesAccessMode}}
+  hostPath:
+    path: "/mnt/edgex-redis-config"
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: edgex-kuiper-sources
+spec:
+  storageClassName: ""
+  claimRef:
+    name: kuiper-sources
+    namespace: {{ .Release.Namespace }}
+  capacity:
+    storage: 8Mi
+  accessModes:
+    - {{.Values.edgex.storage.sharedVolumesAccessMode}}
+  hostPath:
+    path: "/mnt/edgex-kuiper-sources"
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: edgex-kuiper-connections
+spec:
+  storageClassName: ""
+  claimRef:
+    name: kuiper-connections
+    namespace: {{ .Release.Namespace }}
+  capacity:
+    storage: 8Mi
+  accessModes:
+    - {{.Values.edgex.storage.sharedVolumesAccessMode}}
+  hostPath:
+    path: "/mnt/edgex-kuiper-connections"
+    type: DirectoryOrCreate
+{{- if (gt (.Values.edgex.replicas.natsserver | int) 0) }}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: edgex-mqtt
+spec:
+  storageClassName: ""
+  claimRef:
+    name: mqtt
+    namespace: {{ .Release.Namespace }}
+  capacity:
+    storage: 8Mi
+  accessModes:
+    - {{.Values.edgex.storage.nonSharedVolumesAccessMode}}
+  hostPath:
+    path: "/mnt/edgex-mqtt"
+    type: DirectoryOrCreate
+{{- end }}
+{{- end }}
+{{- end }}

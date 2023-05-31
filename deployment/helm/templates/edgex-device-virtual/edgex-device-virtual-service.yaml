@@ -10,7 +10,7 @@ metadata:
   name: {{.Values.edgex.app.device.virtual}}
 spec:
   ports:
-  - name: "device-virtual-name"
+  - name: "http"
     port: {{.Values.edgex.port.device.virtual}}
   selector:
     org.edgexfoundry.service: {{.Values.edgex.app.device.virtual}}

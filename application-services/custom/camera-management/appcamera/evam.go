@@ -12,11 +12,11 @@ import (
 	"net/url"
 	"path"
 
-	"github.com/edgexfoundry/go-mod-core-contracts/v2/common"
+	"github.com/edgexfoundry/go-mod-core-contracts/v3/common"
 
 	"github.com/IOTechSystems/onvif/media"
-	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/interfaces"
-	"github.com/edgexfoundry/go-mod-core-contracts/v2/dtos"
+	"github.com/edgexfoundry/app-functions-sdk-go/v3/pkg/interfaces"
+	"github.com/edgexfoundry/go-mod-core-contracts/v3/dtos"
 	"github.com/pkg/errors"
 )
 
@@ -111,15 +111,19 @@ func (app *CameraManagementApp) startPipeline(deviceName string, sr StartPipelin
 	}
 	app.lc.Infof("Received stream uri for the device %s: %s", deviceName, streamUri)
 
+	// set the secret name to be the onvif one by default
+	secretName := onvifAuth
 	// if device is usb camera, start streaming first
 	if sr.USB != nil {
 		_, err := app.startStreaming(deviceName, *sr.USB)
 		if err != nil {
 			return errors.Wrapf(err, "failed to start streaming usb camera %s", deviceName)
 		}
+		// for usb cameras, use the rtspAuth instead
+		secretName = rtspAuth
 	}
 
-	body, err := app.createPipelineRequestBody(streamUri, deviceName)
+	body, err := app.createPipelineRequestBody(streamUri, deviceName, secretName)
 	if err != nil {
 		return errors.Wrapf(err, "failed to create DLStreamer pipeline request body")
 	}
@@ -133,7 +137,7 @@ func (app *CameraManagementApp) startPipeline(deviceName string, sr StartPipelin
 	if err != nil {
 		return err
 	}
-	reqPath := path.Join("pipelines", info.Name, info.Version)
+	reqPath := path.Join("/pipelines", info.Name, info.Version)
 
 	if err = issuePostRequest(context.Background(), &res, baseUrl.String(), reqPath, body); err != nil {
 		err = errors.Wrap(err, "POST request to start EVAM pipeline failed")
@@ -160,7 +164,7 @@ func (app *CameraManagementApp) startPipeline(deviceName string, sr StartPipelin
 func (app *CameraManagementApp) stopPipeline(deviceName string, id string) error {
 	var res interface{}
 
-	if err := issueDeleteRequest(context.Background(), &res, app.config.AppCustom.EvamBaseUrl, path.Join("pipelines", id)); err != nil {
+	if err := issueDeleteRequest(context.Background(), &res, app.config.AppCustom.EvamBaseUrl, path.Join("/pipelines", id)); err != nil {
 		return errors.Wrap(err, "DELETE request to stop EVAM pipeline failed")
 	}
 	app.lc.Infof("Successfully stopped EVAM pipeline for the device %s", deviceName)
@@ -173,14 +177,14 @@ func (app *CameraManagementApp) stopPipeline(deviceName string, id string) error
 	return nil
 }
 
-func (app *CameraManagementApp) createPipelineRequestBody(streamUri string, deviceName string) ([]byte, error) {
+func (app *CameraManagementApp) createPipelineRequestBody(streamUri string, deviceName string, secretName string) ([]byte, error) {
 	uri, err := url.Parse(streamUri)
 	if err != nil {
 		return nil, err
 	}
 
-	if creds, err := app.tryGetCredentials(); err != nil {
-		app.lc.Warnf("Error retrieving %s secret from the SecretStore: %s", CameraCredentials, err.Error())
+	if creds, err := app.tryGetCredentials(secretName); err != nil {
+		app.lc.Warnf("Error retrieving %s secret from the SecretStore: %s", secretName, err.Error())
 	} else {
 		uri.User = url.UserPassword(creds.Username, creds.Password)
 	}
@@ -214,7 +218,7 @@ func (app *CameraManagementApp) createPipelineRequestBody(streamUri string, devi
 func (app *CameraManagementApp) getPipelineStatus(deviceName string) (interface{}, error) {
 	if info, found := app.getPipelineInfo(deviceName); found {
 		var res interface{}
-		if err := issueGetRequest(context.Background(), &res, app.config.AppCustom.EvamBaseUrl, path.Join("pipelines", "status", info.Id)); err != nil {
+		if err := issueGetRequest(context.Background(), &res, app.config.AppCustom.EvamBaseUrl, path.Join("/pipelines", "status", info.Id)); err != nil {
 			return nil, errors.Wrap(err, "GET request to query EVAM pipeline status failed")
 		}
 		return res, nil
@@ -245,11 +249,11 @@ func (app *CameraManagementApp) processEdgeXDeviceSystemEvent(_ interfaces.AppFu
 	}
 
 	switch systemEvent.Action {
-	case common.DeviceSystemEventActionAdd:
+	case common.SystemEventActionAdd:
 		if err = app.startDefaultPipeline(device); err != nil {
 			return false, err
 		}
-	case common.DeviceSystemEventActionDelete:
+	case common.SystemEventActionDelete:
 		// stop any running pipelines for the deleted device
 		if info, found := app.getPipelineInfo(device.Name); found {
 			if err = app.stopPipeline(device.Name, info.Id); err != nil {
@@ -314,7 +318,7 @@ func (app *CameraManagementApp) startDefaultPipeline(device dtos.Device) error {
 // insert them into the pipeline map.
 func (app *CameraManagementApp) queryAllPipelineStatuses() error {
 	var statuses []PipelineStatus
-	if err := issueGetRequest(context.Background(), &statuses, app.config.AppCustom.EvamBaseUrl, path.Join("pipelines", "status")); err != nil {
+	if err := issueGetRequest(context.Background(), &statuses, app.config.AppCustom.EvamBaseUrl, path.Join("/pipelines", "status")); err != nil {
 		return errors.Wrap(err, "GET request to query EVAM pipeline statuses failed")
 	}
 
@@ -324,7 +328,7 @@ func (app *CameraManagementApp) queryAllPipelineStatuses() error {
 		}
 
 		var resp PipelineInformationResponse
-		if err := issueGetRequest(context.Background(), &resp, app.config.AppCustom.EvamBaseUrl, path.Join("pipelines", status.Id)); err != nil {
+		if err := issueGetRequest(context.Background(), &resp, app.config.AppCustom.EvamBaseUrl, path.Join("/pipelines", status.Id)); err != nil {
 			app.lc.Errorf("GET request to query EVAM pipeline %s info failed: %s", status.Id, err.Error())
 			continue
 		}
@@ -365,7 +369,7 @@ func (app *CameraManagementApp) getAllPipelineStatuses() (map[string]PipelineInf
 
 	// loop through the partially filled response map to fill in the missing data. we do not need to hold the lock here.
 	for camera, data := range response {
-		if err := issueGetRequest(context.Background(), &data.Status, app.config.AppCustom.EvamBaseUrl, path.Join("pipelines", "status", data.Info.Id)); err != nil {
+		if err := issueGetRequest(context.Background(), &data.Status, app.config.AppCustom.EvamBaseUrl, path.Join("/pipelines", "status", data.Info.Id)); err != nil {
 			return nil, errors.Wrap(err, "GET request to query EVAM pipeline failed")
 		}
 		// overwrite the changed result in the map
@@ -377,7 +381,7 @@ func (app *CameraManagementApp) getAllPipelineStatuses() (map[string]PipelineInf
 
 func (app *CameraManagementApp) getPipelines() (interface{}, error) {
 	var res interface{}
-	if err := issueGetRequest(context.Background(), &res, app.config.AppCustom.EvamBaseUrl, "pipelines"); err != nil {
+	if err := issueGetRequest(context.Background(), &res, app.config.AppCustom.EvamBaseUrl, "/pipelines"); err != nil {
 		return nil, errors.Wrap(err, "GET request to query all EVAM pipelines failed")
 	}
 	return res, nil

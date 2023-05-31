@@ -20,6 +20,12 @@ spec:
       labels:
         org.edgexfoundry.service: {{.Values.edgex.app.modbussimulator}}
     spec:
+    {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- range .Values.imagePullSecrets }}
+      - name: {{ . }}
+      {{- end }}
+    {{- end }}
       automountServiceAccountToken: false
       containers:
       - name: {{.Values.edgex.app.modbussimulator}}

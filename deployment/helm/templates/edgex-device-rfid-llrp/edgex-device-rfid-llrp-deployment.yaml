@@ -29,6 +29,12 @@ spec:
                   org.edgexfoundry.service: {{ .Values.edgex.app.secretstoresetup}}
               topologyKey: "kubernetes.io/hostname"
     {{- end}}
+    {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- range .Values.imagePullSecrets }}
+      - name: {{ . }}
+      {{- end }}
+    {{- end }}
       automountServiceAccountToken: false
       containers:
       - name: {{.Values.edgex.app.device.rfidllrp}}
@@ -36,7 +42,7 @@ spec:
         imagePullPolicy: {{.Values.edgex.image.device.rfidllrp.pullPolicy}}
       {{- if .Values.edgex.security.enabled }}
         command: ["/edgex-init/ready_to_run_wait_install.sh"]
-        args: ["/device-rfid-llrp", "-cp=consul.http://edgex-core-consul:8500", "--registry", "--confdir=/res"]
+        args: ["/device-rfid-llrp", "-cp=consul.http://edgex-core-consul:8500", "--registry"]
       {{- end}}
         ports:
         - containerPort: {{.Values.edgex.port.device.rfidllrp}}
@@ -48,25 +54,23 @@ spec:
         {{- end}}
       {{- end}}
         env:
-          - name: SERVICE_HOST
-            value: {{.Values.edgex.app.device.rfidllrp}}
+        - name: SERVICE_HOST
+          value: {{.Values.edgex.app.device.rfidllrp}}
         envFrom:
         - configMapRef:
             name: edgex-common-variables
-        - configMapRef:
-            name: device-common-variables
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
         startupProbe:
           httpGet:
-            path: /api/v2/ping
+            path: /api/v3/ping
             port: {{.Values.edgex.port.device.rfidllrp}}
           periodSeconds: 1
           failureThreshold: 120
         livenessProbe:
           httpGet:
-            path: /api/v2/ping
+            path: /api/v3/ping
             port: {{.Values.edgex.port.device.rfidllrp}}
       {{- if .Values.edgex.security.enabled }}
         volumeMounts:

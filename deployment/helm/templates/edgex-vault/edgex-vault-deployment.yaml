@@ -31,6 +31,12 @@ spec:
               topologyKey: "kubernetes.io/hostname"
     {{- end}}
       automountServiceAccountToken: false
+    {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- range .Values.imagePullSecrets }}
+      - name: {{ . }}
+      {{- end }}
+    {{- end }}
       initContainers:
       - name: prep-volumes
         image: busybox:latest

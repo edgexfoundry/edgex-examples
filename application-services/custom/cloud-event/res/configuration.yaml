@@ -1,0 +1,17 @@
+Writable:
+  LogLevel: "DEBUG"
+  StoreAndForward:
+    Enabled: false
+  Telemetry:
+    Interval: "0s" # Disabled since not using metrics
+
+Service:
+  Host: "localhost"
+  Port: 59780 # Adjust if running multiples examples at the same time to avoid duplicate port conflicts
+  StartupMsg: "Cloud Event Transforms"
+
+# This example expect custom type via HTTP Trigger
+Trigger:
+  Type: "http"
+
+ApplicationSettings: {}

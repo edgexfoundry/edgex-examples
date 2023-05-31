@@ -10,7 +10,7 @@ metadata:
   name: {{.Values.edgex.app.device.mqtt}}
 spec:
   ports:
-  - name: "device-mqtt-htpp"
+  - name: "http"
     port: {{.Values.edgex.port.device.mqtt}}
   selector:
     org.edgexfoundry.service: {{.Values.edgex.app.device.mqtt}}

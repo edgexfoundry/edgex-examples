@@ -23,11 +23,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg"
-	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/interfaces"
-	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/util"
-	"github.com/edgexfoundry/go-mod-bootstrap/v2/bootstrap"
-	"github.com/edgexfoundry/go-mod-messaging/v2/pkg/types"
+	"github.com/edgexfoundry/app-functions-sdk-go/v3/pkg"
+	"github.com/edgexfoundry/app-functions-sdk-go/v3/pkg/interfaces"
+	"github.com/edgexfoundry/app-functions-sdk-go/v3/pkg/util"
+	"github.com/edgexfoundry/go-mod-bootstrap/v3/bootstrap"
+	"github.com/edgexfoundry/go-mod-messaging/v3/pkg/types"
 	"github.com/nats-io/nats.go"
 )
 
@@ -87,9 +87,9 @@ func main() {
 	}
 
 	// Lastly, we'll go ahead and tell the SDK to "start" and begin listening for events
-	err = service.MakeItRun()
+	err = service.Run()
 	if err != nil {
-		service.LoggingClient().Error("MakeItRun returned error: ", err.Error())
+		service.LoggingClient().Error("Run returned error: ", err.Error())
 		os.Exit(-1)
 	}
 
