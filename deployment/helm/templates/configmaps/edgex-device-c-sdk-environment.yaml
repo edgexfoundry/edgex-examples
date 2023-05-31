@@ -1,0 +1,31 @@
+# Copyright (C) 2022 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+# C SDK in EdgeX 3.0 does not yet support common config;
+# Use env var override for what is normally in common config
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: edgex-device-c-sdk-environment
+data:
+  CLIENTS_CORE_METADATA_HOST: edgex-core-metadata
+  DATABASE_HOST: edgex-redis
+  REGISTRY_HOST: edgex-core-consul
+{{- if (eq .Values.edgex.features.messagebusbackend "redis") }}
+  MESSAGEBUS_HOST: edgex-redis
+{{- end }}
+{{- if (eq .Values.edgex.features.messagebusbackend "mqtt") }}
+  MESSAGEBUS_TYPE: mqtt
+  MESSAGEBUS_PROTOCOL: tcp
+  MESSAGEBUS_HOST: edgex-mqtt-broker
+  MESSAGEBUS_PORT: "1883"
+{{- end }}
+{{- if .Values.edgex.security.enabled }}
+  MESSAGEBUS_AUTHMODE: usernamepassword
+  MESSAGEBUS_SECRETNAME: message-bus
+{{- else }}
+  MESSAGEBUS_AUTHMODE: none
+{{- end }}
