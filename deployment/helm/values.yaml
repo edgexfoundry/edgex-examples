@@ -100,106 +100,106 @@ edgex:
     core:
       common_config:
         repository: edgexfoundry/core-common-config-bootstrapper
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
       command:
         repository: edgexfoundry/core-command
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
       data:
         repository: edgexfoundry/core-data
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
       metadata:
         repository: edgexfoundry/core-metadata
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
     support:
       notifications:
         repository: edgexfoundry/support-notifications
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
       scheduler:
         repository: edgexfoundry/support-scheduler
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
     appservice:
       rules:
         repository: edgexfoundry/app-service-configurable
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
       appsample:
         repository: edgexfoundry/app-service-configurable
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
       metricsinfluxdb:
         repository: edgexfoundry/app-service-configurable
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
       rfidllrpinventory:
         repository: edgexfoundry/app-rfid-llrp-inventory
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
       mqttexport:
         repository: edgexfoundry/app-service-configurable
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
       httpexport:
         repository: edgexfoundry/app-service-configurable
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
       externalmqtttrigger:
         repository: edgexfoundry/app-service-configurable
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
     device:
       virtual:
         repository: edgexfoundry/device-virtual
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
       rest:
         repository: edgexfoundry/device-rest
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
       onvifcamera:
         repository: edgexfoundry/device-onvif-camera
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
       usbcamera:
         repository: edgexfoundry/device-usb-camera
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
       mqtt:
         repository: edgexfoundry/device-mqtt
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
       modbus:
         repository: edgexfoundry/device-modbus
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
       bacnet:
         repository: edgexfoundry/device-bacnet
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
       coap:
         repository: edgexfoundry/device-coap
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
       snmp:
         repository: edgexfoundry/device-snmp
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
       rfidllrp:
         repository: edgexfoundry/device-rfid-llrp
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
       gpio:
         repository: edgexfoundry/device-gpio
-        tag: "2.3.0"
+        tag: "3.0.0"
         pullPolicy: IfNotPresent
     ui:
       repository: edgexfoundry/edgex-ui
-      tag: "2.3.0"
+      tag: "3.0.0"
       pullPolicy: IfNotPresent
     consul:
       repository: hashicorp/consul
@@ -219,15 +219,15 @@ edgex:
       pullPolicy: IfNotPresent
     bootstrapper:
       repository: edgexfoundry/security-bootstrapper
-      tag: "2.3.0"
+      tag: "3.0.0"
       pullPolicy: IfNotPresent
     proxysetup:
       repository: edgexfoundry/security-proxy-setup
-      tag: "2.3.0"
+      tag: "3.0.0"
       pullPolicy: IfNotPresent
     secretstoresetup:
       repository: edgexfoundry/security-secretstore-setup
-      tag: "2.3.0"
+      tag: "3.0.0"
       pullPolicy: IfNotPresent
     modbussimulator:
       repository: nexus3.edgexfoundry.org:10003/edgex-devops/edgex-modbus-simulator
@@ -241,6 +241,7 @@ edgex:
       repository: nats
       tag: "2.9.3-alpine"
       pullPolicy: IfNotPresent
+
   # port defines configuration properties for container, target and host ports
   port:
     core:
