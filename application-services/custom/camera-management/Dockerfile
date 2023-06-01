@@ -15,10 +15,10 @@
 #
 
 #build stage
-ARG BASE=golang:1.18-alpine3.16
+ARG BASE=golang:1.20-alpine3.17
 FROM ${BASE} AS builder
 
-ARG ALPINE_PKG_BASE="make git gcc libc-dev libsodium-dev zeromq-dev"
+ARG ALPINE_PKG_BASE="make git gcc libc-dev libsodium-dev"
 ARG ALPINE_PKG_EXTRA=""
 
 LABEL license='SPDX-License-Identifier: Apache-2.0' \
@@ -37,13 +37,13 @@ ARG MAKE="make build-app"
 RUN $MAKE
 
 #final stage
-FROM alpine:3.16
+FROM alpine:3.17
 LABEL license='SPDX-License-Identifier: Apache-2.0' \
-  copyright='Copyright (c) 2022: Intel'
+  copyright='Copyright (c) 2023: Intel'
 LABEL Name=app-camera-management Version=${VERSION}
 
 # dumb-init is required as security-bootstrapper uses it in the entrypoint script
-RUN apk add --update --no-cache ca-certificates zeromq dumb-init
+RUN apk add --update --no-cache ca-certificates dumb-init
 
 COPY --from=builder /app/LICENSE /LICENSE
 COPY --from=builder /app/res/ /res/
@@ -53,4 +53,4 @@ COPY --from=builder /app/web-ui/dist /web-ui/dist
 EXPOSE 59750
 
 ENTRYPOINT ["/app-camera-management"]
-CMD ["-cp=consul.http://edgex-core-consul:8500", "--registry", "--confdir=/res"]
+CMD ["--cp=consul.http://edgex-core-consul:8500", "--registry"]

@@ -8,10 +8,15 @@ package appcamera
 import (
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/edgexfoundry/app-functions-sdk-go/v3/pkg/interfaces"
 	"github.com/edgexfoundry/go-mod-core-contracts/v3/clients/logger"
-	"github.com/pkg/errors"
+	"github.com/edgexfoundry/go-mod-core-contracts/v3/errors"
+)
+
+const (
+	maxRetries = 10
 )
 
 type CameraManagementApp struct {
@@ -37,7 +42,22 @@ func NewCameraManagementApp(service interfaces.ApplicationService) *CameraManage
 
 func (app *CameraManagementApp) Run() error {
 	if err := app.service.LoadCustomConfig(app.config, "AppCustom"); err != nil {
-		return errors.Wrap(err, "failed to load custom configuration")
+		return errors.NewCommonEdgeX(errors.KindServerError, "failed to load custom configuration", err)
+	}
+
+	var err error
+	for i := 0; i < maxRetries; i++ {
+		app.lc.Infof("Querying EVAM pipeline statuses.")
+		if err = app.queryAllPipelineStatuses(); err != nil {
+			app.lc.Errorf("Unable to query EVAM pipeline statuses. Is EVAM running? %s", err.Error())
+			time.Sleep(time.Second)
+		} else {
+			break // no error, so lets continue
+		}
+	}
+	if err != nil {
+		app.lc.Errorf("Unable to query EVAM pipeline statuses after %d tries. .")
+		return err // exit. we do not want to run if evam is not accessible
 	}
 
 	if err := app.addRoutes(); err != nil {
@@ -45,15 +65,8 @@ func (app *CameraManagementApp) Run() error {
 	}
 
 	// Subscribe to events.
-	err := app.service.SetDefaultFunctionsPipeline(
-		app.processEdgeXDeviceSystemEvent)
-	if err != nil {
-		return errors.Wrap(err, "failed to set default pipeline to processEdgeXEvent")
-	}
-
-	if err = app.queryAllPipelineStatuses(); err != nil {
-		// do not exit, just log
-		app.lc.Errorf("Unable to query EVAM pipeline statuses. Is EVAM running? %s", err.Error())
+	if err := app.service.SetDefaultFunctionsPipeline(app.processEdgeXDeviceSystemEvent); err != nil {
+		return errors.NewCommonEdgeX(errors.KindServerError, "failed to set default pipeline to processEdgeXEvent", err)
 	}
 
 	devices, err := app.getAllDevices()
@@ -68,7 +81,7 @@ func (app *CameraManagementApp) Run() error {
 	}
 
 	if err = app.service.Run(); err != nil {
-		return errors.Wrap(err, "failed to run pipeline")
+		return errors.NewCommonEdgeX(errors.KindServerError, "failed to run pipeline", err)
 	}
 
 	return nil

@@ -139,15 +139,7 @@ cd edgex-examples/application-services/custom/camera-management
 # Run this once to download edge-video-analytics into the edge-video-analytics sub-folder, 
 # download models, and patch pipelines
 make install-edge-video-analytics
-
-# Run the EVAM services (in another terminal)
-make run-edge-video-analytics
-# ...
-# Leave this running
 ```
-
-> **Note**: If you press `Ctrl-C` it will stop the EVAM services. If you then run `make stop-edge-video-analytics`,
-> it will also remove the containers and free up the port mappings.
 
 ### 3. Build and run the example application service
 
@@ -161,8 +153,8 @@ make run-edge-video-analytics
 
    ```yaml
   InsecureSecrets:
-     onvifCredentials:
-        SecretName: onvifAuth
+     onvifauth:
+        SecretName: onvifauth
         SecretData:
            username: "<username>"
            password: "<password>"
@@ -183,8 +175,8 @@ Option 1: Modify the [res/configuration.yaml](res/configuration.yaml) file
 
    ```yaml
   InsecureSecrets:
-     usbCredentials:
-        SecretName: rtspAuth
+     rtspauth:
+        SecretName: rtspauth
         SecretData:
            username: "<username>"
            password: "<password>"
@@ -215,12 +207,14 @@ cd edgex-examples/application-services/custom/camera-management
 ```
 
 ```shell
-# Build the app. 
-make build-app
+# Build the docker image. 
+make docker
 
-# Run the app.
-make run-app
+# Start the docker compose services in the background for both EVAM and Camera Management App
+docker compose up -d
 ```
+
+> **Note**: If you would like to view the logs for these services, you can use `docker compose logs -f`. To stop the services, use `docker compose down`.
 
 ## Using the App
 
