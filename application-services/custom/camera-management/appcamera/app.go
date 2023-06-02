@@ -56,7 +56,7 @@ func (app *CameraManagementApp) Run() error {
 		}
 	}
 	if err != nil {
-		app.lc.Errorf("Unable to query EVAM pipeline statuses after %d tries. .")
+		app.lc.Errorf("Unable to query EVAM pipeline statuses after %d tries.", maxRetries)
 		return err // exit. we do not want to run if evam is not accessible
 	}
 
