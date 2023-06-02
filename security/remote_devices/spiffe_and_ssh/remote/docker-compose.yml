@@ -1,4 +1,4 @@
-#  * Copyright 2022 Intel Corporation.
+#  * Copyright 2023 Intel Corporation.
 #  *
 #  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
 #  * in compliance with the License. You may obtain a copy of the License at
@@ -16,7 +16,7 @@ networks:
     driver: bridge
 services:
   sshd-remote:
-    image: edgex-sshd-remote:latest
+    image: edgex-sshd-remote:3.0.0
     build:
       context: sshd-remote
     container_name: edgex-sshd-remote
@@ -50,7 +50,7 @@ services:
     depends_on:
     - sshd-remote
     hostname: edgex-security-spire-agent
-    image: nexus3.edgexfoundry.org:10004/security-spire-agent:latest
+    image: nexus3.edgexfoundry.org:10004/security-spire-agent:3.0.0
     networks:
       edgex-network: {}
     pid: host
@@ -67,7 +67,7 @@ services:
     - /tmp/edgex/secrets/spiffe:/tmp/edgex/secrets/spiffe:z
     - /var/run/docker.sock:/var/run/docker.sock:rw
   device-virtual:
-    command: /device-virtual -cp=consul.http://edgex-core-consul:8500 --registry --confdir=/res
+    command: /device-virtual -cp=consul.http://edgex-core-consul:8500 --registry
     container_name: edgex-device-virtual
     depends_on:
     - remote-spire-agent
