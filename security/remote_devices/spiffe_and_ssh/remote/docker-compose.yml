@@ -16,7 +16,7 @@ networks:
     driver: bridge
 services:
   sshd-remote:
-    image: edgex-sshd-remote:3.0.0
+    image: edgex-sshd-remote:latest
     build:
       context: sshd-remote
     container_name: edgex-sshd-remote
@@ -79,7 +79,7 @@ services:
       MESSAGEQUEUE_HOST: edgex-redis
       REGISTRY_HOST: edgex-core-consul
       SECRETSTORE_HOST: edgex-vault
-      SECRETSTORE_PORT: '8200'
+      SECRETSTORE_PORT: "8200"
       SECRETSTORE_RUNTIMETOKENPROVIDER_ENABLED: "true"
       SECRETSTORE_RUNTIMETOKENPROVIDER_ENDPOINTSOCKET: /tmp/edgex/secrets/spiffe/public/api.sock
       SECRETSTORE_RUNTIMETOKENPROVIDER_HOST: edgex-security-spiffe-token-provider
@@ -89,7 +89,7 @@ services:
       SECRETSTORE_RUNTIMETOKENPROVIDER_TRUSTDOMAIN: edgexfoundry.org
       SERVICE_HOST: edgex-device-virtual
     hostname: edgex-device-virtual
-    image: nexus3.edgexfoundry.org:10004/device-virtual:latest
+    image: nexus3.edgexfoundry.org:10004/device-virtual:3.0.0
     networks:
       edgex-network: {}
     ports:

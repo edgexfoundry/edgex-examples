@@ -1406,7 +1406,7 @@ services:
       SECURITY_SPIRE_SERVER_HOST: edgex-security-spire-server
       SECURITY_SPIRE_SERVER_PORT: 59840
     hostname: edgex-device-ssh-proxy
-    image: device-ssh-proxy:3.0.0
+    image: device-ssh-proxy:latest
     networks:
       edgex-network:
         aliases:
