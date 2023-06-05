@@ -102,18 +102,18 @@ Build: $Id: 6a6c9c332d5354ddf1f8a2da3cc477bd18d2be53 $
 
 <br/>
 
-## 2.6 Install Docker and Docker-compose
+## 2.6 Install Docker and Docker compose v2
 
-Docker is a containerization platform/tool. EdgeX' core services are conveniently packaged as docker containers so that we can leverage Docker to run EdgeX. To install Docker and Docker-compose:
+Docker is a containerization platform/tool. EdgeX' core services are conveniently packaged as docker containers so that we can leverage Docker to run EdgeX. To install Docker and Docker compose v2:
 ```sh
 # Install Docker
 $ sudo apt install -y docker.io
 
 # To confirm the versions installed 
 $ docker -v
-Docker version 20.10.7, build 20.10.7-0ubuntu5.1
-$ docker-compose -v
-docker-compose version 1.27.4, build unknown
+Docker version 20.10.21, build baeda1f
+$ docker compose version
+Docker Compose version v2.16.0
 
 # Enable and start the Docker daemon
 $ sudo systemctl enable docker

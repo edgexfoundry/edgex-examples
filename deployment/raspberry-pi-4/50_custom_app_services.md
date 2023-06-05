@@ -303,7 +303,7 @@ services:
 From there we can attempt to run the service:
 
 ```sh
-$ docker-compose up --build
+$ docker compose up --build
 ```
 
 Once services start the logs should be fairly quiet - we will need to set an echo value before the events start sending:

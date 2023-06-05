@@ -437,7 +437,7 @@ services:
 From there we can attempt to run the service:
 
 ```sh
-$ docker-compose up --build
+$ docker compose up --build
 ```
 
 Please open a new terminal, login to the RPI, and use **curl** to check the state of the device service:

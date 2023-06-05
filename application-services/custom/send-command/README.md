@@ -11,7 +11,7 @@ This Application Service example demonstrates how to use the `Command` client to
 * Ensure that EdgeX is running including Device Virtual Service. Run the follow command to achieve this
 
   ```bash
-  curl https://raw.githubusercontent.com/edgexfoundry/edgex-compose/ireland/docker-compose-no-secty.yml -o docker-compose.yml; docker-compose -p edgex up -d
+  curl https://raw.githubusercontent.com/edgexfoundry/edgex-compose/ireland/docker-compose-no-secty.yml -o docker-compose.yml; docker compose -p edgex up -d
   ```
 
 - Install PostMan (https://www.postman.com/)

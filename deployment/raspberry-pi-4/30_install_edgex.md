@@ -45,7 +45,7 @@ taf
 # With these criteria, we will use "docker-compose-no-secty-arm64.yml". 
 
 # This command launches the stack but might take couple minutes depends on the network.
-$ docker-compose -f docker-compose-no-secty-arm64.yml up -d
+$ docker compose -f docker-compose-no-secty-arm64.yml up -d
 ...
 Creating edgex-ui-go       ... done
 Creating edgex-redis       ... done
@@ -106,9 +106,9 @@ $ curl http://localhost:59882/api/v2/ping
 {"apiVersion":"v2","timestamp":"Mon Jan 10 22:45:56 UTC 2022"}
 ```
 
-Also docker-compose can be used to monitor logs:
+Also docker compose can be used to monitor logs:
 ```sh
-$ docker-compose -f docker-compose-no-secty-arm64.yml logs -f
+$ docker compose -f docker-compose-no-secty-arm64.yml logs -f
 ```
 
 <br/>
@@ -122,7 +122,7 @@ A local web service "Portainer" can be launched to monitor Docker services but i
 $ vi docker-compose-portainer.yml
 
 # Then launch it with this command.
-$ docker-compose -f docker-compose-portainer.yml up -d
+$ docker compose -f docker-compose-portainer.yml up -d
 ```
 
 <br/>

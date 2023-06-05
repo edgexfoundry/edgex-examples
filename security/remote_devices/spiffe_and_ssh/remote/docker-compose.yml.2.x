@@ -1,4 +1,4 @@
-#  * Copyright 2023 Intel Corporation.
+#  * Copyright 2022 Intel Corporation.
 #  *
 #  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
 #  * in compliance with the License. You may obtain a copy of the License at
@@ -50,7 +50,7 @@ services:
     depends_on:
     - sshd-remote
     hostname: edgex-security-spire-agent
-    image: nexus3.edgexfoundry.org:10004/security-spire-agent:3.0.0
+    image: nexus3.edgexfoundry.org:10004/security-spire-agent:latest
     networks:
       edgex-network: {}
     pid: host
@@ -67,7 +67,7 @@ services:
     - /tmp/edgex/secrets/spiffe:/tmp/edgex/secrets/spiffe:z
     - /var/run/docker.sock:/var/run/docker.sock:rw
   device-virtual:
-    command: /device-virtual -cp=consul.http://edgex-core-consul:8500 --registry
+    command: /device-virtual -cp=consul.http://edgex-core-consul:8500 --registry --confdir=/res
     container_name: edgex-device-virtual
     depends_on:
     - remote-spire-agent
@@ -79,7 +79,7 @@ services:
       MESSAGEQUEUE_HOST: edgex-redis
       REGISTRY_HOST: edgex-core-consul
       SECRETSTORE_HOST: edgex-vault
-      SECRETSTORE_PORT: "8200"
+      SECRETSTORE_PORT: '8200'
       SECRETSTORE_RUNTIMETOKENPROVIDER_ENABLED: "true"
       SECRETSTORE_RUNTIMETOKENPROVIDER_ENDPOINTSOCKET: /tmp/edgex/secrets/spiffe/public/api.sock
       SECRETSTORE_RUNTIMETOKENPROVIDER_HOST: edgex-security-spiffe-token-provider
@@ -89,7 +89,7 @@ services:
       SECRETSTORE_RUNTIMETOKENPROVIDER_TRUSTDOMAIN: edgexfoundry.org
       SERVICE_HOST: edgex-device-virtual
     hostname: edgex-device-virtual
-    image: nexus3.edgexfoundry.org:10004/device-virtual:3.0.0
+    image: nexus3.edgexfoundry.org:10004/device-virtual:latest
     networks:
       edgex-network: {}
     ports:

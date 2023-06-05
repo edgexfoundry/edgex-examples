@@ -11,7 +11,7 @@ To run this example:
     - [ ] start edgex which includes Device Virtual
 
         ```
-        docker-compose -p edgex -f docker-compose-no-secty.yml up -d
+        docker compose -p edgex -f docker-compose-no-secty.yml up -d
         ```
 
 1.  Clone **[edgex-examples](https://github.com/edgexfoundry/edgex-examples)** repo

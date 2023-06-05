@@ -1,5 +1,5 @@
 #  ----------------------------------------------------------------------------------
-#  Copyright 2022 Intel Corporation
+#  Copyright 2023 Intel Corporation
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 #  ----------------------------------------------------------------------------------
 
 # Build utility container
-ARG BUILDER_BASE=golang:1.17-alpine3.15
+ARG BUILDER_BASE=golang:1.20-alpine3.17
 FROM ${BUILDER_BASE} AS builder
 
 WORKDIR /edgex-go
@@ -25,7 +25,7 @@ RUN sed -e 's/dl-cdn[.]alpinelinux.org/nl.alpinelinux.org/g' -i~ /etc/apk/reposi
 
 RUN apk add --update --no-cache make git build-base curl
 
-ARG SPIRE_RELEASE=1.2.1
+ARG SPIRE_RELEASE=1.6.3
 
 # build spire from the source in order to be compatible with arch arm64 as well
 RUN mkdir -p spire-build
@@ -36,7 +36,7 @@ RUN wget -q "https://github.com/spiffe/spire/archive/refs/tags/v${SPIRE_RELEASE}
     make bin/spire-server bin/spire-agent
 
 # Deployment image
-FROM alpine:3.15
+FROM alpine:3.17
 
 LABEL license='SPDX-License-Identifier: Apache-2.0' \
       copyright='Copyright (c) 2022 Intel Corporation'

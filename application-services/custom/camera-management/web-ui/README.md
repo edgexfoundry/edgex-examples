@@ -9,7 +9,7 @@ The Camera Management Web UI is an Angular interface that provides features such
 
 
 ## How do I build this thing?
-This project is intended to be built and run using only `make`, `docker`, and `docker-compose` without the need
+This project is intended to be built and run using only `make`, `docker`, and `docker compose` without the need
 for installing `npm` or `nodejs`.
 
 To skip the technical details, jump to **[Initial Setup](#Initial-Setup)**
@@ -119,10 +119,10 @@ make force-install
 # Desktop x11 environment is mapped and programs such as google-chrome can be ran in GUI mode
 make debug
 
-# Tail docker-compose logs (`n` is optional amount of lines to tail first)
+# Tail docker compose logs (`n` is optional amount of lines to tail first)
 make tail [n=XXX]
 
-# Prints docker-compose logs and exits (`n` is optional amount of lines to print)
+# Prints docker compose logs and exits (`n` is optional amount of lines to print)
 make logs [n=XXX] 
 
 # Generate documentation

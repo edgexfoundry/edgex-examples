@@ -295,73 +295,79 @@ services:
     - edgex-init:/edgex-init:ro,z
     - redis-config:/run/redis/conf:z
     - /tmp/edgex/secrets/security-bootstrapper-redis:/tmp/edgex/secrets/security-bootstrapper-redis:ro,z
-  device-virtual:
-    command: /device-virtual -cp=consul.http://edgex-core-consul:8500 --registry --confdir=/res
-    container_name: edgex-device-virtual
-    depends_on:
-    - consul
-    - data
-    - metadata
-    - security-bootstrapper
-    - security-spiffe-token-provider
-    entrypoint:
-    - /edgex-init/ready_to_run_wait_install.sh
-    environment:
-      API_GATEWAY_HOST: edgex-kong
-      API_GATEWAY_STATUS_PORT: '8100'
-      CLIENTS_CORE_COMMAND_HOST: edgex-core-command
-      CLIENTS_CORE_DATA_HOST: edgex-core-data
-      CLIENTS_CORE_METADATA_HOST: edgex-core-metadata
-      CLIENTS_SUPPORT_NOTIFICATIONS_HOST: edgex-support-notifications
-      CLIENTS_SUPPORT_SCHEDULER_HOST: edgex-support-scheduler
-      DATABASES_PRIMARY_HOST: edgex-redis
-      EDGEX_SECURITY_SECRET_STORE: "true"
-      MESSAGEQUEUE_HOST: edgex-redis
-      PROXY_SETUP_HOST: edgex-security-proxy-setup
-      REGISTRY_HOST: edgex-core-consul
-      SECRETSTORE_HOST: edgex-vault
-      SECRETSTORE_PORT: '8200'
-      SECRETSTORE_RUNTIMETOKENPROVIDER_ENABLED: "true"
-      SECRETSTORE_RUNTIMETOKENPROVIDER_ENDPOINTSOCKET: /tmp/edgex/secrets/spiffe/public/api.sock
-      SECRETSTORE_RUNTIMETOKENPROVIDER_HOST: edgex-security-spiffe-token-provider
-      SECRETSTORE_RUNTIMETOKENPROVIDER_PORT: 59841
-      SECRETSTORE_RUNTIMETOKENPROVIDER_PROTOCOL: https
-      SECRETSTORE_RUNTIMETOKENPROVIDER_REQUIREDSECRETS: redisdb
-      SECRETSTORE_RUNTIMETOKENPROVIDER_TRUSTDOMAIN: edgexfoundry.org
-      SERVICE_HOST: edgex-device-virtual
-      SPIFFE_ENDPOINTSOCKET: /tmp/edgex/secrets/spiffe/public/api.sock
-      SPIFFE_TRUSTBUNDLE_PATH: /tmp/edgex/secrets/spiffe/trust/bundle
-      SPIFFE_TRUSTDOMAIN: edgexfoundry.org
-      STAGEGATE_BOOTSTRAPPER_HOST: edgex-security-bootstrapper
-      STAGEGATE_BOOTSTRAPPER_STARTPORT: '54321'
-      STAGEGATE_DATABASE_HOST: edgex-redis
-      STAGEGATE_DATABASE_PORT: '6379'
-      STAGEGATE_DATABASE_READYPORT: '6379'
-      STAGEGATE_KONGDB_HOST: edgex-kong-db
-      STAGEGATE_KONGDB_PORT: '5432'
-      STAGEGATE_KONGDB_READYPORT: '54325'
-      STAGEGATE_READY_TORUNPORT: '54329'
-      STAGEGATE_REGISTRY_HOST: edgex-core-consul
-      STAGEGATE_REGISTRY_PORT: '8500'
-      STAGEGATE_REGISTRY_READYPORT: '54324'
-      STAGEGATE_SECRETSTORESETUP_HOST: edgex-security-secretstore-setup
-      STAGEGATE_SECRETSTORESETUP_TOKENS_READYPORT: '54322'
-      STAGEGATE_WAITFOR_TIMEOUT: 60s
-    hostname: edgex-device-virtual
-    image: nexus3.edgexfoundry.org:10004/device-virtual:latest
-    networks:
-      edgex-network: {}
-    ports:
-    - 127.0.0.1:59900:59900/tcp
-    read_only: true
-    restart: always
-    security_opt:
-    - no-new-privileges:true
-    user: 2002:2001
-    volumes:
-    - edgex-init:/edgex-init:ro,z
-    - /tmp/edgex/secrets/device-virtual:/tmp/edgex/secrets/device-virtual:ro,z
-    - /tmp/edgex/secrets/spiffe/public:/tmp/edgex/secrets/spiffe/public:ro,z
+  ### ===============
+  ### BEGIN REMOVED CONTENT
+  ### ===============
+  # device-virtual:
+  #   command: /device-virtual -cp=consul.http://edgex-core-consul:8500 --registry --confdir=/res
+  #   container_name: edgex-device-virtual
+  #   depends_on:
+  #   - consul
+  #   - data
+  #   - metadata
+  #   - security-bootstrapper
+  #   - security-spiffe-token-provider
+  #   entrypoint:
+  #   - /edgex-init/ready_to_run_wait_install.sh
+  #   environment:
+  #     API_GATEWAY_HOST: edgex-kong
+  #     API_GATEWAY_STATUS_PORT: '8100'
+  #     CLIENTS_CORE_COMMAND_HOST: edgex-core-command
+  #     CLIENTS_CORE_DATA_HOST: edgex-core-data
+  #     CLIENTS_CORE_METADATA_HOST: edgex-core-metadata
+  #     CLIENTS_SUPPORT_NOTIFICATIONS_HOST: edgex-support-notifications
+  #     CLIENTS_SUPPORT_SCHEDULER_HOST: edgex-support-scheduler
+  #     DATABASES_PRIMARY_HOST: edgex-redis
+  #     EDGEX_SECURITY_SECRET_STORE: "true"
+  #     MESSAGEQUEUE_HOST: edgex-redis
+  #     PROXY_SETUP_HOST: edgex-security-proxy-setup
+  #     REGISTRY_HOST: edgex-core-consul
+  #     SECRETSTORE_HOST: edgex-vault
+  #     SECRETSTORE_PORT: '8200'
+  #     SECRETSTORE_RUNTIMETOKENPROVIDER_ENABLED: "true"
+  #     SECRETSTORE_RUNTIMETOKENPROVIDER_ENDPOINTSOCKET: /tmp/edgex/secrets/spiffe/public/api.sock
+  #     SECRETSTORE_RUNTIMETOKENPROVIDER_HOST: edgex-security-spiffe-token-provider
+  #     SECRETSTORE_RUNTIMETOKENPROVIDER_PORT: 59841
+  #     SECRETSTORE_RUNTIMETOKENPROVIDER_PROTOCOL: https
+  #     SECRETSTORE_RUNTIMETOKENPROVIDER_REQUIREDSECRETS: redisdb
+  #     SECRETSTORE_RUNTIMETOKENPROVIDER_TRUSTDOMAIN: edgexfoundry.org
+  #     SERVICE_HOST: edgex-device-virtual
+  #     SPIFFE_ENDPOINTSOCKET: /tmp/edgex/secrets/spiffe/public/api.sock
+  #     SPIFFE_TRUSTBUNDLE_PATH: /tmp/edgex/secrets/spiffe/trust/bundle
+  #     SPIFFE_TRUSTDOMAIN: edgexfoundry.org
+  #     STAGEGATE_BOOTSTRAPPER_HOST: edgex-security-bootstrapper
+  #     STAGEGATE_BOOTSTRAPPER_STARTPORT: '54321'
+  #     STAGEGATE_DATABASE_HOST: edgex-redis
+  #     STAGEGATE_DATABASE_PORT: '6379'
+  #     STAGEGATE_DATABASE_READYPORT: '6379'
+  #     STAGEGATE_KONGDB_HOST: edgex-kong-db
+  #     STAGEGATE_KONGDB_PORT: '5432'
+  #     STAGEGATE_KONGDB_READYPORT: '54325'
+  #     STAGEGATE_READY_TORUNPORT: '54329'
+  #     STAGEGATE_REGISTRY_HOST: edgex-core-consul
+  #     STAGEGATE_REGISTRY_PORT: '8500'
+  #     STAGEGATE_REGISTRY_READYPORT: '54324'
+  #     STAGEGATE_SECRETSTORESETUP_HOST: edgex-security-secretstore-setup
+  #     STAGEGATE_SECRETSTORESETUP_TOKENS_READYPORT: '54322'
+  #     STAGEGATE_WAITFOR_TIMEOUT: 60s
+  #   hostname: edgex-device-virtual
+  #   image: nexus3.edgexfoundry.org:10004/device-virtual:latest
+  #   networks:
+  #     edgex-network: {}
+  #   ports:
+  #   - 127.0.0.1:59900:59900/tcp
+  #   read_only: true
+  #   restart: always
+  #   security_opt:
+  #   - no-new-privileges:true
+  #   user: 2002:2001
+  #   volumes:
+  #   - edgex-init:/edgex-init:ro,z
+  #   - /tmp/edgex/secrets/device-virtual:/tmp/edgex/secrets/device-virtual:ro,z
+  #   - /tmp/edgex/secrets/spiffe/public:/tmp/edgex/secrets/spiffe/public:ro,z
+  ### ===============
+  ### END REMOVED CONTENT
+  ### ===============
   kong:
     container_name: edgex-kong
     depends_on:
@@ -1204,6 +1210,62 @@ services:
     - edgex-init:/edgex-init:ro,z
     - vault-file:/vault/file:z
     - vault-logs:/vault/logs:z
+  ### =================
+  ### BEGIN NEW CONTENT
+  ### =================
+  device-ssh-proxy:
+    build:
+      context: device-ssh-proxy
+    command: docker-entrypoint.sh
+    container_name: edgex-device-ssh-proxy
+    depends_on:
+    - consul
+    - security-bootstrapper
+    entrypoint:
+    - /edgex-init/ready_to_run_wait_install.sh
+    environment:
+      EDGEX_SECURITY_SECRET_STORE: "true"
+      CLIENTS_CORE_DATA_HOST: edgex-core-data
+      CLIENTS_CORE_METADATA_HOST: edgex-core-metadata
+      MESSAGEQUEUE_HOST: edgex-redis
+      REGISTRY_HOST: edgex-core-consul
+      SECRETSTORE_HOST: edgex-vault
+      SECRETSTORE_PORT: '8200'
+      STAGEGATE_BOOTSTRAPPER_HOST: edgex-security-bootstrapper
+      STAGEGATE_READY_TORUNPORT: '54329'
+      STAGEGATE_WAITFOR_TIMEOUT: '60s'
+      # Unique for ssh-proxy
+      SERVICE_HOST: edgex-device-virtual
+      SERVICE_PORT: 59900
+      TUNNEL_HOST: 192.168.122.193
+      TUNNEL_SSH_PORT: 2223
+      SECRETSTORE_RUNTIMETOKENPROVIDER_HOST: edgex-security-spiffe-token-provider
+      SECRETSTORE_RUNTIMETOKENPROVIDER_PORT: 59841
+      SECURITY_SPIRE_SERVER_HOST: edgex-security-spire-server
+      SECURITY_SPIRE_SERVER_PORT: 59840
+    hostname: edgex-device-ssh-proxy
+    image: device-ssh-proxy:latest
+    networks:
+      edgex-network:
+        aliases:
+        - edgex-device-virtual
+    ports:
+    - 127.0.0.1:59900:59900/tcp
+    read_only: true
+    restart: always
+    security_opt:
+    - no-new-privileges:true
+    tmpfs:
+    - /run
+    volumes:
+    - edgex-init:/edgex-init:ro,z
+    - spire-ca:/srv/spiffe/ca:z
+    - spire-remote-agent:/srv/spiffe/remote-agent:z
+    - /tmp/edgex/secrets/spiffe/trust:/tmp/edgex/secrets/spiffe/trust:ro,z
+    - $PWD/ssh_keys:/root/.ssh
+  ### ===============
+  ### END NEW CONTENT
+  ### ===============
 version: '3.7'
 volumes:
   consul-acl-token: {}
@@ -1219,6 +1281,13 @@ volumes:
   postgres-data: {}
   redis-config: {}
   spire-agent: {}
+  ### ===============
+  ### BEGIN NEW CONTENT
+  ### ===============
+  spire-remote-agent: {}
+  ### ===============
+  ### END NEW CONTENT
+  ### ===============
   spire-ca: {}
   spire-server: {}
   vault-config: {}
