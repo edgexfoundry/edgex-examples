@@ -20,7 +20,7 @@ TODO: Update link to `minnesota` branch
    - [ ] start edgex which includes Device Virtual
 
        ```
-       docker-compose -p edgex -f docker-compose-no-secty.yml up -d
+       docker compose -p edgex -f docker-compose-no-secty.yml up -d
        ```
 
 2. Build & run **Advanced App Functions** example
