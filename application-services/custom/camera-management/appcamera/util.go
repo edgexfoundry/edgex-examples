@@ -10,6 +10,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/edgexfoundry/go-mod-core-contracts/v3/errors"
 	"io"
 	"net/http"
 
@@ -18,7 +19,6 @@ import (
 	"github.com/edgexfoundry/go-mod-core-contracts/v3/common"
 	"github.com/edgexfoundry/go-mod-core-contracts/v3/dtos"
 	"github.com/edgexfoundry/go-mod-core-contracts/v3/dtos/responses"
-	"github.com/pkg/errors"
 )
 
 const (
@@ -39,12 +39,12 @@ func (app *CameraManagementApp) parseResponse(commandName string, event *respons
 	val := event.Event.Readings[0].ObjectValue
 	js, err := json.Marshal(val)
 	if err != nil {
-		return errors.Wrapf(err, "failed to marshal %s object value as json object", commandName)
+		return errors.NewCommonEdgeX(errors.KindServerError, fmt.Sprintf("failed to marshal %s object value as json object", commandName), err)
 	}
 
 	err = json.Unmarshal(js, response)
 	if err != nil {
-		return errors.Wrapf(err, "failed to unmarhal %s json object to response type %T", commandName, response)
+		return errors.NewCommonEdgeX(errors.KindServerError, fmt.Sprintf("failed to unmarhal %s json object to response type %T", commandName, response), err)
 	}
 
 	return nil
@@ -55,7 +55,7 @@ func (app *CameraManagementApp) issueGetCommandWithJsonForResponse(ctx context.C
 
 	event, err := app.issueGetCommandWithJson(ctx, deviceName, commandName, jsonValue)
 	if err != nil {
-		return errors.Wrapf(err, "failed to issue get command %s for device %s", commandName, deviceName)
+		return errors.NewCommonEdgeX(errors.KindServerError, fmt.Sprintf("failed to issue get command %s for device %s", commandName, deviceName), err)
 	}
 	return app.parseResponse(commandName, event, response)
 }
@@ -69,7 +69,7 @@ func (app *CameraManagementApp) issueGetCommandForResponse(ctx context.Context, 
 
 	event, err := app.issueGetCommand(ctx, deviceName, commandName)
 	if err != nil {
-		return errors.Wrapf(err, "failed to issue get command %s for device %s", commandName, deviceName)
+		return errors.NewCommonEdgeX(errors.KindServerError, fmt.Sprintf("failed to issue get command %s for device %s", commandName, deviceName), err)
 	}
 	return app.parseResponse(commandName, event, response)
 }
