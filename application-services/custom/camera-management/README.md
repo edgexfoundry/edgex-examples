@@ -6,6 +6,7 @@
 >
 > **The source for the latest release can be found at [Releases](https://github.com/edgexfoundry/edgex-examples/releases).**
 
+
 ## General
 Visit the [EdgeX Documentation page](https://docs.edgexfoundry.org/3.0/examples/AppServiceExamples/Ch-CameraManagement) to learn more about the latest release.
 

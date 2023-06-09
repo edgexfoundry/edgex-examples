@@ -45,8 +45,8 @@ DOCKER_RUN_EX = docker run \
 # usage: $(DOCKER_RUN) command here
 DOCKER_RUN = $(call DOCKER_RUN_EX,)
 
-# default docker-compose command and arguments
-DOCKER_COMPOSE = docker-compose -f docker-compose.yml -p camera-management-web-ui
+# default docker compose command and arguments
+DOCKER_COMPOSE = docker compose -f docker-compose.yml -p camera-management-web-ui
 
 OPEN = xdg-open
 

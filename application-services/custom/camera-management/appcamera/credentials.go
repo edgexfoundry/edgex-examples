@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	rtspAuth  = "rtspAuth"
-	onvifAuth = "onvifAuth"
+	rtspauth  = "rtspauth"
+	onvifauth = "onvifauth"
 )
 
 // tryGetCredentials will attempt one time to get the camera credentials from the

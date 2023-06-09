@@ -1,11 +1,11 @@
 //
-// Copyright (C) 2022 Intel Corporation
+// Copyright (C) 2022-2023 Intel Corporation
 //
 // SPDX-License-Identifier: Apache-2.0
 
 module github.com/edgexfoundry/edgex-examples/application-services/custom/camera-management
 
-go 1.18
+go 1.20
 
 require (
 	github.com/IOTechSystems/onvif v0.1.6
@@ -13,7 +13,6 @@ require (
 	github.com/edgexfoundry/go-mod-bootstrap/v3 v3.0.1
 	github.com/edgexfoundry/go-mod-core-contracts/v3 v3.0.0
 	github.com/gorilla/mux v1.8.0
-	github.com/pkg/errors v0.9.1
 )
 
 require (

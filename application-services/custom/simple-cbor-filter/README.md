@@ -18,7 +18,7 @@ TODO: replace 'main' with 'minnesota'
    - [ ] start edgex 
      
      ```
-     docker-compose -p edgex -f docker-compose-no-secty.yml up -d
+     docker compose -p edgex -f docker-compose-no-secty.yml up -d
      ```
 
 3. Build & run **simple-cbor-filter** example

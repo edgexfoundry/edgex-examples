@@ -89,13 +89,13 @@ EdgeX provides an [App-Service-Configurable](https://github.com/edgexfoundry/app
 * Note the volume mount of the `ibm-mqtt-export` profile at the bottom of the above snippet.
 * Start the EdgeX services including your new `app-ibm-mqtt-export` Application Service
     ```bash
-    docker-compose -p edgex up -d
+    docker compose -p edgex up -d
     ```
 
 - View the running containers.
 
   ```bash
-  docker-compose -p edgex ps
+  docker compose -p edgex ps
   ```
 
   ```bash
@@ -118,7 +118,7 @@ EdgeX provides an [App-Service-Configurable](https://github.com/edgexfoundry/app
 - Check the logs for `app-ibm-mqtt-export`
 
   ```bash
-  docker-compose -p edgex logs app-ibm-mqtt-export
+  docker compose -p edgex logs app-ibm-mqtt-export
   ```
 
   ```bash

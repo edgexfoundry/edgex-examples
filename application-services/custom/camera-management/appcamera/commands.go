@@ -8,6 +8,7 @@ package appcamera
 import (
 	"context"
 	"fmt"
+	"github.com/edgexfoundry/go-mod-core-contracts/v3/errors"
 
 	"github.com/IOTechSystems/onvif/device"
 	"github.com/IOTechSystems/onvif/media"
@@ -15,7 +16,6 @@ import (
 	"github.com/IOTechSystems/onvif/xsd/onvif"
 	"github.com/edgexfoundry/go-mod-core-contracts/v3/dtos"
 	dtosCommon "github.com/edgexfoundry/go-mod-core-contracts/v3/dtos/common"
-	"github.com/pkg/errors"
 )
 
 const (
@@ -36,7 +36,7 @@ const (
 func (app *CameraManagementApp) getImageFormats(deviceName string) (interface{}, error) {
 	resp, err := app.issueGetCommand(context.Background(), deviceName, usbImageFormatsCommand)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to issue get ImageFormats command")
+		return nil, errors.NewCommonEdgeX(errors.KindServerError, "failed to issue get ImageFormats command", err)
 	}
 	return resp.Event.Readings[0].ObjectValue, nil
 }
@@ -80,7 +80,7 @@ func (app *CameraManagementApp) getCameraFeatures(deviceName string) (CameraFeat
 		features.CameraType = Onvif
 		caps, err := app.getCapabilities(deviceName)
 		if err != nil {
-			return CameraFeatures{}, errors.Wrapf(err, "unable to get device capabilities")
+			return CameraFeatures{}, errors.NewCommonEdgeX(errors.KindServerError, "unable to get device capabilities", err)
 		}
 		if caps.Capabilities.PTZ.XAddr != "" {
 			features.PTZ = true
@@ -193,8 +193,8 @@ func (app *CameraManagementApp) getAllDevices() ([]dtos.Device, error) {
 	}
 
 	if len(devices) <= 0 {
-		return nil, errors.Errorf("no devices registered yet for the device services %s or %s",
-			app.config.AppCustom.OnvifDeviceServiceName, app.config.AppCustom.USBDeviceServiceName)
+		return nil, errors.NewCommonEdgeX(errors.KindServerError, fmt.Sprintf("no devices registered yet for the device services %s or %s",
+			app.config.AppCustom.OnvifDeviceServiceName, app.config.AppCustom.USBDeviceServiceName), nil)
 	}
 
 	return devices, nil

@@ -41,13 +41,13 @@ Please refer to the [Application Functions SDK documentation](https://docs.edgex
    Run the following command from the same folder the compose file resides.
 
    ```console
-   docker-compose -p edgex up -d
+   docker compose -p edgex up -d
    ```
 
    Now all the EdgeX service will be running. This can be verified by running the following command:
 
    ```console
-   docker-compose -p edgex ps
+   docker compose -p edgex ps
    ```
 
    Which will output the following:

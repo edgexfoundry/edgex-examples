@@ -7,6 +7,7 @@ package appcamera
 
 import (
 	"fmt"
+	"github.com/edgexfoundry/go-mod-core-contracts/v3/errors"
 	"net/http"
 	"path"
 
@@ -14,7 +15,6 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/edgexfoundry/go-mod-core-contracts/v3/common"
-	"github.com/pkg/errors"
 )
 
 const (
@@ -117,7 +117,7 @@ func (app *CameraManagementApp) addRoutes() error {
 
 func (app *CameraManagementApp) addRoute(path, method string, f http.HandlerFunc) error {
 	if err := app.service.AddRoute(path, f, method); err != nil {
-		return errors.Wrapf(err, "failed to add route, path=%s, method=%s", path, method)
+		return errors.NewCommonEdgeX(errors.KindServerError, fmt.Sprintf("failed to add route, path=%s, method=%s", path, method), err)
 	}
 	return nil
 }

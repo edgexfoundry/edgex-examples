@@ -229,7 +229,7 @@ spec:
       automountServiceAccountToken: false
       containers:
       - name: security-proxy-setup
-        image: nexus3.edgexfoundry.org:10004/security-proxy-setup:latest
+        image: nexus3.edgexfoundry.org:10004/security-proxy-setup:3.0.0
         imagePullPolicy: Always
         command: ["/edgex-init/ready_to_run_wait_install.sh"]
         args: ["/edgex/secrets-config", "proxy", "adduser", "--user", "edgexuser", "--useRootToken"]

@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-version: "3"
+version: '3.7'
 
 networks:
   edgex_edgex-network:
@@ -22,9 +22,31 @@ networks:
     driver: "bridge"
 
 services:
-  edge_video_analytics_microservice:
+  edgex-app-camera-management:
+    image: edgexfoundry/app-camera-management:0.0.0-dev
+    hostname: edgex-app-camera-management
+    container_name: edgex-app-camera-management
+    networks:
+      - edgex_edgex-network
+    environment:
+      EDGEX_SECURITY_SECRET_STORE: "false"
+      SERVICE_HOST: edgex-app-camera-management
+      SERVICE_SERVERBINDADDR: "0.0.0.0"
+      APPCUSTOM_EVAMBASEURL: "http://edgex-video-analytics:8080"
+    read_only: true
+    restart: always
+    security_opt:
+      - no-new-privileges:true
+    depends_on:
+      edgex-video-analytics:
+        condition: service_started
+    ports:
+      - '59750:59750/tcp'
+
+  edgex-video-analytics:
     image: intel/edge_video_analytics_microservice:0.7.2
-    hostname: edge_video_analytics_microservice
+    hostname: edgex-video-analytics
+    container_name: edgex-video-analytics
     privileged: true
     entrypoint: ["./run.sh"]
     ports:
@@ -42,10 +64,13 @@ services:
       DETECTION_DEVICE: CPU
       CLASSIFICATION_DEVICE: CPU
       GST_DEBUG: "*:2,python*:4"
+    restart: always
+    security_opt:
+      - no-new-privileges:true
     volumes:
-      - "./pipelines/:/home/pipeline-server/pipelines/"
-      - "./models:/home/pipeline-server/models/"
-      - "./config.json:/home/pipeline-server/config.json"
+      - "./edge-video-analytics/pipelines/:/home/pipeline-server/pipelines/"
+      - "./edge-video-analytics/models:/home/pipeline-server/models/"
+      - "./edge-video-analytics/config.json:/home/pipeline-server/config.json"
     device_cgroup_rules:
       # Default run - device-cgroup-rule='c 189:* rmw'
       # NCS2 run - device-cgroup-rule='c 209:* rmw'
