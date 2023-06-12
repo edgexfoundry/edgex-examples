@@ -8,6 +8,6 @@
 
 
 ## General
-Visit the [EdgeX Documentation page](https://docs.edgexfoundry.org/3.0/examples/AppServiceExamples/Ch-CameraManagement) to learn more about the latest camera management example app.
+Visit the [EdgeX Documentation page](https://docs.edgexfoundry.org/latest/examples/AppServiceExamples/Ch-CameraManagement) to learn more about the latest camera management example app.
 
 [Apache-2.0](LICENSE)
