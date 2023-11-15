@@ -50,7 +50,7 @@ services:
     depends_on:
     - sshd-remote
     hostname: edgex-security-spire-agent
-    image: nexus3.edgexfoundry.org:10004/security-spire-agent:3.0.0
+    image: edgexfoundry/security-spire-agent:3.1.0
     networks:
       edgex-network: {}
     pid: host
@@ -89,7 +89,7 @@ services:
       SECRETSTORE_RUNTIMETOKENPROVIDER_TRUSTDOMAIN: edgexfoundry.org
       SERVICE_HOST: edgex-device-virtual
     hostname: edgex-device-virtual
-    image: nexus3.edgexfoundry.org:10004/device-virtual:3.0.0
+    image: edgexfoundry/device-virtual:3.1.0
     networks:
       edgex-network: {}
     ports:
