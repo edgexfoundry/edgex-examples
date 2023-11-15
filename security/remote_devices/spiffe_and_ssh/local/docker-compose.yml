@@ -47,7 +47,7 @@ services:
       STAGEGATE_SECRETSTORESETUP_TOKENS_READYPORT: "54322"
       STAGEGATE_WAITFOR_TIMEOUT: 60s
     hostname: edgex-app-rules-engine
-    image: nexus3.edgexfoundry.org:10004/app-service-configurable:3.0.0
+    image: edgexfoundry/app-service-configurable:3.1.0
     networks:
       edgex-network: null
     ports:
@@ -190,7 +190,7 @@ services:
       STAGEGATE_SECRETSTORESETUP_TOKENS_READYPORT: "54322"
       STAGEGATE_WAITFOR_TIMEOUT: 60s
     hostname: edgex-core-command
-    image: nexus3.edgexfoundry.org:10004/core-command:3.0.0
+    image: edgexfoundry/core-command:3.1.0
     networks:
       edgex-network: null
     ports:
@@ -254,7 +254,7 @@ services:
       STAGEGATE_SECRETSTORESETUP_TOKENS_READYPORT: "54322"
       STAGEGATE_WAITFOR_TIMEOUT: 60s
     hostname: edgex-core-common-config-bootstrapper
-    image: nexus3.edgexfoundry.org:10004/core-common-config-bootstrapper:3.0.0
+    image: edgexfoundry/core-common-config-bootstrapper:3.1.0
     networks:
       edgex-network: null
     read_only: true
@@ -311,7 +311,7 @@ services:
       STAGEGATE_SECRETSTORESETUP_TOKENS_READYPORT: "54322"
       STAGEGATE_WAITFOR_TIMEOUT: 60s
     hostname: edgex-core-data
-    image: nexus3.edgexfoundry.org:10004/core-data:3.0.0
+    image: edgexfoundry/core-data:3.1.0
     networks:
       edgex-network: null
     ports:
@@ -373,7 +373,7 @@ services:
       STAGEGATE_SECRETSTORESETUP_TOKENS_READYPORT: "54322"
       STAGEGATE_WAITFOR_TIMEOUT: 60s
     hostname: edgex-core-metadata
-    image: nexus3.edgexfoundry.org:10004/core-metadata:3.0.0
+    image: edgexfoundry/core-metadata:3.1.0
     networks:
       edgex-network: null
     ports:
@@ -507,7 +507,7 @@ services:
   #     STAGEGATE_SECRETSTORESETUP_TOKENS_READYPORT: "54322"
   #     STAGEGATE_WAITFOR_TIMEOUT: 60s
   #   hostname: edgex-device-virtual
-  #   image: nexus3.edgexfoundry.org:10004/device-virtual:3.0.0
+  #   image: edgexfoundry/device-virtual:3.1.0
   #   networks:
   #     edgex-network: null
   #   ports:
@@ -705,7 +705,7 @@ services:
       STAGEGATE_SECRETSTORESETUP_TOKENS_READYPORT: "54322"
       STAGEGATE_WAITFOR_TIMEOUT: 60s
     hostname: edgex-security-bootstrapper
-    image: nexus3.edgexfoundry.org:10004/security-bootstrapper:3.0.0
+    image: edgexfoundry/security-bootstrapper:3.1.0
     networks:
       edgex-network: null
     read_only: true
@@ -749,7 +749,7 @@ services:
       STAGEGATE_SECRETSTORESETUP_TOKENS_READYPORT: "54322"
       STAGEGATE_WAITFOR_TIMEOUT: 60s
     hostname: edgex-proxy-auth
-    image: nexus3.edgexfoundry.org:10004/security-proxy-auth:3.0.0
+    image: edgexfoundry/security-proxy-auth:3.1.0
     networks:
       edgex-network: null
     ports:
@@ -811,7 +811,7 @@ services:
       STAGEGATE_SECRETSTORESETUP_TOKENS_READYPORT: "54322"
       STAGEGATE_WAITFOR_TIMEOUT: 60s
     hostname: edgex-security-proxy-setup
-    image: nexus3.edgexfoundry.org:10004/security-proxy-setup:3.0.0
+    image: edgexfoundry/security-proxy-setup:3.1.0
     networks:
       edgex-network: null
     read_only: true
@@ -877,7 +877,7 @@ services:
       STAGEGATE_SECRETSTORESETUP_TOKENS_READYPORT: "54322"
       STAGEGATE_WAITFOR_TIMEOUT: 60s
     hostname: edgex-security-secretstore-setup
-    image: nexus3.edgexfoundry.org:10004/security-secretstore-setup:3.0.0
+    image: edgexfoundry/security-secretstore-setup:3.1.0
     networks:
       edgex-network: null
     read_only: true
@@ -944,7 +944,7 @@ services:
       STAGEGATE_SECRETSTORESETUP_TOKENS_READYPORT: "54322"
       STAGEGATE_WAITFOR_TIMEOUT: 60s
     hostname: edgex-security-spiffe-token-provider
-    image: nexus3.edgexfoundry.org:10004/security-spiffe-token-provider:3.0.0
+    image: edgexfoundry/security-spiffe-token-provider:3.1.0
     networks:
       edgex-network: null
     ports:
@@ -1003,7 +1003,7 @@ services:
       STAGEGATE_SECRETSTORESETUP_TOKENS_READYPORT: "54322"
       STAGEGATE_WAITFOR_TIMEOUT: 60s
     hostname: edgex-security-spire-agent
-    image: nexus3.edgexfoundry.org:10004/security-spire-agent:3.0.0
+    image: edgexfoundry/security-spire-agent:3.1.0
     networks:
       edgex-network: null
     pid: host
@@ -1065,7 +1065,7 @@ services:
       STAGEGATE_SECRETSTORESETUP_TOKENS_READYPORT: "54322"
       STAGEGATE_WAITFOR_TIMEOUT: 60s
     hostname: edgex-security-spire-config
-    image: nexus3.edgexfoundry.org:10004/security-spire-config:3.0.0
+    image: edgexfoundry/security-spire-config:3.1.0
     networks:
       edgex-network: null
     read_only: true
@@ -1112,7 +1112,7 @@ services:
       STAGEGATE_SECRETSTORESETUP_TOKENS_READYPORT: "54322"
       STAGEGATE_WAITFOR_TIMEOUT: 60s
     hostname: edgex-security-spire-server
-    image: nexus3.edgexfoundry.org:10004/security-spire-server:3.0.0
+    image: edgexfoundry/security-spire-server:3.1.0
     networks:
       edgex-network: null
     pid: host
@@ -1187,7 +1187,7 @@ services:
       STAGEGATE_SECRETSTORESETUP_TOKENS_READYPORT: "54322"
       STAGEGATE_WAITFOR_TIMEOUT: 60s
     hostname: edgex-support-notifications
-    image: nexus3.edgexfoundry.org:10004/support-notifications:3.0.0
+    image: edgexfoundry/support-notifications:3.1.0
     networks:
       edgex-network: null
     ports:
@@ -1262,7 +1262,7 @@ services:
       STAGEGATE_SECRETSTORESETUP_TOKENS_READYPORT: "54322"
       STAGEGATE_WAITFOR_TIMEOUT: 60s
     hostname: edgex-support-scheduler
-    image: nexus3.edgexfoundry.org:10004/support-scheduler:3.0.0
+    image: edgexfoundry/support-scheduler:3.1.0
     networks:
       edgex-network: null
     ports:
@@ -1302,7 +1302,7 @@ services:
       EDGEX_SECURITY_SECRET_STORE: "true"
       SERVICE_HOST: edgex-ui-go
     hostname: edgex-ui-go
-    image: nexus3.edgexfoundry.org:10004/edgex-ui:3.0.0
+    image: edgexfoundry/edgex-ui:3.1.0
     networks:
       edgex-network: null
     ports:
