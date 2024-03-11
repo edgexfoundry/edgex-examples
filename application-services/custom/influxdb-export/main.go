@@ -34,7 +34,7 @@ func main() {
 
 	// 3) Load the MQTT custom configuration
 	config := &ServiceConfig{}
-	if err := service.LoadCustomConfig(config, "MqttSecretConfig"); err != nil {
+	if err := service.LoadCustomConfig(config, "MqttConfig"); err != nil {
 		lc.Errorf("LoadCustomConfig failed: %s", err.Error())
 		os.Exit(-1)
 	}
